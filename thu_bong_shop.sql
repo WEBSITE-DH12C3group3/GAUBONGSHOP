@@ -329,3 +329,7 @@ INSERT INTO imports (supplier_name, total_cost, status, notes) VALUES
 INSERT INTO import_details (import_id, product_id, quantity, unit_price) VALUES 
 (1, 1, 50, 80000.00),  -- Nhập 50 Gấu Teddy Socola, giá nhập 80k/con
 (2, 2, 30, 60000.00);  -- Nhập 30 Thỏ Bông Trắng, giá nhập 60k/con
+
+ALTER TABLE payments 
+ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
