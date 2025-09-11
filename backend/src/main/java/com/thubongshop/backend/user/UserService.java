@@ -23,27 +23,35 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // Đăng ký user mới
-    public String register(User user) {
-        Optional<User> existing = userRepository.findByEmail(user.getEmail());
-        if (existing.isPresent()) {
-            return "Email đã tồn tại!";
+    /**
+     * Đăng ký user mới từ DTO
+     */
+    public User registerUser(RegisterRequest request) {
+        // Kiểm tra email đã tồn tại chưa
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email đã tồn tại!");
         }
 
-        // Mã hoá password
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        // Tạo user mới
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setAddress(request.getAddress());
+        user.setPhone(request.getPhone());
 
-        // Set role mặc định CUSTOMER
-        if (user.getRoles() == null || user.getRoles().isEmpty()) {
-            Role defaultRole = roleRepository.findById(2L)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy role CUSTOMER"));
-            user.setRoles(Set.of(defaultRole));
-        }
+        // Gán role mặc định CUSTOMER (id = 2 hoặc name = "Customer")
+        Role defaultRole = roleRepository.findById(2L)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy role CUSTOMER"));
+        user.setRoles(Set.of(defaultRole));
 
-        userRepository.save(user);
-        return "Đăng ký thành công!";
+        // Lưu user
+        return userRepository.save(user);
     }
 
+    /**
+     * Tìm user theo email
+     */
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }

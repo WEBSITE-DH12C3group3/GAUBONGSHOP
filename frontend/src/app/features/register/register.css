@@ -1,0 +1,110 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  background: linear-gradient(135deg, #ffdde1 0%, #ee9ca7 100%);
+  padding: 20px;
+}
+
+.register-card {
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  width: 100%;
+  max-width: 520px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.register-card h2 {
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 24px;
+  font-weight: 800;
+  color: #e75480;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.state.error {
+  background: #fff3f6;
+  color: #b33c5f;
+  border: 1px solid #f4c5d3;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.form-group {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 600px) {
+  .form-row-2 { grid-template-columns: 1fr; }
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #444;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.form-group label i {
+  color: #e75480;
+}
+
+.form-group input, .form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #f3b5c8;
+  background: #fff5f7;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.form-group input:focus, .form-group textarea:focus {
+  border-color: #e75480;
+  background: #ffeaf0;
+  outline: none;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: #e75480;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.1s;
+  margin-top: 6px;
+}
+button:hover { background: #d64570; transform: scale(1.01); }
+
+.login-link {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 14px;
+}
+.login-link a { color: #e75480; font-weight: 700; text-decoration: none; }
+.login-link a:hover { text-decoration: underline; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}

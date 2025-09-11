@@ -15,7 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:4200") // FE Angular chạy ở 4200
 public class UserController {
 
     private final UserService userService;
@@ -30,14 +30,41 @@ public class UserController {
         this.jwtUtil = jwtUtil;
     }
 
+    // ----------------------------
     // Đăng ký
+    // ----------------------------
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
-        String result = userService.register(user);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        try {
+            userService.registerUser(request);
+
+            // Nếu muốn trả token luôn sau khi đăng ký:
+            var user = userService.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy user sau khi đăng ký"));
+            UserDetails userDetails = org.springframework.security.core.userdetails.User
+                    .withUsername(user.getEmail())
+                    .password(user.getPassword())
+                    .authorities("ROLE_USER") // hoặc map roles từ DB
+                    .build();
+
+            String token = jwtUtil.generateToken(userDetails); // ✅ đúng
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Đăng ký thành công");
+            response.put("token", token);
+            response.put("user", new UserDTO(user));
+
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Lỗi server: " + e.getMessage()));
+        }
     }
 
+    // ----------------------------
     // Đăng nhập
+    // ----------------------------
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         System.out.println("Login attempt for email: " + request.getEmail());
@@ -47,26 +74,31 @@ public class UserController {
                             request.getEmail(), request.getPassword()
                     )
             );
+
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String token = jwtUtil.generateToken(userDetails);
+
             User user = userService.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found"));
-            UserDTO userDTO = new UserDTO(user);
+
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
-            response.put("user", userDTO);
+            response.put("user", new UserDTO(user));
+
             System.out.println("Login successful for email: " + request.getEmail());
             return ResponseEntity.ok(response);
         } catch (AuthenticationException e) {
             System.out.println("Authentication failed for email: " + request.getEmail() + ", error: " + e.getMessage());
-            return ResponseEntity.status(401).body("Sai email hoặc mật khẩu: " + e.getMessage());
+            return ResponseEntity.status(401).body(Map.of("error", "Sai email hoặc mật khẩu"));
         } catch (Exception e) {
             System.out.println("Unexpected error for email: " + request.getEmail() + ", error: " + e.getMessage());
-            return ResponseEntity.status(500).body("Lỗi server khi tạo token: " + e.getMessage());
+            return ResponseEntity.status(500).body(Map.of("error", "Lỗi server khi tạo token"));
         }
     }
 
-    // Lấy thông tin user hiện tại từ token
+    // ----------------------------
+    // Lấy user hiện tại (dựa vào token)
+    // ----------------------------
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails != null) {
@@ -74,6 +106,6 @@ public class UserController {
                     .map(user -> ResponseEntity.ok(new UserDTO(user)))
                     .orElse(ResponseEntity.notFound().build());
         }
-        return ResponseEntity.status(401).body("Chưa đăng nhập");
+        return ResponseEntity.status(401).body(Map.of("error", "Chưa đăng nhập"));
     }
 }

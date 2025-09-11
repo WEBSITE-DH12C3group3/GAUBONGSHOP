@@ -1,1 +1,86 @@
-<p>profile works!</p>
+<div class="profile-wrapper">
+  <div class="profile-card">
+    <h2><i class="fa fa-id-card"></i> Hồ sơ của tôi</h2>
+
+    <!-- Loading / Error -->
+    <div *ngIf="loading" class="state info"><i class="fa fa-spinner fa-spin"></i> Đang tải hồ sơ...</div>
+    <div *ngIf="!loading && error" class="state error"><i class="fa fa-triangle-exclamation"></i> {{ error }}</div>
+
+    <div *ngIf="!loading && !error" class="profile-grid">
+      <!-- Cột trái: Avatar -->
+      <div class="left">
+        <div class="avatar">
+          <img
+            [src]="profile.avatarUrl || 'https://i.pravatar.cc/200?img=12'"
+            alt="avatar"
+          />
+          <button type="button" class="btn-secondary">
+            <i class="fa fa-camera"></i> Đổi ảnh
+          </button>
+          <p class="hint">Tip: dùng ảnh vuông 400x400 để hiển thị đẹp nhất.</p>
+        </div>
+      </div>
+
+      <!-- Cột phải: Thông tin -->
+      <div class="right">
+        <form #profileForm="ngForm" (ngSubmit)="onSaveProfile(profileForm)" class="form">
+          <div class="form-row">
+            <label><i class="fa fa-user"></i> Tên đăng nhập</label>
+            <input type="text" name="username" [(ngModel)]="profile.username" required />
+          </div>
+
+          <div class="form-row">
+            <label><i class="fa fa-envelope"></i> Email</label>
+            <input type="email" name="email" [(ngModel)]="profile.email" required />
+          </div>
+
+          <div class="form-row">
+            <label><i class="fa fa-phone"></i> Số điện thoại</label>
+            <input type="text" name="phone" [(ngModel)]="profile.phone" />
+          </div>
+
+          <div class="form-row">
+            <label><i class="fa fa-location-dot"></i> Địa chỉ</label>
+            <textarea name="address" rows="3" [(ngModel)]="profile.address"></textarea>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn-primary" [disabled]="!profileForm.valid">
+              <i class="fa fa-save"></i> Lưu hồ sơ
+            </button>
+          </div>
+        </form>
+
+        <div class="divider"></div>
+
+        <!-- Đổi mật khẩu -->
+        <h3><i class="fa fa-key"></i> Đổi mật khẩu</h3>
+        <div class="form">
+          <div class="form-row">
+            <label><i class="fa fa-lock"></i> Mật khẩu hiện tại</label>
+            <input type="password" [(ngModel)]="pwd.current" name="pwdCurrent" />
+          </div>
+
+          <div class="form-row">
+            <label><i class="fa fa-lock"></i> Mật khẩu mới</label>
+            <input type="password" [(ngModel)]="pwd.next" name="pwdNext" />
+          </div>
+
+          <div class="form-row">
+            <label><i class="fa fa-lock"></i> Nhập lại mật khẩu mới</label>
+            <input type="password" [(ngModel)]="pwd.confirm" name="pwdConfirm" />
+          </div>
+
+          <div class="actions">
+            <button type="button" class="btn-secondary" (click)="onChangePassword()">
+              <i class="fa fa-rotate"></i> Đổi mật khẩu
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gợi ý -->
+    <p class="foot-hint"><i class="fa fa-circle-info"></i> Dữ liệu của bạn được bảo vệ theo chính sách bảo mật của cửa hàng.</p>
+  </div>
+</div>

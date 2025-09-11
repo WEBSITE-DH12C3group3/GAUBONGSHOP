@@ -1,12 +1,15 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../../shared/services/auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
-  templateUrl: './login.html'
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './login.html',
+  styleUrls: ['./login.css']
 })
 export class LoginComponent {
   email = '';
@@ -15,15 +18,21 @@ export class LoginComponent {
   constructor(private auth: AuthService, private router: Router) {}
 
   onLogin() {
+    if (!this.email || !this.password) return;
+
     this.auth.login({ email: this.email, password: this.password }).subscribe({
       next: (res: any) => {
         this.auth.saveToken(res.token);
         this.router.navigate(['/']);
       },
       error: (err) => {
-            console.error('Login error:', err);
-            alert(`Đăng nhập thất bại: ${err.status === 401 ? 'Sai email hoặc mật khẩu!' : 'Lỗi server: ' + err.status}`);
-          }
+        console.error('Login error:', err);
+        alert(
+          `Đăng nhập thất bại: ${
+            err?.status === 401 ? 'Sai email hoặc mật khẩu!' : 'Lỗi server'
+          }`
+        );
+      }
     });
   }
 }
