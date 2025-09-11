@@ -1,0 +1,38 @@
+<!-- Banner -->
+<section class="banner">
+  <div class="slide" style="background-image: url('assets/images/banner1.jpg')">
+    <div class="overlay">
+      <h2>Gấu Teddy Socola siêu mềm</h2>
+    </div>
+  </div>
+  <div class="slide" style="background-image: url('assets/images/banner2.jpg')">
+    <div class="overlay">
+      <h2>Thỏ Bông Trắng dễ thương</h2>
+    </div>
+  </div>
+</section>
+
+<!-- Danh mục -->
+<section class="container">
+  <h2 class="section-title">Danh mục nổi bật</h2>
+  <div class="grid">
+    <div *ngFor="let cat of categories" class="card hover">
+      <img [src]="cat.image_url" alt="{{cat.name}}" />
+      <h3>{{ cat.name }}</h3>
+    </div>
+  </div>
+</section>
+
+<!-- Sản phẩm -->
+<section class="container bg-light">
+  <h2 class="section-title">Sản phẩm mới</h2>
+  <div class="grid">
+    <div *ngFor="let p of products" class="card hover">
+      <img [src]="p.image_url" alt="{{p.name}}" />
+      <h3>{{ p.name }}</h3>
+      <p class="price">{{ p.price | currency:'VND':'symbol':'1.0-0' }}</p>
+      <button class="btn">Thêm vào giỏ</button>
+    </div>
+  </div>
+</section>
+

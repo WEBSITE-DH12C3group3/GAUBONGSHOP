@@ -1,0 +1,8 @@
+<div class="login-container">
+  <h2>Đăng nhập</h2>
+  <form (ngSubmit)="onLogin()">
+    <input type="email" [(ngModel)]="email" name="email" placeholder="Email" required />
+    <input type="password" [(ngModel)]="password" name="password" placeholder="Mật khẩu" required />
+    <button type="submit">Đăng nhập</button>
+  </form>
+</div>

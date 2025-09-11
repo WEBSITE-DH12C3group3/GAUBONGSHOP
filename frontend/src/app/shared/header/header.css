@@ -1,0 +1,210 @@
+/* Header chính */
+.header {
+  background: linear-gradient(90deg, #ff416c, #ff4b2b);
+  color: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.container {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1.2rem;
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: bold;
+  font-size: 1.3rem;
+}
+.logo img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+/* Search */
+.search-box {
+  flex: 1;
+  max-width: 450px;
+  display: flex;
+  background: white;
+  border-radius: 25px;
+  overflow: hidden;
+  margin: 0 1rem;
+}
+.search-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.9rem;
+  color: #333;
+}
+.search-box button {
+  border: none;
+  background: #ff416c;
+  color: white;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+}
+.search-box button:hover {
+  background: #ff1744;
+}
+
+/* Icons */
+.icons {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+.icon {
+  font-size: 1.3rem;
+  cursor: pointer;
+  position: relative;
+}
+.icon:hover {
+  color: #ffe082;
+}
+/* Dropdown Account */
+.icon.dropdown {
+  position: relative;
+}
+
+.icon.dropdown .dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0; /* canh bên phải icon */
+  top: 120%;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-radius: 6px;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease-in-out;
+  min-width: 180px;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+.icon.dropdown .dropdown-menu a {
+  padding: 0.7rem 1rem;
+  display: block;
+  color: #333;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background 0.2s ease, padding-left 0.2s ease;
+}
+.icon.dropdown .dropdown-menu a:hover {
+  background: #ffeef2;
+  padding-left: 1.3rem;
+  color: #ff416c;
+}
+
+.icon.dropdown:hover .dropdown-menu {
+  display: flex;
+}
+
+.icon.dropdown .dropdown-menu hr {
+  margin: 0.3rem 0;
+  border: none;
+  border-top: 1px solid #eee;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.cart .badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  background: #ffe082;
+  color: #000;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+/* Navbar dưới */
+.navbar {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  position: sticky;
+  top: 65px; /* đặt ngay dưới header trên */
+  z-index: 999;
+}
+.navbar .container {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 0.8rem 1.5rem;
+}
+
+/* Item cơ bản */
+.menu-item {
+  position: relative;
+  font-weight: 500;
+  color: #333;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+.menu-item:hover {
+  color: #ff416c;
+  transform: translateY(-2px);
+}
+
+/* Dropdown */
+.dropdown span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 110%;
+  left: 0;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-radius: 6px;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease-in-out;
+  min-width: 180px;
+  flex-direction: column;
+  z-index: 1000;
+}
+.dropdown-menu a {
+  padding: 0.7rem 1rem;
+  display: block;
+  color: #333;
+  text-decoration: none;
+  transition: background 0.2s ease, padding-left 0.2s ease;
+}
+.dropdown-menu a:hover {
+  background: #ffeef2;
+  padding-left: 1.3rem;
+  color: #ff416c;
+}
+
+/* Hiện dropdown khi hover */
+.dropdown:hover .dropdown-menu {
+  display: flex;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

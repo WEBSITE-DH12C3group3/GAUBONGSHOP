@@ -1,0 +1,85 @@
+<!-- Header trên cùng -->
+<header class="header">
+  <div class="container">
+    <!-- Logo -->
+    <div class="logo">
+      <img src="assets/images/logo.png" alt="Logo" />
+      <span>GAUBONGSHOP</span>
+    </div>
+
+    <!-- Search -->
+    <div class="search-box">
+      <input type="text" placeholder="Tìm kiếm sản phẩm..." />
+      <button><i class="fa-solid fa-magnifying-glass"></i></button>
+    </div>
+
+    <!-- Icons -->
+    <div class="icons">
+      <div class="icon">
+        <i class="fa-solid fa-heart"></i>
+      </div>
+      <div class="icon cart">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span class="badge">2</span>
+      </div>
+      <!-- Icons -->
+      <div class="icons">
+        <!-- Dropdown Account -->
+        <!-- Dropdown Account -->
+        <!-- Dropdown Account -->
+        <div class="icon dropdown">
+          <i class="fa-solid fa-user"></i>
+
+          <div class="dropdown-menu">
+            <!-- Nếu chưa đăng nhập -->
+            <ng-container *ngIf="!auth.isLoggedIn(); else loggedIn">
+              <a routerLink="/login">
+                <i class="fa-solid fa-right-to-bracket"></i> Đăng nhập
+              </a>
+              <a routerLink="/register">
+                <i class="fa-solid fa-user-plus"></i> Đăng ký
+              </a>
+            </ng-container>
+
+            <!-- Nếu đã đăng nhập -->
+            <ng-template #loggedIn>
+              <a routerLink="/profile">
+                <i class="fa-solid fa-id-card"></i> Hồ sơ
+              </a>
+              <a routerLink="/orders">
+                <i class="fa-solid fa-box"></i> Đơn hàng
+              </a>
+              <hr />
+              <a (click)="onLogout()" class="logout-link">
+                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+              </a>
+            </ng-template>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</header>
+
+<!-- Navbar dưới -->
+<nav class="navbar">
+  <div class="container">
+    <!-- Danh mục -->
+    <div class="menu-item dropdown">
+      <span>Danh mục <i class="fa-solid fa-angle-down"></i></span>
+      <div class="dropdown-menu">
+        <a routerLink="/products/teddy">Gấu Teddy</a>
+        <a routerLink="/products/thobong">Thỏ Bông</a>
+        <a routerLink="/products/hoabong">Hoa Bông</a>
+        <a routerLink="/products/phukienshop">Phụ Kiện</a>
+      </div>
+    </div>
+
+    <!-- Các mục khác -->
+    <a class="menu-item" routerLink="/home" routerLinkActive="active">Trang chủ</a>
+    <a class="menu-item" routerLink="/about" routerLinkActive="active">Giới thiệu</a>
+    <a class="menu-item" routerLink="/contact" routerLinkActive="active">Liên hệ</a>
+  </div>
+</nav>

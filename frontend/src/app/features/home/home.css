@@ -1,0 +1,96 @@
+/* Banner */
+.banner {
+  display: flex;
+  overflow: hidden;
+  height: 400px;
+}
+.banner .slide {
+  flex: 1;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  transition: transform 0.5s ease-in-out;
+}
+.banner .overlay {
+  background: rgba(0,0,0,0.4);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.banner h2 {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Section */
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 3rem 1rem;
+}
+.section-title {
+  font-size: 1.8rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #e91e63;
+  font-weight: bold;
+}
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Card */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+.card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+.card .price {
+  color: #e91e63;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+.card.hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+/* Button */
+.btn {
+  background: #e91e63;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.btn:hover {
+  background: #d81b60;
+}
+
+/* Background section */
+.bg-light {
+  background: #f9f9f9;
+}

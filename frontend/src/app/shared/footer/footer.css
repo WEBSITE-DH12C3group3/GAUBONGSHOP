@@ -1,0 +1,53 @@
+.footer {
+  background: #f8f8f8;
+  color: #333;
+  padding: 2rem 1rem;
+  margin-top: 2rem;
+}
+.footer .container {
+  max-width: 1200px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+}
+.footer .col h3 {
+  color: #e91e63;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.footer .col h4 {
+  margin-bottom: 1rem;
+  color: #e91e63;
+}
+.footer .col a {
+  display: block;
+  color: #333;
+  margin-bottom: 0.5rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.footer .col a:hover {
+  color: #e91e63;
+}
+.footer .social {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+.footer .social i {
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+.footer .social i:hover {
+  color: #e91e63;
+}
+.footer .bottom {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+  font-size: 0.9rem;
+  color: #777;
+}
