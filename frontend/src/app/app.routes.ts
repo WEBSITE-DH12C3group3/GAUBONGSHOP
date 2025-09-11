@@ -3,7 +3,8 @@ import { HomeComponent } from './features/home/home';       // nếu file bạn 
 import { LoginComponent } from './features/login/login';    // nếu file bạn tên login.ts
 import { RegisterComponent } from './features/register/register';
 import { ProfileComponent } from './features/profile/profile';
-import { AuthGuard } from './shared/services/auth.guard';
+import { AuthGuard } from './shared/services/auth.guard'; // 👈 thêm dòng này
+
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },

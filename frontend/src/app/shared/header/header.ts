@@ -5,7 +5,8 @@ import { AuthService } from '../../shared/services/auth.service';
 @Component({
   selector: 'app-header',
   templateUrl: './header.html',
-  styleUrls: ['./header.css']
+  styleUrls: ['./header.css'],
+
 })
 export class HeaderComponent {
   constructor(public auth: AuthService, private router: Router) {}

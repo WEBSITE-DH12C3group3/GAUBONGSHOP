@@ -1,24 +1,39 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
-
+import { Observable, BehaviorSubject } from 'rxjs';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly apiUrl = 'http://localhost:8080/api/users'; // Sửa URL
+  private readonly apiUrl = 'http://localhost:8080/api/users';
+  private isBrowser: boolean;
+  private loggedIn$ = new BehaviorSubject<boolean>(false);
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
 
+    // Khi chạy ở browser thì kiểm tra token sẵn có
+    if (this.isBrowser && this.getToken()) {
+      this.loggedIn$.next(true);
+    }
+  }
+
+  // Đăng ký
   register(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/register`, data);
   }
 
+  // Đăng nhập
   login(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, data);
   }
 
+  // Lấy user hiện tại
   getCurrentUser(): Observable<any> {
     return this.http.get(`${this.apiUrl}/me`, {
       headers: new HttpHeaders({
@@ -27,19 +42,37 @@ export class AuthService {
     });
   }
 
+  // Lưu token
   saveToken(token: string) {
-    localStorage.setItem('token', token);
+    if (this.isBrowser) {
+      localStorage.setItem('token', token);
+      this.loggedIn$.next(true);
+    }
   }
 
+  // Lấy token
   getToken(): string | null {
-    return localStorage.getItem('token');
+    if (this.isBrowser) {
+      return localStorage.getItem('token');
+    }
+    return null;
   }
 
+  // Kiểm tra đăng nhập
   isLoggedIn(): boolean {
-    return !!this.getToken();
+    return this.loggedIn$.value;
   }
 
+  // Observable để subscribe trong component
+  isLoggedIn$(): Observable<boolean> {
+    return this.loggedIn$.asObservable();
+  }
+
+  // Đăng xuất
   logout() {
-    localStorage.removeItem('token');
+    if (this.isBrowser) {
+      localStorage.removeItem('token');
+      this.loggedIn$.next(false);
+    }
   }
 }

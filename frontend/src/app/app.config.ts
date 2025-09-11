@@ -11,6 +11,8 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
-    provideHttpClient()   // 👈 thêm dòng này
+    provideHttpClient() ,  // 👈 thêm dòng này
+//     provideHttpClient(withFetch()) // 👈 thêm withFetch()
+
   ]
 };
