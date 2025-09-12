@@ -5,7 +5,7 @@ import { CommonModule, NgIf, NgFor } from '@angular/common'; // 👈 thêm NgIf,
 import { AuthService } from '../../shared/services/auth.service';
 
 @Component({
-  selector: 'app-header',
+ selector: 'app-user-header',
   standalone: true,
   templateUrl: './header.html',
   styleUrls: ['./header.css'],

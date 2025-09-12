@@ -41,7 +41,7 @@ public class UserService {
         user.setPhone(request.getPhone());
 
         // Gán role mặc định CUSTOMER (id = 2 hoặc name = "Customer")
-        Role defaultRole = roleRepository.findById(2L)
+        Role defaultRole = roleRepository.findById(1L)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy role CUSTOMER"));
         user.setRoles(Set.of(defaultRole));
 

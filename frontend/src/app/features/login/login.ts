@@ -11,27 +11,39 @@ import { AuthService } from '../../shared/services/auth.service';
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
-export class LoginComponent {
+export class Login {
   email = '';
   password = '';
+  loading = false;
+  error: string | null = null;
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private readonly auth: AuthService, private readonly router: Router) {}
 
   onLogin() {
-    if (!this.email || !this.password) return;
+    if (!this.email || !this.password) {
+      this.error = 'Vui lòng nhập đầy đủ email và mật khẩu';
+      return;
+    }
 
+    this.loading = true;
     this.auth.login({ email: this.email, password: this.password }).subscribe({
       next: (res: any) => {
         this.auth.saveToken(res.token);
-        this.router.navigate(['/']);
+        this.auth.saveUser(res.user);
+
+        const role = this.auth.getRole();
+        if (role === 'Admin') {
+          this.router.navigate(['/admin/dashboard']);
+        } else {
+          this.router.navigate(['/']);
+        }
+
+        this.loading = false;
       },
       error: (err) => {
         console.error('Login error:', err);
-        alert(
-          `Đăng nhập thất bại: ${
-            err?.status === 401 ? 'Sai email hoặc mật khẩu!' : 'Lỗi server'
-          }`
-        );
+        this.error = err?.status === 401 ? 'Sai email hoặc mật khẩu!' : 'Lỗi server';
+        this.loading = false;
       }
     });
   }

@@ -42,6 +42,18 @@ export class AuthService {
     });
   }
 
+  getRole(): string | null {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return null;
+    const user = JSON.parse(userStr);
+    return user.roles && user.roles.length > 0 ? user.roles[0].name : null;
+  }
+
+saveUser(user: any) {
+  localStorage.setItem('user', JSON.stringify(user));
+}
+
+
   // Lưu token
   saveToken(token: string) {
     if (this.isBrowser) {

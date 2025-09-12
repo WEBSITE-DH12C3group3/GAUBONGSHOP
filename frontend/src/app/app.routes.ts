@@ -1,15 +1,39 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './features/home/home';       // nếu file bạn tên home.ts
-import { LoginComponent } from './features/login/login';    // nếu file bạn tên login.ts
+
+// Layouts
+import { UserLayout } from './features/layout/user-layout';
+import { AdminLayout } from './admin/layout/admin-layout';
+
+// Features customer
+import { HomeComponent } from './features/home/home';
+import { Login } from './features/login/login';
 import { RegisterComponent } from './features/register/register';
 import { ProfileComponent } from './features/profile/profile';
-import { AuthGuard } from './shared/services/auth.guard'; // 👈 thêm dòng này
 
+// Admin pages
+import { Dashboard } from './admin/dashboard/dashboard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', component: HomeComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
-  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] }
+  // Customer layout
+  {
+    path: '',
+    component: UserLayout,
+    children: [
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: 'home', component: HomeComponent },
+      { path: 'login', component: Login },
+      { path: 'register', component: RegisterComponent },
+      { path: 'profile', component: ProfileComponent }
+    ]
+  },
+
+  // Admin layout (giữ nguyên)
+  {
+    path: 'admin',
+    component: AdminLayout,
+    children: [
+      { path: 'dashboard', component: Dashboard },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+    ]
+  }
 ];

@@ -1,0 +1,28 @@
+ .admin-header {
+   font-family: 'Inter', sans-serif;
+   position: sticky;
+   top: 0;
+   z-index: 50;
+ }
+
+ .search-input {
+   border: 1px solid #e5e7eb;
+   border-radius: 6px;
+   padding: 6px 12px;
+   font-size: 14px;
+ }
+ .search-input:focus {
+   outline: none;
+   border-color: #ec4899;
+ }
+
+ .icon-btn {
+   background: #fce7f3;
+   border-radius: 50%;
+   padding: 8px;
+   transition: all 0.2s;
+ }
+ .icon-btn:hover {
+   background: #f9a8d4;
+ }
+

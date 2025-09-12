@@ -1,0 +1,13 @@
+<div class="dashboard p-6">
+  <h2 class="title">📊 Thống kê tổng quan</h2>
+
+  <div class="grid">
+    <div *ngFor="let stat of stats" class="card" [ngClass]="stat.color">
+      <div class="icon">{{ stat.icon }}</div>
+      <div class="info">
+        <h3>{{ stat.title }}</h3>
+        <p>{{ stat.value }}</p>
+      </div>
+    </div>
+  </div>
+</div>

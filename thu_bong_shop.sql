@@ -1,335 +1,916 @@
--- Tạo database
-CREATE DATABASE IF NOT EXISTS thu_bong_shop;
-USE thu_bong_shop;
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: Sep 11, 2025 at 06:31 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
--- Bảng 1: Categories (Danh mục sản phẩm)
-CREATE TABLE categories (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
--- Bảng 2: Brands (Thương hiệu)
-CREATE TABLE brands (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) UNIQUE NOT NULL,
-    description TEXT,
-    logo_url VARCHAR(255),
-    website_url VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
 
--- Bảng 3: Attributes (Thuộc tính)
-CREATE TABLE attributes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
--- Bảng 4: Products (Sản phẩm)
-CREATE TABLE products (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    price DECIMAL(10, 2) NOT NULL,
-    image_url VARCHAR(255),
-    category_id INT,
-    brand_id INT,
-    stock INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
-    FOREIGN KEY (brand_id) REFERENCES brands(id) ON DELETE SET NULL
-);
+--
+-- Database: `thu_bong_shop`
+--
 
--- Bảng 5: Product_Attributes (Thuộc tính sản phẩm)
-CREATE TABLE product_attributes (
-    product_id INT,
-    attribute_id INT,
-    value VARCHAR(100) NOT NULL,
-    PRIMARY KEY (product_id, attribute_id),
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-    FOREIGN KEY (attribute_id) REFERENCES attributes(id) ON DELETE CASCADE
-);
+-- --------------------------------------------------------
 
--- Bảng 6: Users (Người dùng)
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    address VARCHAR(255),
-    phone VARCHAR(20),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+--
+-- Table structure for table `attributes`
+--
 
--- Bảng 7: Roles (Nhóm quyền)
-CREATE TABLE roles (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) UNIQUE NOT NULL,
-    description TEXT
-);
+CREATE TABLE `attributes` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Bảng 8: Permissions (Quyền)
-CREATE TABLE permissions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) UNIQUE NOT NULL,
-    description TEXT
-);
+--
+-- Dumping data for table `attributes`
+--
 
--- Bảng 9: Role_Permissions (Gán quyền cho nhóm)
-CREATE TABLE role_permissions (
-    role_id INT,
-    permission_id INT,
-    PRIMARY KEY (role_id, permission_id),
-    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
-    FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
-);
+INSERT INTO `attributes` (`id`, `name`, `description`, `created_at`) VALUES
+(1, 'Màu sắc', 'Màu sắc của sản phẩm', '2025-08-25 14:50:57'),
+(2, 'Kích thước', 'Kích thước của sản phẩm', '2025-08-25 14:50:57'),
+(3, 'Chất liệu', 'Chất liệu làm sản phẩm', '2025-08-25 14:50:57');
 
--- Bảng 10: User_Roles (Gán nhóm cho user)
-CREATE TABLE user_roles (
-    user_id INT,
-    role_id INT,
-    PRIMARY KEY (user_id, role_id),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
-);
+-- --------------------------------------------------------
 
--- Bảng 11: Carts (Giỏ hàng)
-CREATE TABLE carts (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    product_id INT,
-    quantity INT DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-);
+--
+-- Table structure for table `brands`
+--
 
--- Bảng 12: Orders (Đơn hàng)
-CREATE TABLE orders (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
-    total_amount DECIMAL(10, 2) NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-);
+CREATE TABLE `brands` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `logo_url` varchar(255) DEFAULT NULL,
+  `website_url` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Bảng 13: Order_Items (Chi tiết đơn hàng)
-CREATE TABLE order_items (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT,
-    product_id INT,
-    quantity INT,
-    price DECIMAL(10, 2),
-    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
-);
+--
+-- Dumping data for table `brands`
+--
 
--- Bảng 14: Payments (Thanh toán)
-CREATE TABLE payments (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT,
-    payment_method ENUM('COD', 'bank_transfer', 'e_wallet', 'credit_card'),
-    amount DECIMAL(10, 2),
-    payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('paid', 'pending', 'failed') DEFAULT 'pending',
-    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
-);
+INSERT INTO `brands` (`id`, `name`, `description`, `logo_url`, `website_url`, `created_at`) VALUES
+(1, 'Teddy', 'Thương hiệu gấu bông cao cấp', '/Brandimg/1756284670991-82964158-OIP.webp', 'https://www.teddy.it/en/home/', '2025-08-25 14:50:57'),
+(2, 'Kuromi', 'Thương hiệu thú bông nhân vật hoạt hình', '/Brandimg/1756284599669-261707982-download (1).webp', 'https://kuromi.co.uk/what-animal-is-kuromi/', '2025-08-25 14:50:57'),
+(3, 'OEM', 'Thương hiệu sản xuất chung', '/Brandimg/1756284502761-606171162-download.webp', 'https://thunhoibongthanhdat.com/', '2025-08-25 14:50:57'),
+(4, 'Steiff', 'Hãng gấu bông cao cấp đến từ Đức', '/Brandimg/1756284427104-458305385-OIF.webp', 'https://www.steiff.com/en', '2025-08-27 08:47:07');
 
--- Bảng 15: Shipping (Vận chuyển)
-CREATE TABLE shipping (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT,
-    address VARCHAR(255) NOT NULL,
-    shipping_method VARCHAR(100),
-    tracking_number VARCHAR(50),
-    shipped_date TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
-);
+-- --------------------------------------------------------
 
--- Bảng 16: Reviews (Đánh giá)
-CREATE TABLE reviews (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    product_id INT,
-    user_id INT,
-    rating INT CHECK (rating BETWEEN 1 AND 5),
-    comment TEXT,
-    review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-);
+--
+-- Table structure for table `carts`
+--
 
--- Bảng 17: Favorites (Yêu thích)
-CREATE TABLE favorites (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    product_id INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_favorite (user_id, product_id),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-);
+CREATE TABLE `carts` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `product_id` int(11) DEFAULT NULL,
+  `quantity` int(11) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Bảng 18: Imports (Phiếu nhập)
-CREATE TABLE imports (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    supplier_name VARCHAR(100) NOT NULL,
-    import_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    total_cost DECIMAL(10, 2),
-    status ENUM('pending', 'completed', 'cancelled') DEFAULT 'pending',
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- --------------------------------------------------------
 
--- Bảng 19: Import_Details (Chi tiết phiếu nhập)
-CREATE TABLE import_details (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    import_id INT NOT NULL,
-    product_id INT NOT NULL,
-    quantity INT NOT NULL CHECK (quantity > 0),
-    unit_price DECIMAL(10, 2) NOT NULL,
-    FOREIGN KEY (import_id) REFERENCES imports(id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-);
+--
+-- Table structure for table `categories`
+--
 
--- Trigger để tự động cập nhật stock khi nhập hàng
-DELIMITER //
-CREATE TRIGGER after_import_details_insert
-AFTER INSERT ON import_details
-FOR EACH ROW
-BEGIN
+CREATE TABLE `categories` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `is_featured` tinyint(1) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `categories`
+--
+
+INSERT INTO `categories` (`id`, `name`, `description`, `created_at`, `is_featured`) VALUES
+(1, 'Gấu Teddy meme', 'Danh mục gấu bông Teddy cao cấp', '2025-08-25 14:50:57', 1),
+(2, 'Thỏ Bông', 'Danh mục thỏ nhồi bông', '2025-08-25 14:50:57', 1),
+(4, 'kabuchino', 'hoạt hình vui vẻ', '2025-08-27 08:25:23', 1),
+(5, 'KHÁ BẢNH', 'dân chơi nửa mùa', '2025-08-28 06:08:34', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `favorites`
+--
+
+CREATE TABLE `favorites` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `imports`
+--
+
+CREATE TABLE `imports` (
+  `id` int(11) NOT NULL,
+  `import_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `total_cost` decimal(10,2) DEFAULT NULL,
+  `status` enum('pending','completed','cancelled') DEFAULT 'pending',
+  `notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `supplier_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `imports`
+--
+
+INSERT INTO `imports` (`id`, `import_date`, `total_cost`, `status`, `notes`, `created_at`, `supplier_id`) VALUES
+(1, '2025-08-24 17:00:00', 0.00, 'completed', 'Nhập lô gấu Teddy mới', '2025-08-25 14:50:57', 1),
+(2, '2025-08-24 17:00:00', 0.00, 'pending', 'Chờ kiểm tra chất lượng', '2025-08-25 14:50:57', 1),
+(3, '2025-08-26 17:00:00', 2000000.00, 'pending', NULL, '2025-08-27 13:47:30', 1),
+(4, '2025-08-26 17:00:00', 5210000.00, 'pending', NULL, '2025-08-27 14:31:57', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `import_details`
+--
+
+CREATE TABLE `import_details` (
+  `id` int(11) NOT NULL,
+  `import_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL CHECK (`quantity` > 0),
+  `unit_price` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `import_details`
+--
+
+INSERT INTO `import_details` (`id`, `import_id`, `product_id`, `quantity`, `unit_price`) VALUES
+(4, 3, 4, 10, 200000.00),
+(5, 4, 6, 13, 130000.00),
+(6, 4, 4, 11, 200000.00),
+(7, 4, 14, 11, 120000.00);
+
+--
+-- Triggers `import_details`
+--
+DELIMITER $$
+CREATE TRIGGER `after_import_details_insert` AFTER INSERT ON `import_details` FOR EACH ROW BEGIN
     UPDATE products 
     SET stock = stock + NEW.quantity
     WHERE id = NEW.product_id;
-END //
+END
+$$
 DELIMITER ;
 
--- Thêm chỉ mục để tối ưu tìm kiếm
-CREATE INDEX idx_product_name ON products(name);
-CREATE INDEX idx_order_status ON orders(status);
-CREATE INDEX idx_import_details_product ON import_details(product_id);
+-- --------------------------------------------------------
 
--- Dữ liệu mẫu
+--
+-- Table structure for table `orders`
+--
 
--- Categories
-INSERT INTO categories (name, description) VALUES 
-('Gấu Teddy', 'Danh mục gấu bông Teddy cao cấp'),
-('Thỏ Bông', 'Danh mục thỏ nhồi bông'),
-('Hoa Bông', 'Danh mục bó hoa bằng bông');
+CREATE TABLE `orders` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `order_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` enum('pending','processing','shipped','delivered','cancelled') DEFAULT 'pending',
+  `total_amount` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Brands
-INSERT INTO brands (name, description) VALUES 
-('Teddy', 'Thương hiệu gấu bông cao cấp'),
-('Kuromi', 'Thương hiệu thú bông nhân vật hoạt hình'),
-('OEM', 'Thương hiệu sản xuất chung');
+--
+-- Dumping data for table `orders`
+--
 
--- Attributes
-INSERT INTO attributes (name, description) VALUES 
-('Màu sắc', 'Màu sắc của sản phẩm'),
-('Kích thước', 'Kích thước của sản phẩm'),
-('Chất liệu', 'Chất liệu làm sản phẩm');
+INSERT INTO `orders` (`id`, `user_id`, `order_date`, `status`, `total_amount`) VALUES
+(1, 1, '2025-08-25 14:50:57', 'pending', 890000.00),
+(2, 1, '2025-08-25 14:50:57', 'shipped', 250000.00);
 
--- Products
-INSERT INTO products (name, description, price, image_url, category_id, brand_id, stock) VALUES 
-('Gấu Teddy Socola', 'Gấu bông màu nâu socola', 445000.00, 'https://example.com/teddy.jpg', 1, 1, 100),
-('Thỏ Bông Trắng', 'Thỏ bông trắng mềm mại', 250000.00, 'https://example.com/rabbit.jpg', 2, 2, 50),
-('Hoa Bông Tím', 'Bó hoa nhồi bông màu tím', 350000.00, 'https://example.com/flower.jpg', 3, 3, 20);
+-- --------------------------------------------------------
 
--- Product_Attributes
-INSERT INTO product_attributes (product_id, attribute_id, value) VALUES 
-(1, 1, 'Nâu'), (1, 2, '30cm'), (1, 3, 'Bông gòn cao cấp'),
-(2, 1, 'Trắng'), (2, 2, '25cm'), (2, 3, 'Vải lông mềm'),
-(3, 1, 'Tím'), (3, 2, '20cm'), (3, 3, 'Bông tổng hợp');
+--
+-- Table structure for table `order_items`
+--
 
--- Users
-INSERT INTO users (username, password, email, address, phone) VALUES 
-('khachhang1', 'hashed_pass1', 'khachhang1@example.com', '123 Đường Láng, Hà Nội', '0901234567'),
-('seller1', 'hashed_pass2', 'seller1@example.com', '456 Nguyễn Huệ, TP.HCM', '0912345678'),
-('admin1', 'hashed_pass3', 'admin1@example.com', '789 Lê Lợi, Đà Nẵng', '0923456789');
+CREATE TABLE `order_items` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `product_id` int(11) DEFAULT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `price` decimal(10,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Roles
-INSERT INTO roles (name, description) VALUES 
-('Customer', 'Khách hàng thông thường'),
-('Seller', 'Nhà bán hàng quản lý sản phẩm'),
-('Admin', 'Quản trị viên toàn quyền');
+--
+-- Dumping data for table `order_items`
+--
 
--- Permissions
-INSERT INTO permissions (name, description) VALUES 
-('view_products', 'Xem danh sách sản phẩm'),
-('add_to_cart', 'Thêm vào giỏ hàng'),
-('add_to_favorites', 'Thêm vào yêu thích'),
-('place_order', 'Đặt hàng'),
-('view_orders', 'Xem đơn hàng của mình'),
-('manage_products', 'Quản lý sản phẩm (thêm/sửa/xóa)'),
-('manage_orders', 'Quản lý đơn hàng (xử lý, hủy)'),
-('manage_users', 'Quản lý người dùng'),
-('view_reports', 'Xem báo cáo doanh thu'),
-('manage_imports', 'Quản lý phiếu nhập (tạo, sửa, xóa)'),
-('view_imports', 'Xem danh sách phiếu nhập');
+INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `price`) VALUES
+(1, 1, NULL, 2, 445000.00),
+(2, 2, NULL, 1, 250000.00);
 
--- Role_Permissions
-INSERT INTO role_permissions (role_id, permission_id) VALUES 
--- Customer
-(1, 1), (1, 2), (1, 3), (1, 4), (1, 5),
--- Seller
-(2, 1), (2, 6), (2, 7), (2, 10), (2, 11),
--- Admin
-(3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11);
+-- --------------------------------------------------------
 
--- User_Roles
-INSERT INTO user_roles (user_id, role_id) VALUES 
-(1, 1),  -- khachhang1 là Customer
-(2, 2),  -- seller1 là Seller
-(3, 3);  -- admin1 là Admin
+--
+-- Table structure for table `payments`
+--
 
--- Carts
-INSERT INTO carts (user_id, product_id, quantity) VALUES 
-(1, 1, 2),  -- khachhang1 thêm 2 Gấu Teddy Socola vào giỏ
-(1, 2, 1);  -- khachhang1 thêm 1 Thỏ Bông Trắng
+CREATE TABLE `payments` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `payment_method` enum('COD','bank_transfer','e_wallet','credit_card') DEFAULT NULL,
+  `amount` decimal(10,2) DEFAULT NULL,
+  `payment_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` enum('paid','pending','failed') DEFAULT 'pending',
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Orders
-INSERT INTO orders (user_id, total_amount, status) VALUES 
-(1, 890000.00, 'pending'),  -- Đơn hàng của khachhang1
-(1, 250000.00, 'shipped');  -- Đơn hàng khác
+--
+-- Dumping data for table `payments`
+--
 
--- Order_Items
-INSERT INTO order_items (order_id, product_id, quantity, price) VALUES 
-(1, 1, 2, 445000.00),  -- 2 Gấu Teddy Socola
-(2, 2, 1, 250000.00);  -- 1 Thỏ Bông Trắng
+INSERT INTO `payments` (`id`, `order_id`, `payment_method`, `amount`, `payment_date`, `status`, `created_at`, `updated_at`) VALUES
+(1, 1, 'COD', 890000.00, '2025-08-25 14:50:57', 'pending', '2025-09-11 23:30:19', '2025-09-11 23:30:19'),
+(2, 2, 'e_wallet', 250000.00, '2025-08-25 14:50:57', 'paid', '2025-09-11 23:30:19', '2025-09-11 23:30:19');
 
--- Payments
-INSERT INTO payments (order_id, payment_method, amount, status) VALUES 
-(1, 'COD', 890000.00, 'pending'),
-(2, 'e_wallet', 250000.00, 'paid');
+-- --------------------------------------------------------
 
--- Shipping
-INSERT INTO shipping (order_id, address, shipping_method, tracking_number) VALUES 
-(1, '123 Đường Láng, Hà Nội', 'GHTK', 'GH12345'),
-(2, '123 Đường Láng, Hà Nội', 'Viettel Post', 'VT67890');
+--
+-- Table structure for table `permissions`
+--
 
--- Reviews
-INSERT INTO reviews (product_id, user_id, rating, comment) VALUES 
-(1, 1, 5, 'Gấu bông rất mềm và đáng yêu!'),
-(2, 1, 4, 'Thỏ bông đẹp nhưng hơi nhỏ');
+CREATE TABLE `permissions` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Favorites
-INSERT INTO favorites (user_id, product_id) VALUES 
-(1, 1),  -- khachhang1 yêu thích Gấu Teddy Socola
-(1, 3);  -- khachhang1 yêu thích Hoa Bông Tím
+--
+-- Dumping data for table `permissions`
+--
 
--- Imports
-INSERT INTO imports (supplier_name, total_cost, status, notes) VALUES 
-('Công ty ABC', 5000000.00, 'completed', 'Nhập lô gấu Teddy mới'),
-('Nhà cung cấp XYZ', 3000000.00, 'pending', 'Chờ kiểm tra chất lượng');
+INSERT INTO `permissions` (`id`, `name`, `description`) VALUES
+(1, 'view_products', 'Xem danh sách sản phẩm'),
+(2, 'add_to_cart', 'Thêm vào giỏ hàng'),
+(3, 'add_to_favorites', 'Thêm vào yêu thích'),
+(4, 'place_order', 'Đặt hàng'),
+(5, 'view_orders', 'Xem đơn hàng của mình'),
+(6, 'manage_products', 'Quản lý sản phẩm (thêm/sửa/xóa)'),
+(7, 'manage_orders', 'Quản lý đơn hàng (xử lý, hủy)'),
+(8, 'manage_users', 'Quản lý người dùng'),
+(9, 'view_reports', 'Xem báo cáo doanh thu'),
+(10, 'manage_imports', 'Quản lý phiếu nhập (tạo, sửa, xóa)'),
+(11, 'view_imports', 'Xem danh sách phiếu nhập');
 
--- Import_Details
-INSERT INTO import_details (import_id, product_id, quantity, unit_price) VALUES 
-(1, 1, 50, 80000.00),  -- Nhập 50 Gấu Teddy Socola, giá nhập 80k/con
-(2, 2, 30, 60000.00);  -- Nhập 30 Thỏ Bông Trắng, giá nhập 60k/con
+-- --------------------------------------------------------
 
-ALTER TABLE payments 
-ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+--
+-- Table structure for table `products`
+--
+
+CREATE TABLE `products` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `brand_id` int(11) DEFAULT NULL,
+  `stock` int(11) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `products`
+--
+
+INSERT INTO `products` (`id`, `name`, `description`, `price`, `image_url`, `category_id`, `brand_id`, `stock`, `created_at`) VALUES
+(4, 'gấu bông noel', 'hihi', 200000.00, '/uploads/1756279158686-303970204-memeandroid1.jpg', 1, 1, 43, '2025-08-27 07:05:09'),
+(5, 'GẤU HỒNG CUTE', 'NGOAN XINH YÊU', 130000.00, '/uploads/1756279804940-824896769-OIP (1).jpg', 1, 3, 11, '2025-08-27 07:30:04'),
+(6, 'GẤU NÂU MỀM MẠI', 'HIHI', 130000.00, '/uploads/1756279859283-580258136-OIP (1).webp', 1, 2, 24, '2025-08-27 07:30:59'),
+(7, 'GẤU NÂU MỀM MẠI', 'hhh', 130000.00, '/uploads/1756280319988-585411408-OIP (1).webp', 1, 2, 11, '2025-08-27 07:38:39'),
+(8, 'GẤU BUỒN NGỦ ', 'KKK', 130000.00, '/uploads/1756280527194-32202040-OIP (2).webp', 2, 3, 11, '2025-08-27 07:42:07'),
+(9, 'HỔ KAKA', 'WWWWW', 130000.00, '/uploads/1756280577416-563265173-OIP (3).webp', 2, 1, 11, '2025-08-27 07:42:57'),
+(10, 'GẤU TRÚC THIẾU NGỦ', 'HHH', 120000.00, '/uploads/1756280627818-112704816-OIP (4).webp', 2, 3, 12, '2025-08-27 07:43:47'),
+(11, 'GẤU TRÚC HAM ĂN', 'HHH', 130000.00, '/uploads/1756280679637-881067446-OIP9.jpg', 1, 3, 11, '2025-08-27 07:44:39'),
+(12, 'GẤU DÂU ĐÁNG YÊU', 'KKKK', 210000.00, '/uploads/1756280739648-379525019-OIP (5).webp', NULL, 1, 22, '2025-08-27 07:45:39'),
+(13, 'THỎ ĐÀO NGỌT NGÀO', 'HHH', 210000.00, '/uploads/1756280802618-785400663-OIP (7).webp', NULL, 3, 22, '2025-08-27 07:46:42'),
+(14, 'TIỂU ĐÀO ĐÀO', 'HHH', 120000.00, '/uploads/1756280863080-210403397-OIP (6).webp', NULL, 3, 22, '2025-08-27 07:47:43');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `product_attributes`
+--
+
+CREATE TABLE `product_attributes` (
+  `product_id` int(11) NOT NULL,
+  `attribute_id` int(11) NOT NULL,
+  `value` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `product_attributes`
+--
+
+INSERT INTO `product_attributes` (`product_id`, `attribute_id`, `value`) VALUES
+(4, 1, 'đỏ'),
+(4, 2, '30cm'),
+(4, 3, 'len'),
+(5, 1, 'đỏ'),
+(5, 2, '30cm'),
+(5, 3, 'len'),
+(6, 1, 'đỏ'),
+(6, 2, '30cm'),
+(6, 3, 'len'),
+(7, 1, 'đỏ'),
+(7, 2, '30cm'),
+(7, 3, 'len'),
+(8, 1, 'đỏ'),
+(8, 2, '30cm'),
+(8, 3, 'len'),
+(9, 1, 'đỏ'),
+(9, 2, '30cm'),
+(9, 3, 'len'),
+(10, 1, 'đỏ'),
+(10, 2, '30cm'),
+(10, 3, 'len'),
+(11, 1, 'đỏ'),
+(11, 2, '30cm'),
+(11, 3, 'len'),
+(12, 1, 'đỏ'),
+(12, 2, '30cm'),
+(12, 3, 'len'),
+(13, 1, 'đỏ'),
+(13, 2, '30cm'),
+(13, 3, 'len'),
+(14, 1, 'đỏ'),
+(14, 2, '30cm'),
+(14, 3, 'len');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `reviews`
+--
+
+CREATE TABLE `reviews` (
+  `id` int(11) NOT NULL,
+  `product_id` int(11) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `rating` int(11) DEFAULT NULL CHECK (`rating` between 1 and 5),
+  `comment` text DEFAULT NULL,
+  `review_date` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `roles`
+--
+
+CREATE TABLE `roles` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `roles`
+--
+
+INSERT INTO `roles` (`id`, `name`, `description`) VALUES
+(1, 'Customer', 'Khách hàng thông thường'),
+(2, 'Seller', 'Nhà bán hàng quản lý sản phẩm'),
+(3, 'Admin', 'Quản trị viên toàn quyền');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `role_permissions`
+--
+
+CREATE TABLE `role_permissions` (
+  `role_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `role_permissions`
+--
+
+INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
+(1, 1),
+(1, 2),
+(1, 3),
+(1, 4),
+(1, 5),
+(2, 1),
+(2, 6),
+(2, 7),
+(2, 10),
+(2, 11),
+(3, 1),
+(3, 2),
+(3, 3),
+(3, 4),
+(3, 5),
+(3, 6),
+(3, 7),
+(3, 8),
+(3, 9),
+(3, 10),
+(3, 11);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `shipping`
+--
+
+CREATE TABLE `shipping` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `address` varchar(255) NOT NULL,
+  `shipping_method` varchar(100) DEFAULT NULL,
+  `tracking_number` varchar(50) DEFAULT NULL,
+  `shipped_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `shipping`
+--
+
+INSERT INTO `shipping` (`id`, `order_id`, `address`, `shipping_method`, `tracking_number`, `shipped_date`) VALUES
+(1, 1, '123 Đường Láng, Hà Nội', 'GHTK', 'GH12345', '2025-08-25 14:50:57'),
+(2, 2, '123 Đường Láng, Hà Nội', 'Viettel Post', 'VT67890', '2025-08-25 14:50:57');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `suppliers`
+--
+
+CREATE TABLE `suppliers` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `contact_person` varchar(100) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `suppliers`
+--
+
+INSERT INTO `suppliers` (`id`, `name`, `contact_person`, `phone`, `email`, `address`, `created_at`, `updated_at`) VALUES
+(1, 'công ty trách nhiệm hữu hạn một mình tao', 'phùng thị trang', '0349459165', 'phungtrang19012004@gmail.com', 'fffffff', '2025-08-27 13:46:25', '2025-08-27 13:47:03');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `username`, `password`, `email`, `address`, `phone`, `created_at`) VALUES
+(1, 'khachhang1', 'hashed_pass1', 'khachhang1@example.com', '123 Đường Láng, Hà Nội', '0901234567', '2025-08-25 14:50:57'),
+(2, 'seller1', 'hashed_pass2', 'seller1@example.com', '456 Nguyễn Huệ, TP.HCM', '0912345678', '2025-08-25 14:50:57'),
+(3, 'admin1', 'hashed_pass3', 'admin1@example.com', '789 Lê Lợi, Đà Nẵng', '0923456789', '2025-08-25 14:50:57'),
+(4, 'trangtrang', '$2b$10$dIvyvZ4yYNA82C.IPksJnOnF9mmMNtwMdCthgOAuo1StQC0x8qdqm', 'phungtrang19012004@gmail.com', 'fffffff', '0349459165', '2025-08-26 03:52:55'),
+(8, 'geoserver', '1', 'pwea@gmail.com', 'ss', '0368498289', '2025-08-26 05:16:11'),
+(10, 'ad', '1', 'banh@gmail.com', 'ss', '0368498289', '2025-08-26 05:23:50'),
+(12, 'ad', '1', 'anh@gmail.com', 'ss', '0368498289', '2025-08-26 05:31:59'),
+(16, 'ad', '1', 'affnh@gmail.com', 'ss', '0368498289', '2025-08-26 05:45:47'),
+(21, 'ad', '1', 'nh@gmail.com', 'ss', '0368498289', '2025-08-26 05:53:21'),
+(23, 'ad', '1', 'nhi@gmail.com', 'ss', '0368498289', '2025-08-26 05:57:18'),
+(24, 'ad', '1', 'nhie@gmail.com', 'ss', '0368498289', '2025-08-26 05:59:33'),
+(25, 'ad', '1', 'nhien@gmail.com', 'ss', '0368498289', '2025-08-26 07:27:57'),
+(26, 'customer', '1', 'customer@test', 'hanoi', '0349459165', '2025-08-26 14:19:39'),
+(27, 'admin', '1', 'admin@test', 'hanoi', '03', '2025-08-26 14:20:23'),
+(28, 'lua', '123', 'lua@gmail.com', NULL, NULL, '2025-09-10 11:49:44'),
+(29, 'trang', '123', 'trang@gmail.com', NULL, NULL, '2025-09-10 12:34:00'),
+(30, 'Nguyen Van A', '$2a$10$jg4lUFNGWYbrqETGuMhBuusX.KdbfQIbmcgNjoI8vT/EYXHxBvh/.', 'abc@gmail.com', NULL, NULL, '2025-09-10 14:24:35'),
+(31, 'tien dat', '$2a$10$Jbw9XjQiRYzNa7TVbdihyuO59SBI56UgGTNbYJinZ37g.93UXIT.i', 'a@gmail.com', NULL, NULL, '2025-09-10 14:58:31'),
+(32, 'Nguyen Van A', '$2a$10$grUUt5EDoYTpU0AZ4i6GjO9tn8vbxI3oBBauviwknkouOWt24uyvG', 'aaa@gmail.com', NULL, NULL, '2025-09-10 15:16:34'),
+(33, 'khachhang_test', '$2a$10$gy1jz2u5ZuXWC14tB4B1i.8kvTEt.LMKV8LjQTMgMZjGS7IXXsR32', 'khachhang_test@example.com', '123 Hà Nội', '0909999999', '2025-09-11 01:47:29'),
+(34, 'ad', '$2a$10$527LwUd3c3shgkMpfowDg.DNiiM7Cy4NfwYBxpJLCIbeuw1oOgYsO', 'phu19012004@gmail.com', 'fffffff', '0349459165', '2025-09-11 13:24:45'),
+(35, 'tiendat', '$2a$10$Hh05Mbc2C/i5cgwqKUhZ5OpjpUa9/m6nTv111/YMxhNXwpzBck55C', 'atest@example.com', NULL, NULL, '2025-09-11 14:19:56'),
+(36, 'tiendatngu', '$2a$10$MGY7KBezFTLE8ZY0UaWCi.jCoOX4nTqafoknJrZsxOCkL1MJv5iXm', 'tiendat9012004@gmail.com', 'fffffff', '0349459165', '2025-09-11 14:29:02');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_roles`
+--
+
+CREATE TABLE `user_roles` (
+  `user_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `user_roles`
+--
+
+INSERT INTO `user_roles` (`user_id`, `role_id`) VALUES
+(1, 1),
+(2, 2),
+(3, 3),
+(25, 3),
+(26, 1),
+(27, 3),
+(28, 1),
+(29, 1),
+(30, 2),
+(31, 2),
+(32, 2),
+(33, 2),
+(34, 2),
+(35, 2),
+(36, 2);
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `attributes`
+--
+ALTER TABLE `attributes`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `brands`
+--
+ALTER TABLE `brands`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `carts`
+--
+ALTER TABLE `carts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `product_id` (`product_id`);
+
+--
+-- Indexes for table `categories`
+--
+ALTER TABLE `categories`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `favorites`
+--
+ALTER TABLE `favorites`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_favorite` (`user_id`,`product_id`),
+  ADD KEY `product_id` (`product_id`);
+
+--
+-- Indexes for table `imports`
+--
+ALTER TABLE `imports`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `supplier_id` (`supplier_id`);
+
+--
+-- Indexes for table `import_details`
+--
+ALTER TABLE `import_details`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `import_id` (`import_id`),
+  ADD KEY `idx_import_details_product` (`product_id`);
+
+--
+-- Indexes for table `orders`
+--
+ALTER TABLE `orders`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `idx_order_status` (`status`);
+
+--
+-- Indexes for table `order_items`
+--
+ALTER TABLE `order_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `order_id` (`order_id`),
+  ADD KEY `product_id` (`product_id`);
+
+--
+-- Indexes for table `payments`
+--
+ALTER TABLE `payments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `order_id` (`order_id`);
+
+--
+-- Indexes for table `permissions`
+--
+ALTER TABLE `permissions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `products`
+--
+ALTER TABLE `products`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `category_id` (`category_id`),
+  ADD KEY `brand_id` (`brand_id`),
+  ADD KEY `idx_product_name` (`name`);
+
+--
+-- Indexes for table `product_attributes`
+--
+ALTER TABLE `product_attributes`
+  ADD PRIMARY KEY (`product_id`,`attribute_id`),
+  ADD KEY `attribute_id` (`attribute_id`);
+
+--
+-- Indexes for table `reviews`
+--
+ALTER TABLE `reviews`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `product_id` (`product_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `roles`
+--
+ALTER TABLE `roles`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `role_permissions`
+--
+ALTER TABLE `role_permissions`
+  ADD PRIMARY KEY (`role_id`,`permission_id`),
+  ADD KEY `permission_id` (`permission_id`);
+
+--
+-- Indexes for table `shipping`
+--
+ALTER TABLE `shipping`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `order_id` (`order_id`);
+
+--
+-- Indexes for table `suppliers`
+--
+ALTER TABLE `suppliers`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `email_2` (`email`);
+
+--
+-- Indexes for table `user_roles`
+--
+ALTER TABLE `user_roles`
+  ADD PRIMARY KEY (`user_id`,`role_id`),
+  ADD KEY `role_id` (`role_id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `attributes`
+--
+ALTER TABLE `attributes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `brands`
+--
+ALTER TABLE `brands`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `carts`
+--
+ALTER TABLE `carts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `categories`
+--
+ALTER TABLE `categories`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `favorites`
+--
+ALTER TABLE `favorites`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `imports`
+--
+ALTER TABLE `imports`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `import_details`
+--
+ALTER TABLE `import_details`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `orders`
+--
+ALTER TABLE `orders`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `order_items`
+--
+ALTER TABLE `order_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `payments`
+--
+ALTER TABLE `payments`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `permissions`
+--
+ALTER TABLE `permissions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT for table `products`
+--
+ALTER TABLE `products`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
+-- AUTO_INCREMENT for table `reviews`
+--
+ALTER TABLE `reviews`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `roles`
+--
+ALTER TABLE `roles`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `shipping`
+--
+ALTER TABLE `shipping`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `suppliers`
+--
+ALTER TABLE `suppliers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `carts`
+--
+ALTER TABLE `carts`
+  ADD CONSTRAINT `carts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `carts_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `favorites`
+--
+ALTER TABLE `favorites`
+  ADD CONSTRAINT `favorites_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `favorites_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `imports`
+--
+ALTER TABLE `imports`
+  ADD CONSTRAINT `imports_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `import_details`
+--
+ALTER TABLE `import_details`
+  ADD CONSTRAINT `import_details_ibfk_1` FOREIGN KEY (`import_id`) REFERENCES `imports` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `import_details_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `orders`
+--
+ALTER TABLE `orders`
+  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `order_items`
+--
+ALTER TABLE `order_items`
+  ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `payments`
+--
+ALTER TABLE `payments`
+  ADD CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `products`
+--
+ALTER TABLE `products`
+  ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `products_ibfk_2` FOREIGN KEY (`brand_id`) REFERENCES `brands` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `product_attributes`
+--
+ALTER TABLE `product_attributes`
+  ADD CONSTRAINT `product_attributes_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `product_attributes_ibfk_2` FOREIGN KEY (`attribute_id`) REFERENCES `attributes` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `reviews`
+--
+ALTER TABLE `reviews`
+  ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `role_permissions`
+--
+ALTER TABLE `role_permissions`
+  ADD CONSTRAINT `role_permissions_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `role_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `shipping`
+--
+ALTER TABLE `shipping`
+  ADD CONSTRAINT `shipping_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `user_roles`
+--
+ALTER TABLE `user_roles`
+  ADD CONSTRAINT `user_roles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `user_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
