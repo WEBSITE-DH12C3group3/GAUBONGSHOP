@@ -139,15 +139,27 @@
     <div class="space-y-4">
       <div>
         <label class="block mb-1 font-medium">Mật khẩu hiện tại</label>
-        <input type="password" [(ngModel)]="pwd.current" name="pwdCurrent" class="input-primary w-full">
+        <input type="password"
+              [(ngModel)]="pwd.current"
+              name="pwdCurrent"
+              placeholder="Nhập mật khẩu hiện tại"
+              class="input-primary w-full">
       </div>
       <div>
         <label class="block mb-1 font-medium">Mật khẩu mới</label>
-        <input type="password" [(ngModel)]="pwd.next" name="pwdNext" class="input-primary w-full">
+        <input type="password"
+              [(ngModel)]="pwd.next"
+              name="pwdNext"
+              placeholder="Nhập mật khẩu mới"
+              class="input-primary w-full">
       </div>
       <div>
         <label class="block mb-1 font-medium">Nhập lại mật khẩu mới</label>
-        <input type="password" [(ngModel)]="pwd.confirm" name="pwdConfirm" class="input-primary w-full">
+        <input type="password"
+              [(ngModel)]="pwd.confirm"
+              name="pwdConfirm"
+              placeholder="Nhập lại mật khẩu mới"
+              class="input-primary w-full">
       </div>
       <div class="flex justify-end">
         <button class="btn-secondary" (click)="onChangePassword()">
@@ -156,6 +168,9 @@
       </div>
     </div>
   </div>
+
+
+
 
   <!-- Đơn hàng -->
   <div *ngIf="activeTab === 'orders'" class="space-y-4">

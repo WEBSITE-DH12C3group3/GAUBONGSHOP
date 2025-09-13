@@ -84,14 +84,29 @@ login(data: any): Observable<any> {
     return null;
   }
 
-// Cập nhật hồ sơ người dùng
+  // Cập nhật hồ sơ người dùng
   updateProfile(profile: any): Observable<any> {
+    const token = this.getToken();
+    console.log('DEBUG: token gửi đi', token);
+    console.log('DEBUG: profile gửi đi', profile);
+
     return this.http.put(`${this.apiUrl}/update`, profile, {
       headers: new HttpHeaders({
-        Authorization: `Bearer ${this.getToken()}`
+        Authorization: `Bearer ${token}`
       })
     });
   }
+
+  changePassword(data: { currentPassword: string; newPassword: string }): Observable<any> {
+    const token = this.getToken();
+    return this.http.post(`${this.apiUrl}/change-password`, data, {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      })
+    });
+  }
+
+
 
 
   saveToken(token: string) {

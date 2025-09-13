@@ -79,6 +79,7 @@ export class ProfileComponent implements OnInit {
           createdAt: res?.createdAt || ''
         };
         this.loading = false;
+        this.pwd.current = '********';
 
         // 👇 ép Angular render ngay vì zoneless
         this.cdr.detectChanges();
@@ -105,24 +106,28 @@ export class ProfileComponent implements OnInit {
   }
 
   // Lưu hồ sơ
-  onSaveProfile(form: NgForm) {
-    if (form.invalid) return;
+ onSaveProfile(form: NgForm) {
+  console.log('DEBUG submit form:', form.value);
 
-    this.auth.updateProfile(this.profile).subscribe({
-      next: (res: any) => {
-        this.profile = {
-          ...this.profile,
-          ...res
-        };
-        alert('Hồ sơ đã được cập nhật!');
-        this.editMode = false;
-      },
-      error: (err: any) => {
-        console.error('Update profile error:', err);
-        alert('Có lỗi xảy ra khi cập nhật hồ sơ.');
-      }
-    });
+  if (form.invalid) {
+    console.warn('Form invalid!');
+    return;
   }
+
+  this.auth.updateProfile(this.profile).subscribe({
+    next: (res: any) => {
+      this.profile = { ...res };  // nhận UserDTO trả về
+      this.editMode = false;
+      alert('✅ Hồ sơ đã được cập nhật!');
+    },
+    error: (err) => {
+      console.error('❌ Update profile error:', err);
+      alert('Có lỗi xảy ra khi cập nhật hồ sơ.');
+    }
+  });
+
+}
+
 
 
   // Đổi mật khẩu
@@ -135,10 +140,21 @@ export class ProfileComponent implements OnInit {
       alert('Mật khẩu mới nhập lại không khớp.');
       return;
     }
-    // TODO: Gọi API đổi mật khẩu
-    alert('(Demo) Mật khẩu đã được đổi!');
-    this.pwd = { current: '', next: '', confirm: '' };
+
+    this.auth.changePassword({
+      currentPassword: this.pwd.current,
+      newPassword: this.pwd.next
+    }).subscribe({
+      next: (res) => {
+        alert('✅ ' + res.message);
+        this.pwd = { current: '********', next: '', confirm: '' }; // reset
+      },
+      error: (err) => {
+        alert('❌ ' + (err.error?.error || 'Lỗi khi đổi mật khẩu'));
+      }
+    });
   }
+
 
   // Xem chi tiết đơn hàng
   viewOrder(order: any) {
