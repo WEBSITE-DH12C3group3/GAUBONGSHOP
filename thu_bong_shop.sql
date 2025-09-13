@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 11, 2025 at 06:31 PM
+-- Generation Time: Sep 13, 2025 at 04:40 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -529,7 +529,8 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `address`, `phone`, 
 (33, 'khachhang_test', '$2a$10$gy1jz2u5ZuXWC14tB4B1i.8kvTEt.LMKV8LjQTMgMZjGS7IXXsR32', 'khachhang_test@example.com', '123 Hà Nội', '0909999999', '2025-09-11 01:47:29'),
 (34, 'ad', '$2a$10$527LwUd3c3shgkMpfowDg.DNiiM7Cy4NfwYBxpJLCIbeuw1oOgYsO', 'phu19012004@gmail.com', 'fffffff', '0349459165', '2025-09-11 13:24:45'),
 (35, 'tiendat', '$2a$10$Hh05Mbc2C/i5cgwqKUhZ5OpjpUa9/m6nTv111/YMxhNXwpzBck55C', 'atest@example.com', NULL, NULL, '2025-09-11 14:19:56'),
-(36, 'tiendatngu', '$2a$10$MGY7KBezFTLE8ZY0UaWCi.jCoOX4nTqafoknJrZsxOCkL1MJv5iXm', 'tiendat9012004@gmail.com', 'fffffff', '0349459165', '2025-09-11 14:29:02');
+(36, 'tiendatngu', '$2a$10$iqs9cMI36IfRmgr9l/PjvORx.1v919EsLp5yYKyqAyqENxKVgCO8u', 'tiendat9012004@gmail.com', 'ha noi', '0349459165', '2025-09-11 14:29:02'),
+(37, 'tiendatngu', '$2a$10$tOmpK/6WzSSG3Iya/O1H2epxi.Dmy1i3IuU.BO7YTNP7nFtfoQZq2', 'dat9012004@gmail.com', 'fffffff', '0349459165', '2025-09-11 16:54:02');
 
 -- --------------------------------------------------------
 
@@ -558,10 +559,11 @@ INSERT INTO `user_roles` (`user_id`, `role_id`) VALUES
 (30, 2),
 (31, 2),
 (32, 2),
-(33, 2),
+(33, 3),
 (34, 2),
 (35, 2),
-(36, 2);
+(36, 2),
+(37, 3);
 
 --
 -- Indexes for dumped tables
@@ -817,7 +819,7 @@ ALTER TABLE `suppliers`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- Constraints for dumped tables
