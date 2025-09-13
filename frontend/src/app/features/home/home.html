@@ -1,38 +1,94 @@
-<!-- Banner -->
-<section class="banner">
-  <div class="slide" style="background-image: url('assets/images/banner1.jpg')">
-    <div class="overlay">
-      <h2>Gấu Teddy Socola siêu mềm</h2>
-    </div>
-  </div>
-  <div class="slide" style="background-image: url('assets/images/banner2.jpg')">
-    <div class="overlay">
-      <h2>Thỏ Bông Trắng dễ thương</h2>
+<!-- Danh mục nổi bật -->
+<!-- Danh mục nổi bật -->
+<!-- Danh mục nổi bật -->
+<section class="container mx-auto px-6 py-12" *ngIf="!isLoading">
+  <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center">
+    Danh mục nổi bật
+  </h2>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div
+      *ngFor="let cat of featuredCategories"
+      class="bg-white rounded-2xl shadow hover:shadow-xl transition p-6 flex flex-col justify-between items-center text-center"
+    >
+      <!-- Icon minh hoạ -->
+      <div class="w-16 h-16 flex items-center justify-center bg-pink-100 rounded-full mb-4">
+        <!-- Ví dụ icon box -->
+        <svg xmlns="http://www.w3.org/2000/svg" 
+             fill="none" 
+             viewBox="0 0 24 24" 
+             stroke-width="1.5" 
+             stroke="currentColor" 
+             class="w-8 h-8 text-pink-500">
+          <path stroke-linecap="round" 
+                stroke-linejoin="round" 
+                d="M3.375 7.5l8.25-4.5 8.25 4.5m-16.5 0l8.25 4.5m-8.25-4.5v9l8.25 4.5m8.25-13.5l-8.25 4.5m8.25-4.5v9l-8.25 4.5" />
+        </svg>
+      </div>
+
+      <!-- Tên danh mục -->
+      <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ cat.name }}</h3>
+
+      <!-- Mô tả -->
+      <p class="text-gray-600 text-sm flex-1 mb-4">
+        {{ cat.description || 'Danh mục sản phẩm đặc biệt' }}
+      </p>
+
+      <!-- Nút khám phá -->
+      <a
+        [routerLink]="['/products']"
+        [queryParams]="{ category: cat.id }"
+        class="block w-full bg-pink-500 hover:bg-pink-600 text-white py-2 px-4 rounded-lg font-medium transition"
+      >
+        Khám phá
+      </a>
+
     </div>
   </div>
 </section>
 
-<!-- Danh mục -->
-<section class="container">
-  <h2 class="section-title">Danh mục nổi bật</h2>
-  <div class="grid">
-    <div *ngFor="let cat of categories" class="card hover">
-      <img [src]="cat.image_url" alt="{{cat.name}}" />
-      <h3>{{ cat.name }}</h3>
+
+
+<!-- Sản phẩm mới -->
+<section class="bg-gray-50 py-12">
+  <div class="container mx-auto px-6">
+    <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center">
+      Sản phẩm mới
+    </h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+      <div
+        *ngFor="let p of newProducts"
+        class="bg-white rounded-2xl shadow hover:shadow-xl overflow-hidden group transition cursor-pointer"
+      >
+        <div class="relative">
+          <img
+            [src]="p.imageUrl || 'https://picsum.photos/400/300?random=' + p.id"
+            [alt]="p.name"
+            class="w-full h-56 object-cover group-hover:scale-105 transition duration-500"
+          />
+          <span
+            class="absolute top-3 left-3 bg-pink-500 text-white text-xs px-3 py-1 rounded-full shadow"
+          >
+            Mới
+          </span>
+        </div>
+        <div class="p-4">
+          <h3
+            class="text-lg font-semibold text-gray-800 truncate group-hover:text-pink-500 transition"
+          >
+            {{ p.name }}
+          </h3>
+          <p class="text-pink-600 text-lg font-bold mt-2">
+            {{ p.price | currency: 'VND':'symbol':'1.0-0' }}
+          </p>
+          <button
+            class="mt-4 w-full bg-pink-500 hover:bg-pink-600 text-white py-2 px-4 rounded-lg transition font-medium"
+          >
+            Thêm vào giỏ
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </section>
-
-<!-- Sản phẩm -->
-<section class="container bg-light">
-  <h2 class="section-title">Sản phẩm mới</h2>
-  <div class="grid">
-    <div *ngFor="let p of products" class="card hover">
-      <img [src]="p.image_url" alt="{{p.name}}" />
-      <h3>{{ p.name }}</h3>
-      <p class="price">{{ p.price | currency:'VND':'symbol':'1.0-0' }}</p>
-      <button class="btn">Thêm vào giỏ</button>
-    </div>
-  </div>
-</section>
-

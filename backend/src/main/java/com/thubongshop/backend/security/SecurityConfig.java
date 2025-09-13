@@ -27,43 +27,72 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ Bật CORS
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/register", "/api/users/login").permitAll() // cho phép không cần token
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
-                        .anyRequest().authenticated()
-                );
+        http
+            // ❌ Tắt CSRF vì dùng JWT (stateless)
+            .csrf(csrf -> csrf.disable())
 
-        // Thêm JWT filter trước UsernamePasswordAuthenticationFilter
+            // 🌐 Bật CORS để cho phép FE Angular truy cập
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+            // 🔒 Không lưu session, mỗi request đều xác thực bằng JWT
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+            // ⚡ Phân quyền
+            .authorizeHttpRequests(auth -> auth
+                // --- Public API (không cần login) ---
+                .requestMatchers(
+                        "/api/users/register",
+                        "/api/users/login",
+                        "/api/products/**",
+                        "/api/categories/**"
+                ).permitAll()
+
+                // --- Admin API ---
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                // --- Customer API ---
+                .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
+
+                // --- Các request khác cần đăng nhập ---
+                .anyRequest().authenticated()
+            );
+
+        // ✅ Thêm JwtFilter trước UsernamePasswordAuthenticationFilter
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // ✅ Cấu hình CORS cho toàn bộ API
+    // 🌐 Cấu hình CORS cho toàn bộ API
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200")); // FE Angular
+
+        // Cho phép FE Angular (http://localhost:4200) gọi API
+        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+
+        // Các method được phép
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        // Cho phép tất cả headers
         configuration.setAllowedHeaders(List.of("*"));
+
+        // Cho phép gửi cookie/authorization
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
 
-    // ✅ AuthenticationManager
+    // ⚙️ AuthenticationManager (xác thực login)
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    // ✅ PasswordEncoder
+    // 🔑 PasswordEncoder (mã hoá mật khẩu)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

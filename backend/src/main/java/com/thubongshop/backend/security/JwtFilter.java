@@ -13,12 +13,21 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
+
+    // Các endpoint public không cần filter
+    private static final List<String> PUBLIC_ENDPOINTS = List.of(
+            "/api/users/login",
+            "/api/users/register",
+            "/api/products",
+            "/api/categories"
+    );
 
     public JwtFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;
@@ -32,8 +41,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String path = request.getServletPath();
 
-        // Bỏ qua filter cho endpoint public
-        if (path.equals("/api/users/login") || path.equals("/api/users/register")) {
+        // Nếu path nằm trong public endpoint thì bỏ qua
+        if (PUBLIC_ENDPOINTS.stream().anyMatch(path::startsWith)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -43,7 +52,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 String token = authHeader.substring(7);
-                String username = jwtUtil.extractUsername(token); // có thể là email
+                String username = jwtUtil.extractUsername(token);
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -54,8 +63,6 @@ public class JwtFilter extends OncePerRequestFilter {
                                         userDetails, null, userDetails.getAuthorities()
                                 );
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                        // ✅ Set authentication vào context
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
                 }

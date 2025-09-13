@@ -1,6 +1,14 @@
-package com.thubongshop.backend.user;
+package com.thubongshop.backend.user.controller;
 
 import com.thubongshop.backend.security.JwtUtil;
+import com.thubongshop.backend.user.ChangePasswordRequest;
+import com.thubongshop.backend.user.LoginRequest;
+import com.thubongshop.backend.user.RegisterRequest;
+import com.thubongshop.backend.user.UpdateProfileRequest;
+import com.thubongshop.backend.user.User;
+import com.thubongshop.backend.user.UserDTO;
+import com.thubongshop.backend.user.UserService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

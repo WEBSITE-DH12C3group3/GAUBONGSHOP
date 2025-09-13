@@ -23,6 +23,9 @@ public class Category {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "is_featured")
+    private Boolean isFeatured = false; // ✅ Thêm trường nổi bật
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

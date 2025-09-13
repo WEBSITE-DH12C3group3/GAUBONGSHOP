@@ -1,56 +1,63 @@
-package com.thubongshop.backend.brand;
+package com.thubongshop.backend.product.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.thubongshop.backend.product.ProductRequest;
+import com.thubongshop.backend.product.ProductResponse;
+import com.thubongshop.backend.product.ProductService;
+
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/brands")
+@RequestMapping("/api/products")
 @CrossOrigin(origins = "*")
-public class BrandController {
+public class ProductController {
 
-    private final BrandService service;
+    private final ProductService service;
 
-    public BrandController(BrandService service) {
+    public ProductController(ProductService service) {
         this.service = service;
     }
 
-    // GET /api/brands?q=&page=0&size=10&sort=id,desc
     @GetMapping
     public ResponseEntity<?> list(
             @RequestParam(required = false) String q,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) Integer brandId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id,desc") String sort
     ) {
         Pageable pageable = buildPageable(page, size, sort);
-        Page<BrandResponse> data = service.list(q, pageable);
-        Map<String,Object> resp = new HashMap<>();
+        Page<ProductResponse> data = service.list(q, categoryId, brandId, pageable);
+
+        Map<String, Object> resp = new HashMap<>();
         resp.put("items", data.getContent());
         resp.put("page", data.getNumber());
         resp.put("size", data.getSize());
         resp.put("totalPages", data.getTotalPages());
         resp.put("totalElements", data.getTotalElements());
+
         return ResponseEntity.ok(resp);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Integer id) {
-        return ResponseEntity.ok(Map.of("brand", service.get(id)));
+        return ResponseEntity.ok(Map.of("product", service.get(id)));
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@Valid @RequestBody BrandRequest req) {
-        return ResponseEntity.ok(Map.of("brand", service.create(req)));
+    public ResponseEntity<?> create(@Valid @RequestBody ProductRequest req) {
+        return ResponseEntity.ok(Map.of("product", service.create(req)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Integer id, @Valid @RequestBody BrandRequest req) {
-        return ResponseEntity.ok(Map.of("brand", service.update(id, req)));
+    public ResponseEntity<?> update(@PathVariable Integer id, @Valid @RequestBody ProductRequest req) {
+        return ResponseEntity.ok(Map.of("product", service.update(id, req)));
     }
 
     @DeleteMapping("/{id}")
@@ -59,6 +66,7 @@ public class BrandController {
         return ResponseEntity.ok(Map.of("message", "Deleted"));
     }
 
+    // Helper build Pageable
     private Pageable buildPageable(int page, int size, String sort) {
         try {
             String[] sp = sort.split(",");

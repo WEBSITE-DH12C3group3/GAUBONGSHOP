@@ -1,1 +1,24 @@
-<p>products works!</p>
+<section class="container mx-auto px-6 py-12">
+  <h2 class="text-2xl font-bold mb-6">Sản phẩm</h2>
+
+  <div *ngIf="isLoading" class="text-center text-gray-500">Đang tải...</div>
+
+  <div *ngIf="!isLoading && products.length === 0" class="text-center text-gray-500">
+    Không có sản phẩm nào.
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+       *ngIf="!isLoading && products.length > 0">
+    <div *ngFor="let p of products" class="bg-white shadow rounded-lg overflow-hidden">
+      <img [src]="'http://localhost:8080' + p.imageUrl"
+           [alt]="p.name"
+           class="w-full h-48 object-cover" />
+      <div class="p-4">
+        <h3 class="font-semibold text-lg">{{ p.name }}</h3>
+        <p class="text-pink-600 font-bold">
+          {{ p.price | currency:'VND':'symbol':'1.0-0' }}
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,8 +1,12 @@
-package com.thubongshop.backend.attribute;
+package com.thubongshop.backend.attribute.controller;
 
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.thubongshop.backend.attribute.Attribute;
+import com.thubongshop.backend.attribute.AttributeService;
+import com.thubongshop.backend.attribute.AttributeService.AttrValue;
 
 import java.util.*;
 
