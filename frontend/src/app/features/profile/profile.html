@@ -1,86 +1,224 @@
-<div class="profile-wrapper">
-  <div class="profile-card">
-    <h2><i class="fa fa-id-card"></i> Hồ sơ của tôi</h2>
+<div class="container mx-auto p-6 bg-white rounded-2xl shadow">
+  <!-- Tabs -->
+  <div class="flex border-b mb-6 space-x-6">
+    <button
+      (click)="setTab('profile')"
+      [class.text-pink-600]="activeTab === 'profile'"
+      [class.border-b-2]="activeTab === 'profile'"
+      [class.border-pink-600]="activeTab === 'profile'"
+      class="pb-2 font-medium transition">
+      Thông tin cá nhân
+    </button>
 
-    <!-- Loading / Error -->
-    <div *ngIf="loading" class="state info"><i class="fa fa-spinner fa-spin"></i> Đang tải hồ sơ...</div>
-    <div *ngIf="!loading && error" class="state error"><i class="fa fa-triangle-exclamation"></i> {{ error }}</div>
+    <button
+      (click)="setTab('security')"
+      [class.text-pink-600]="activeTab === 'security'"
+      [class.border-b-2]="activeTab === 'security'"
+      [class.border-pink-600]="activeTab === 'security'"
+      class="pb-2 font-medium transition">
+      Bảo mật & Mật khẩu
+    </button>
 
-    <div *ngIf="!loading && !error" class="profile-grid">
+    <button
+      (click)="setTab('orders')"
+      [class.text-pink-600]="activeTab === 'orders'"
+      [class.border-b-2]="activeTab === 'orders'"
+      [class.border-pink-600]="activeTab === 'orders'"
+      class="pb-2 font-medium transition">
+      Đơn hàng
+    </button>
+
+    <button
+      (click)="setTab('voucher')"
+      [class.text-pink-600]="activeTab === 'voucher'"
+      [class.border-b-2]="activeTab === 'voucher'"
+      [class.border-pink-600]="activeTab === 'voucher'"
+      class="pb-2 font-medium transition">
+      Voucher
+    </button>
+
+    <button
+      (click)="setTab('history')"
+      [class.text-pink-600]="activeTab === 'history'"
+      [class.border-b-2]="activeTab === 'history'"
+      [class.border-pink-600]="activeTab === 'history'"
+      class="pb-2 font-medium transition">
+      Lịch sử mua hàng
+    </button>
+  </div>
+
+  <!-- Nội dung tabs -->
+  <!-- Thông tin cá nhân -->
+  <!-- Thông tin cá nhân -->
+  <div *ngIf="activeTab === 'profile'" class="space-y-6">
+    <h3 class="text-lg font-semibold flex items-center">
+      <i class="fa fa-user mr-2 text-pink-600"></i> Thông tin cá nhân
+    </h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
       <!-- Cột trái: Avatar -->
-      <div class="left">
-        <div class="avatar">
-          <img
-            [src]="profile.avatarUrl || 'https://i.pravatar.cc/200?img=12'"
-            alt="avatar"
-          />
-          <button type="button" class="btn-secondary">
-            <i class="fa fa-camera"></i> Đổi ảnh
-          </button>
-          <p class="hint">Tip: dùng ảnh vuông 400x400 để hiển thị đẹp nhất.</p>
-        </div>
+      <div class="flex flex-col items-center bg-gray-50 p-6 rounded-xl shadow-sm">
+        <img
+          [src]="profile.avatarUrl || 'https://i.pravatar.cc/200?img=12'"
+          alt="avatar"
+          class="w-28 h-28 rounded-full border-4 border-pink-500 shadow-md"
+        />
+        <button class="btn-secondary mt-4">
+          <i class="fa fa-camera"></i> Đổi ảnh
+        </button>
+        <span class="mt-3 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-600">
+        ● Trạng thái: Đang hoạt động
+      </span>
+        <p class="text-gray-500 text-xs mt-2">Đăng nhập gần nhất: 2 giờ trước</p>
       </div>
 
-      <!-- Cột phải: Thông tin -->
-      <div class="right">
-        <form #profileForm="ngForm" (ngSubmit)="onSaveProfile(profileForm)" class="form">
-          <div class="form-row">
-            <label><i class="fa fa-user"></i> Tên đăng nhập</label>
-            <input type="text" name="username" [(ngModel)]="profile.username" required />
-          </div>
+      <!-- Cột phải: Thông tin chi tiết -->
+      <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-sm">
+        <div class="space-y-4 text-sm">
+          <p><i class="fa fa-user mr-2 text-pink-600"></i>
+            <span class="font-medium">Tên đăng nhập:</span> {{ profile.username }}
+          </p>
+          <p><i class="fa fa-envelope mr-2 text-pink-600"></i>
+            <span class="font-medium">Email:</span> {{ profile.email }}
+          </p>
+          <p><i class="fa fa-phone mr-2 text-pink-600"></i>
+            <span class="font-medium">Số điện thoại:</span> {{ profile.phone || 'Chưa cập nhật' }}
+          </p>
+          <p><i class="fa fa-location-dot mr-2 text-pink-600"></i>
+            <span class="font-medium">Địa chỉ:</span> {{ profile.address || 'Chưa cập nhật' }}
+          </p>
+          <p><i class="fa fa-calendar-alt mr-2 text-pink-600"></i>
+            <span class="font-medium">Ngày tham gia:</span> {{ profile.createdAt || '---' }}
+          </p>
+          <p><i class="fa fa-gem mr-2 text-pink-600"></i>
+            <span class="font-medium">Hạng thành viên:</span> <span class="text-yellow-600 font-semibold">Silver</span>
+          </p>
+        </div>
 
-          <div class="form-row">
-            <label><i class="fa fa-envelope"></i> Email</label>
-            <input type="email" name="email" [(ngModel)]="profile.email" required />
-          </div>
-
-          <div class="form-row">
-            <label><i class="fa fa-phone"></i> Số điện thoại</label>
-            <input type="text" name="phone" [(ngModel)]="profile.phone" />
-          </div>
-
-          <div class="form-row">
-            <label><i class="fa fa-location-dot"></i> Địa chỉ</label>
-            <textarea name="address" rows="3" [(ngModel)]="profile.address"></textarea>
-          </div>
-
-          <div class="actions">
-            <button type="submit" class="btn-primary" [disabled]="!profileForm.valid">
-              <i class="fa fa-save"></i> Lưu hồ sơ
-            </button>
-          </div>
-        </form>
-
-        <div class="divider"></div>
-
-        <!-- Đổi mật khẩu -->
-        <h3><i class="fa fa-key"></i> Đổi mật khẩu</h3>
-        <div class="form">
-          <div class="form-row">
-            <label><i class="fa fa-lock"></i> Mật khẩu hiện tại</label>
-            <input type="password" [(ngModel)]="pwd.current" name="pwdCurrent" />
-          </div>
-
-          <div class="form-row">
-            <label><i class="fa fa-lock"></i> Mật khẩu mới</label>
-            <input type="password" [(ngModel)]="pwd.next" name="pwdNext" />
-          </div>
-
-          <div class="form-row">
-            <label><i class="fa fa-lock"></i> Nhập lại mật khẩu mới</label>
-            <input type="password" [(ngModel)]="pwd.confirm" name="pwdConfirm" />
-          </div>
-
-          <div class="actions">
-            <button type="button" class="btn-secondary" (click)="onChangePassword()">
-              <i class="fa fa-rotate"></i> Đổi mật khẩu
-            </button>
-          </div>
+        <!-- Nút chỉnh sửa -->
+        <div class="flex justify-end mt-6">
+          <button class="btn-primary" (click)="editMode = !editMode">
+            <i class="fa fa-pen"></i> Cập nhật thông tin
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Gợi ý -->
-    <p class="foot-hint"><i class="fa fa-circle-info"></i> Dữ liệu của bạn được bảo vệ theo chính sách bảo mật của cửa hàng.</p>
+    <!-- Form chỉnh sửa -->
+    <div *ngIf="editMode" class="mt-6 bg-gray-50 p-6 rounded-xl shadow-inner">
+      <form #profileForm="ngForm" (ngSubmit)="onSaveProfile(profileForm)" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Tên đăng nhập</label>
+          <input type="text" name="username" [(ngModel)]="profile.username" class="input-primary w-full" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Email</label>
+          <input type="email" name="email" [(ngModel)]="profile.email" class="input-primary w-full" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Số điện thoại</label>
+          <input type="text" name="phone" [(ngModel)]="profile.phone" class="input-primary w-full">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Địa chỉ</label>
+          <textarea name="address" rows="3" [(ngModel)]="profile.address" class="input-primary w-full"></textarea>
+        </div>
+        <div class="flex justify-end">
+          <button type="submit" class="btn-primary" [disabled]="!profileForm.valid">
+            <i class="fa fa-save"></i> Lưu thay đổi
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Bảo mật & Mật khẩu -->
+  <div *ngIf="activeTab === 'security'" class="space-y-4">
+    <h3 class="text-lg font-semibold"><i class="fa fa-lock mr-2"></i>Bảo mật & Mật khẩu</h3>
+    <div class="space-y-4">
+      <div>
+        <label class="block mb-1 font-medium">Mật khẩu hiện tại</label>
+        <input type="password"
+              [(ngModel)]="pwd.current"
+              name="pwdCurrent"
+              placeholder="Nhập mật khẩu hiện tại"
+              class="input-primary w-full">
+      </div>
+      <div>
+        <label class="block mb-1 font-medium">Mật khẩu mới</label>
+        <input type="password"
+              [(ngModel)]="pwd.next"
+              name="pwdNext"
+              placeholder="Nhập mật khẩu mới"
+              class="input-primary w-full">
+      </div>
+      <div>
+        <label class="block mb-1 font-medium">Nhập lại mật khẩu mới</label>
+        <input type="password"
+              [(ngModel)]="pwd.confirm"
+              name="pwdConfirm"
+              placeholder="Nhập lại mật khẩu mới"
+              class="input-primary w-full">
+      </div>
+      <div class="flex justify-end">
+        <button class="btn-secondary" (click)="onChangePassword()">
+          <i class="fa fa-rotate"></i> Đổi mật khẩu
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <!-- Đơn hàng -->
+  <div *ngIf="activeTab === 'orders'" class="space-y-4">
+    <h3 class="text-lg font-semibold"><i class="fa fa-box mr-2"></i>Đơn hàng của tôi</h3>
+    <table class="w-full border border-gray-200 rounded-lg">
+      <thead class="bg-pink-100">
+      <tr>
+        <th class="p-2">Mã đơn</th>
+        <th class="p-2">Ngày</th>
+        <th class="p-2">Tổng tiền</th>
+        <th class="p-2">Trạng thái</th>
+        <th class="p-2">Hành động</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let order of orders" class="border-t">
+        <td class="p-2">{{ order.code }}</td>
+        <td class="p-2">{{ order.date | date }}</td>
+        <td class="p-2">{{ order.total | currency:'VND' }}</td>
+        <td class="p-2">{{ order.status }}</td>
+        <td class="p-2">
+          <button class="text-pink-600 hover:underline" (click)="viewOrder(order)">Chi tiết</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Voucher -->
+  <div *ngIf="activeTab === 'voucher'" class="space-y-4">
+    <h3 class="text-lg font-semibold"><i class="fa fa-ticket mr-2"></i>Voucher</h3>
+    <div *ngFor="let voucher of vouchers" class="p-4 border rounded-lg flex justify-between items-center">
+      <div>
+        <p class="font-medium text-pink-600">{{ voucher.code }}</p>
+        <p class="text-sm text-gray-500">{{ voucher.desc }}</p>
+      </div>
+      <button class="btn-primary" (click)="applyVoucher(voucher)">Dùng ngay</button>
+    </div>
+  </div>
+
+  <!-- Lịch sử mua hàng -->
+  <div *ngIf="activeTab === 'history'" class="space-y-4">
+    <h3 class="text-lg font-semibold"><i class="fa fa-history mr-2"></i>Lịch sử mua hàng</h3>
+    <ul class="space-y-3">
+      <li *ngFor="let h of history" class="border p-3 rounded-lg flex justify-between">
+        <span>{{ h.date | date }} - {{ h.item }}</span>
+        <span class="text-pink-600">{{ h.amount | currency:'VND' }}</span>
+      </li>
+    </ul>
   </div>
 </div>

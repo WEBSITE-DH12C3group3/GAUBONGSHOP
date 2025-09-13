@@ -1,83 +1,107 @@
-<!-- Header trên cùng -->
-<header class="header">
-  <div class="container">
+<!-- Header -->
+<header class="bg-white shadow sticky top-0 z-50">
+  <div class="container mx-auto flex items-center justify-between py-3 px-6">
     <!-- Logo -->
-    <div class="logo">
-      <img src="assets/images/logo.png" alt="Logo" />
-      <span>GAUBONGSHOP</span>
+    <div class="flex items-center space-x-2">
+      <img src="assets/images/logo.png" alt="Logo" class="h-10 w-10 object-contain" />
+      <span class="text-xl font-bold text-pink-600 tracking-wide">GAUBONGSHOP</span>
     </div>
 
     <!-- Search -->
-    <div class="search-box">
-      <input type="text" placeholder="Tìm kiếm sản phẩm..." />
-      <button><i class="fa-solid fa-magnifying-glass"></i></button>
+    <div class="flex-1 mx-6">
+      <div
+        class="flex bg-gray-100 rounded-lg overflow-hidden shadow-sm transition focus-within:ring-2 focus-within:ring-pink-400">
+        <input
+          type="search"
+          [formControl]="searchTerm"
+          name="gaubong-search"
+          placeholder="Tìm kiếm sản phẩm..."
+          autocomplete="off"
+          readonly
+          (focus)="removeReadonly($event)"
+          class="flex-1 px-4 py-2 bg-transparent outline-none text-gray-700"
+        />
+
+        <button (click)="onSearch()" class="px-4 text-pink-600 hover:text-pink-800 transition">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </div>
     </div>
 
     <!-- Icons -->
-    <div class="icons">
-      <div class="icon">
-        <i class="fa-solid fa-heart"></i>
-      </div>
-      <div class="icon cart">
-        <i class="fa-solid fa-cart-shopping"></i>
-        <span class="badge">2</span>
-      </div>
-      <!-- Icons -->
-      <div class="icons">
-        <!-- Dropdown Account -->
-        <div class="icon dropdown">
-          <i class="fa-solid fa-user"></i>
+    <div class="flex items-center space-x-6">
+      <!-- Yêu thích -->
+      <a routerLink="/wishlist" class="relative text-gray-600 hover:text-pink-600 transition">
+        <i class="fa-solid fa-heart text-xl"></i>
+      </a>
 
-          <div class="dropdown-menu">
-            <!-- Nếu chưa đăng nhập -->
-            <ng-container *ngIf="!auth.isLoggedIn(); else loggedIn">
-              <a routerLink="/login">
-                <i class="fa-solid fa-right-to-bracket"></i> Đăng nhập
-              </a>
-              <a routerLink="/register">
-                <i class="fa-solid fa-user-plus"></i> Đăng ký
-              </a>
-            </ng-container>
+      <!-- Giỏ hàng -->
+      <a routerLink="/cart" class="relative text-gray-600 hover:text-pink-600 transition">
+        <i class="fa-solid fa-cart-shopping text-xl"></i>
+        <span
+          class="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold rounded-full px-2 py-0.5 shadow">
+          {{ cartCount || 0 }}
+        </span>
+      </a>
 
-            <!-- Nếu đã đăng nhập -->
-            <ng-template #loggedIn>
-              <a routerLink="/profile">
-                <i class="fa-solid fa-id-card"></i> Hồ sơ
-              </a>
-              <a routerLink="/orders">
-                <i class="fa-solid fa-box"></i> Đơn hàng
-              </a>
-              <hr />
-              <a (click)="onLogout()" class="logout-link">
-                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
-              </a>
-            </ng-template>
-          </div>
+      <!-- Tài khoản -->
+      <div class="relative">
+        <button (click)="toggleDropdown()" class="text-gray-600 hover:text-pink-600 transition">
+          <i class="fa-solid fa-user text-xl"></i>
+        </button>
+
+        <!-- Dropdown -->
+        <div *ngIf="dropdownOpen"
+             class="absolute right-0 mt-3 w-48 bg-white border border-gray-200 rounded-lg shadow-md transition duration-200">
+          <!-- Nếu chưa đăng nhập -->
+          <ng-container *ngIf="!auth.isLoggedIn(); else loggedIn">
+            <a routerLink="/login" class="block px-4 py-2 hover:bg-gray-50">
+              <i class="fa-solid fa-right-to-bracket mr-2"></i> Đăng nhập
+            </a>
+            <a routerLink="/register" class="block px-4 py-2 hover:bg-gray-50">
+              <i class="fa-solid fa-user-plus mr-2"></i> Đăng ký
+            </a>
+          </ng-container>
+
+          <!-- Nếu đã đăng nhập -->
+          <ng-template #loggedIn>
+            <a routerLink="/profile" class="block px-4 py-2 hover:bg-gray-50">
+              <i class="fa-solid fa-id-card mr-2"></i> Hồ sơ
+            </a>
+            <a routerLink="/orders" class="block px-4 py-2 hover:bg-gray-50">
+              <i class="fa-solid fa-box mr-2"></i> Đơn hàng
+            </a>
+            <hr />
+            <a (click)="onLogout()" class="block px-4 py-2 text-red-600 hover:bg-red-50">
+              <i class="fa-solid fa-right-from-bracket mr-2"></i> Đăng xuất
+            </a>
+          </ng-template>
         </div>
+      </div>
+    </div> <!-- ✅ đóng div Icons -->
+  </div> <!-- ✅ đóng div container -->
 
+  <!-- Navbar -->
+  <nav class="bg-pink-600 text-white">
+    <div class="container mx-auto flex items-center space-x-6 px-6 py-2">
+      <!-- Danh mục -->
+      <div class="relative group">
+        <span class="cursor-pointer flex items-center font-medium hover:text-yellow-200 transition">
+          Danh mục <i class="fa-solid fa-angle-down ml-1"></i>
+        </span>
+        <div
+          class="absolute left-0 mt-2 w-48 bg-white text-gray-700 rounded-lg shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition">
+          <a routerLink="/products/teddy" class="block px-4 py-2 hover:bg-gray-50">Gấu Teddy</a>
+          <a routerLink="/products/thobong" class="block px-4 py-2 hover:bg-gray-50">Thỏ Bông</a>
+          <a routerLink="/products/hoabong" class="block px-4 py-2 hover:bg-gray-50">Hoa Bông</a>
+          <a routerLink="/products/phukienshop" class="block px-4 py-2 hover:bg-gray-50">Phụ Kiện</a>
+        </div>
       </div>
 
+      <!-- Menu -->
+      <a class="hover:text-yellow-200 transition" routerLink="/home" routerLinkActive="font-bold">Trang chủ</a>
+      <a class="hover:text-yellow-200 transition" routerLink="/about" routerLinkActive="font-bold">Giới thiệu</a>
+      <a class="hover:text-yellow-200 transition" routerLink="/contact" routerLinkActive="font-bold">Liên hệ</a>
     </div>
-  </div>
+  </nav>
 </header>
-
-<!-- Navbar dưới -->
-<nav class="navbar">
-  <div class="container">
-    <!-- Danh mục -->
-    <div class="menu-item dropdown">
-      <span>Danh mục <i class="fa-solid fa-angle-down"></i></span>
-      <div class="dropdown-menu">
-        <a routerLink="/products/teddy">Gấu Teddy</a>
-        <a routerLink="/products/thobong">Thỏ Bông</a>
-        <a routerLink="/products/hoabong">Hoa Bông</a>
-        <a routerLink="/products/phukienshop">Phụ Kiện</a>
-      </div>
-    </div>
-
-    <!-- Các mục khác -->
-    <a class="menu-item" routerLink="/home" routerLinkActive="active">Trang chủ</a>
-    <a class="menu-item" routerLink="/about" routerLinkActive="active">Giới thiệu</a>
-    <a class="menu-item" routerLink="/contact" routerLinkActive="active">Liên hệ</a>
-  </div>
-</nav>
