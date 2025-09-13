@@ -26,7 +26,8 @@ public class JwtFilter extends OncePerRequestFilter {
             "/api/users/login",
             "/api/users/register",
             "/api/products",
-            "/api/categories"
+            "/api/categories",
+            "/uploads" 
     );
 
     public JwtFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {

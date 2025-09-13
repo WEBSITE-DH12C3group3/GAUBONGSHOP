@@ -63,7 +63,7 @@
       >
         <div class="relative">
           <img
-            [src]="p.imageUrl || 'https://picsum.photos/400/300?random=' + p.id"
+            [src]="'http://localhost:8080' + p.imageUrl || 'https://picsum.photos/400/300?random=' + p.id"
             [alt]="p.name"
             class="w-full h-56 object-cover group-hover:scale-105 transition duration-500"
           />
@@ -92,3 +92,4 @@
     </div>
   </div>
 </section>
+

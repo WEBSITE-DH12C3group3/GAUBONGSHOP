@@ -44,7 +44,8 @@ public class SecurityConfig {
                         "/api/users/register",
                         "/api/users/login",
                         "/api/products/**",
-                        "/api/categories/**"
+                        "/api/categories/**",
+                        "/uploads/**"
                 ).permitAll()
 
                 // --- Admin API ---
