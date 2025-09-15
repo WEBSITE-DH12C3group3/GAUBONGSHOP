@@ -12,9 +12,16 @@ import { ProfileComponent } from './features/profile/profile';
 import { ProductsComponent } from './features/products/products';
 import { ProductDetailComponent } from './features/product_detail/product_detail';
 
-// Admin pages
+// Admin
 import { Dashboard } from './admin/dashboard/dashboard';
+
 import { ProductsAdminComponent } from './admin/products-admin/products-admin';
+
+import { CategoriesAdminListComponent } from './admin/categories-admin/categories-admin-list.component';
+import { CategoriesAdminAddComponent } from './admin/categories-admin/categories-admin-add.component';
+import { CategoriesAdminEditComponent } from './admin/categories-admin/categories-admin-edit.component';
+
+
 
 export const routes: Routes = [
   // Customer layout
@@ -27,10 +34,12 @@ export const routes: Routes = [
       { path: 'login', component: Login },
       { path: 'register', component: RegisterComponent },
       { path: 'profile', component: ProfileComponent },
+
       { path: 'products', component: ProductsComponent },
 
       // 👉 Route chi tiết sản phẩm
       { path: 'product/:id', component: ProductDetailComponent }
+
     ]
   },
 
@@ -41,7 +50,19 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: Dashboard },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'products', component: ProductsAdminComponent }
+      { path: 'products', component: ProductsAdminComponent },
+
+      { path: 'categories', children: [
+          { path: '', component: CategoriesAdminListComponent },
+          { path: 'add', component: CategoriesAdminAddComponent },
+          { path: 'edit/:id', component: CategoriesAdminEditComponent }
+        ]
+      },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+
     ]
-  }
-];
+  },
+
+  // Catch all
+  { path: '**', redirectTo: 'home' }
+                                  ];
