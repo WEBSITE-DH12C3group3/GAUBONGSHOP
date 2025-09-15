@@ -53,15 +53,20 @@ export class ProductsAdminComponent implements OnInit {
     this.searchProducts();
   }
 
-  // Load danh mục
-  loadCategories() {
-    this.categoryService.getCategories().subscribe({
+  loadCategories(page: number = 0, size: number = 10) {
+    this.categoryService.getAll({ page, size }).subscribe({
       next: (res) => {
-        this.categories = res.items || res;
+        this.categories = res.content;       // ✅ dùng content thay vì items
+        this.totalPages = res.totalPages;
+        this.totalElements = res.totalElements;
+        this.page = res.number;
+        this.size = res.size;
       },
       error: (err) => console.error('Lỗi khi tải danh mục:', err)
     });
   }
+
+
 
   // Load thương hiệu
   loadBrands() {

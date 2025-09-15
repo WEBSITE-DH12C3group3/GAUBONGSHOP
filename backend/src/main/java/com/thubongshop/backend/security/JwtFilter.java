@@ -25,13 +25,6 @@ public class JwtFilter extends OncePerRequestFilter {
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
             "/api/users/login",
             "/api/users/register",
-            // "/api/products",
-            // "/api/categories",
-            // "/api/brands",
-            // "/api/attributes",
-            // "/api/product-attributes",
-            // "/api/product-attributes/",
-            // "/api/reviews/products",
             "/uploads"
     );
 

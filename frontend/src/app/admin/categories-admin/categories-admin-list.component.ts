@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 import { Category } from '../../models/category.model';
-import { CategoryAdminService } from '../../shared/services/category_admin.service';
+import { CategoryAdminService } from '../../shared/services/category-admin.service';
 
 @Component({
   selector: 'app-categories-admin-list',

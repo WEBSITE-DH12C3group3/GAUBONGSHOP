@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { CategoryAdminService } from '../../shared/services/category_admin.service';
+import { CategoryAdminService } from '../../shared/services/category-admin.service';
 import { Category } from '../../models/category.model';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
