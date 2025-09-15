@@ -6,14 +6,24 @@ import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
-
 import { routes } from './app.routes';
 
 // 🔑 Interceptor gắn token
 export const authInterceptorFn: HttpInterceptorFn = (req, next) => {
   const platformId = inject(PLATFORM_ID);
-  let token: string | null = null;
 
+  // ⚡ Bỏ qua token cho API public
+  const isPublicApi =
+    req.url.includes('/api/products') ||
+    req.url.includes('/api/categories') ||
+    (req.method === 'GET' && req.url.includes('/api/admin/categories'));
+
+  if (isPublicApi) {
+    return next(req); // 🚀 Không gắn token
+  }
+
+  // 👉 Các API khác thì mới gắn token
+  let token: string | null = null;
   if (isPlatformBrowser(platformId)) {
     token = localStorage.getItem('token');
   }
@@ -23,8 +33,10 @@ export const authInterceptorFn: HttpInterceptorFn = (req, next) => {
       setHeaders: { Authorization: `Bearer ${token}` }
     });
   }
+
   return next(req);
 };
+
 
 // ⚠️ Interceptor xử lý lỗi (401, 403)
 export const errorInterceptorFn: HttpInterceptorFn = (req, next) => {
@@ -52,7 +64,7 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withEventReplay()),
     provideHttpClient(
       withFetch(),
-      withInterceptors([authInterceptorFn, errorInterceptorFn]) // interceptor cho mọi request
-    )
+      withInterceptors([authInterceptorFn, errorInterceptorFn]), // interceptor cho mọi request
+    ),
   ]
 };

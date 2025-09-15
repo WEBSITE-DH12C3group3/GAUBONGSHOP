@@ -1,0 +1,27 @@
+<div class="p-6 max-w-lg mx-auto">
+  <h2 class="text-2xl font-bold text-pink-600 mb-4">✏️ Sửa danh mục</h2>
+  
+  <form (ngSubmit)="save()" class="space-y-4">
+    <div>
+      <label class="block mb-1">Tên danh mục</label>
+      <input [(ngModel)]="category.name" name="name"
+             class="w-full border rounded p-2 focus:ring focus:ring-pink-300" required />
+    </div>
+
+    <div>
+      <label class="block mb-1">Mô tả</label>
+      <textarea [(ngModel)]="category.description" name="description"
+                class="w-full border rounded p-2 focus:ring focus:ring-pink-300"></textarea>
+    </div>
+
+    <div class="flex items-center">
+      <input type="checkbox" [(ngModel)]="category.isFeatured" name="isFeatured" class="mr-2" />
+      <label>Nổi bật</label>
+    </div>
+
+    <button type="submit"
+            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+      Cập nhật
+    </button>
+  </form>
+</div>

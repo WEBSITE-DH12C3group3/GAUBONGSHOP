@@ -1,0 +1,96 @@
+<div class="p-6 bg-gray-50 min-h-screen">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-3xl font-extrabold text-pink-600 flex items-center gap-2">
+      📂 Quản lý Danh mục
+    </h2>
+    <a routerLink="/admin/categories/add"
+       class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg shadow flex items-center gap-2">
+       ➕ Thêm mới
+    </a>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center items-center py-20 text-gray-600">
+    <svg class="animate-spin h-8 w-8 mr-3 text-pink-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+    </svg>
+    <span class="text-lg">Đang tải dữ liệu...</span>
+  </div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto">
+    <table *ngIf="!loading && categories.length > 0"
+           class="min-w-full bg-white border border-gray-200 rounded-lg shadow">
+      <thead>
+        <tr class="bg-pink-100 text-left text-gray-700">
+          <th class="px-4 py-3">ID</th>
+          <th class="px-4 py-3">Tên</th>
+          <th class="px-4 py-3">Mô tả</th>
+          <th class="px-4 py-3 text-center">Nổi bật</th>
+          <th class="px-4 py-3">Ngày tạo</th>
+          <th class="px-4 py-3 text-center">Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of categories"
+            class="border-t hover:bg-pink-50 transition">
+          <td class="px-4 py-3">{{ c.id }}</td>
+          <td class="px-4 py-3 font-medium">{{ c.name }}</td>
+          <td class="px-4 py-3">{{ c.description }}</td>
+          <td class="px-4 py-3 text-center">
+            <span [class]="'px-3 py-1 rounded-full text-xs font-semibold ' +
+              (c.isFeatured ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600')">
+              {{ c.isFeatured ? '✔️ Có' : '❌ Không' }}
+            </span>
+          </td>
+          <td class="px-4 py-3">{{ c.createdAt | date:'dd/MM/yyyy' }}</td>
+          <td class="px-4 py-3 flex justify-center gap-3">
+            <a [routerLink]="['/admin/categories/edit', c.id]"
+               class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md shadow flex items-center gap-1">
+               ✏️ <span>Sửa</span>
+            </a>
+            <button (click)="deleteCategory(c.id!)"
+                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md shadow flex items-center gap-1">
+              🗑️ <span>Xóa</span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- No data -->
+  <div *ngIf="!loading && categories.length === 0"
+       class="text-center text-gray-500 py-10 text-lg">
+    😥 Chưa có danh mục nào
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && totalPages > 1" class="flex justify-center items-center gap-2 mt-6">
+    <!-- Nút trước -->
+    <button (click)="changePage(page - 1)"
+            [disabled]="page === 0"
+            class="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50">
+      ⬅️ Trước
+    </button>
+
+    <!-- Số trang -->
+    <ng-container *ngFor="let p of pages">
+      <button (click)="changePage(p)"
+              [class.bg-pink-500]="p === page"
+              [class.text-white]="p === page"
+              class="px-3 py-1 rounded-md hover:bg-pink-200">
+        {{ p + 1 }}
+      </button>
+    </ng-container>
+
+    <!-- Nút tiếp -->
+    <button (click)="changePage(page + 1)"
+            [disabled]="page + 1 >= totalPages"
+            class="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300 disabled:opacity-50">
+      Tiếp ➡️
+    </button>
+  </div>
+</div>

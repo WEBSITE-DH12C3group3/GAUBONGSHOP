@@ -2,6 +2,7 @@ package com.thubongshop.backend.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,18 +29,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // ❌ Tắt CSRF vì dùng JWT (stateless)
+            // ❌ Tắt CSRF vì dùng JWT
             .csrf(csrf -> csrf.disable())
 
-            // 🌐 Bật CORS để cho phép FE Angular truy cập
+            // 🌐 Bật CORS
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-            // 🔒 Không lưu session, mỗi request đều xác thực bằng JWT
+            // 🔒 Stateless session
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
             // ⚡ Phân quyền
             .authorizeHttpRequests(auth -> auth
-                // --- Public API (không cần login) ---
+                // ✅ Cho phép tất cả OPTIONS (fix preflight CORS)
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                // --- Public API ---
                 .requestMatchers(
                         "/api/users/register",
                         "/api/users/login",
@@ -48,13 +52,21 @@ public class SecurityConfig {
                         "/uploads/**"
                 ).permitAll()
 
-                // --- Admin API ---
+                // --- Cho phép GET categories trong admin công khai ---
+                .requestMatchers(HttpMethod.GET, "/api/admin/categories", "/api/admin/categories/**").permitAll()
+
+                // --- Chỉ ADMIN mới được CRUD categories ---
+                .requestMatchers(HttpMethod.POST, "/api/admin/categories/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/admin/categories/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/admin/categories/**").hasRole("ADMIN")
+
+                // --- Các API admin khác: chỉ ADMIN ---
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                 // --- Customer API ---
                 .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
 
-                // --- Các request khác cần đăng nhập ---
+                // --- Các request khác ---
                 .anyRequest().authenticated()
             );
 
@@ -64,22 +76,17 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 🌐 Cấu hình CORS cho toàn bộ API
+    // 🌐 CORS config
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Cho phép FE Angular (http://localhost:4200) gọi API
+        // Cho phép Angular FE gọi API
         configuration.setAllowedOrigins(List.of("http://localhost:4200"));
-
-        // Các method được phép
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
-        // Cho phép tất cả headers
-        configuration.setAllowedHeaders(List.of("*"));
-
-        // Cho phép gửi cookie/authorization
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L); // cache preflight 1h
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -87,13 +94,13 @@ public class SecurityConfig {
         return source;
     }
 
-    // ⚙️ AuthenticationManager (xác thực login)
+    // ⚙️ AuthenticationManager
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    // 🔑 PasswordEncoder (mã hoá mật khẩu)
+    // 🔑 PasswordEncoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

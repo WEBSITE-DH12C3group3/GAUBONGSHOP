@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import {
   HttpInterceptor,
   HttpRequest,
@@ -6,20 +6,27 @@ import {
   HttpEvent
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const token = localStorage.getItem('token'); // 👈 lấy token từ localStorage
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
 
-    if (token) {
-      // Clone request và thêm Authorization header
-      const authReq = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      return next.handle(authReq);
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    // ✅ Chỉ chạy khi ở browser
+    if (isPlatformBrowser(this.platformId)) {
+      const token = localStorage.getItem('token');
+      console.log("🔑 Token trong interceptor:", token);
+
+      if (token) {
+        const authReq = req.clone({
+          setHeaders: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        console.log("📤 Request kèm Authorization:", authReq);
+        return next.handle(authReq);
+      }
     }
 
     return next.handle(req);
