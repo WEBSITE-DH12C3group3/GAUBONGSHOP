@@ -5,17 +5,18 @@ import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 import com.thubongshop.backend.category.Category;
 import com.thubongshop.backend.category.CategoryService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.*;
+
 
 import java.util.HashMap;
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/admin/categories")
@@ -23,7 +24,6 @@ import java.util.Map;
 public class AdminCategoryController {
 
     private final CategoryService service;
-
 
     // Lấy danh sách category (phân trang, tìm kiếm, lọc)
     @GetMapping
@@ -72,16 +72,14 @@ public class AdminCategoryController {
         return service.getById(id);
     }
 
-
-    // Tạo category
-
+    // ✅ Tạo mới category
     @PostMapping
     public Category create(@RequestBody Category category) {
         return service.create(category);
     }
 
-
     // ✅ Sửa category
+
 
     @PutMapping("/{id}")
     public Category update(@PathVariable Long id, @RequestBody Category category) {

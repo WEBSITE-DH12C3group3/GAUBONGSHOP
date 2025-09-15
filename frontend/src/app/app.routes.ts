@@ -14,12 +14,14 @@ import { ProductDetailComponent } from './features/product_detail/product_detail
 
 // Admin
 import { Dashboard } from './admin/dashboard/dashboard';
-
-import { ProductsAdminComponent } from './admin/products-admin/products-admin';
-
 import { CategoriesAdminListComponent } from './admin/categories-admin/categories-admin-list.component';
 import { CategoriesAdminAddComponent } from './admin/categories-admin/categories-admin-add.component';
 import { CategoriesAdminEditComponent } from './admin/categories-admin/categories-admin-edit.component';
+
+
+import { ProductsAdminComponent } from './admin/products-admin/products-admin';
+
+
 
 
 
@@ -35,10 +37,12 @@ export const routes: Routes = [
       { path: 'register', component: RegisterComponent },
       { path: 'profile', component: ProfileComponent },
 
+
       { path: 'products', component: ProductsComponent },
 
       // 👉 Route chi tiết sản phẩm
       { path: 'product/:id', component: ProductDetailComponent }
+
 
     ]
   },
@@ -49,8 +53,10 @@ export const routes: Routes = [
     component: AdminLayout,
     children: [
       { path: 'dashboard', component: Dashboard },
+
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'products', component: ProductsAdminComponent },
+
 
       { path: 'categories', children: [
           { path: '', component: CategoriesAdminListComponent },
@@ -65,4 +71,6 @@ export const routes: Routes = [
 
   // Catch all
   { path: '**', redirectTo: 'home' }
-                                  ];
+
+];
+

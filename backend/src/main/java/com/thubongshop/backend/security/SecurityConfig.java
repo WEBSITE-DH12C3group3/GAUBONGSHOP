@@ -55,6 +55,7 @@ public class SecurityConfig {
                         "/uploads/**"
                 ).permitAll()
 
+
 // <<<<<<< HEAD
                 .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
@@ -79,6 +80,7 @@ public class SecurityConfig {
 
 //                 // --- Các API admin khác: chỉ ADMIN ---
 // >>>>>>> 3ae76a28004dc97b4d247e1cafc42a7ea3428870
+
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                 // --- Customer API ---
