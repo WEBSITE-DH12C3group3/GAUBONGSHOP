@@ -1,0 +1,47 @@
+<div class="max-w-3xl mx-auto p-6 space-y-6">
+  <a routerLink="/admin/suppliers" class="underline text-sm">&larr; Quay lại danh sách</a>
+  <h2 class="text-xl font-bold">{{ id() ? 'Sửa nhà cung cấp' : 'Thêm nhà cung cấp' }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="space-y-1">
+        <label class="text-sm">Tên <span class="text-red-600">*</span></label>
+        <input formControlName="name" class="border rounded-xl px-3 py-2 w-full" placeholder="VD: Công ty ABC" />
+        <div class="text-xs text-red-600" *ngIf="form.controls.name.touched && form.controls.name.invalid">
+          Tên là bắt buộc (tối đa 100 ký tự)
+        </div>
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-sm">Người liên hệ</label>
+        <input formControlName="contactPerson" class="border rounded-xl px-3 py-2 w-full" placeholder="Nguyễn Văn B" />
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="space-y-1">
+        <label class="text-sm">Điện thoại</label>
+        <input formControlName="phone" class="border rounded-xl px-3 py-2 w-full" placeholder="09xxxxxxxx" />
+      </div>
+      <div class="space-y-1">
+        <label class="text-sm">Email</label>
+        <input formControlName="email" class="border rounded-xl px-3 py-2 w-full" placeholder="email@domain.com" />
+        <div class="text-xs text-red-600" *ngIf="form.controls.email.touched && form.controls.email.invalid">
+          Email không hợp lệ
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-1">
+      <label class="text-sm">Địa chỉ</label>
+      <textarea formControlName="address" rows="3" class="border rounded-xl px-3 py-2 w-full"
+                placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành"></textarea>
+    </div>
+
+    <div class="pt-2">
+      <button type="submit" class="px-4 py-2 rounded-xl bg-black text-white" [disabled]="saving()">
+        {{ saving() ? 'Đang lưu...' : 'Lưu' }}
+      </button>
+    </div>
+  </form>
+</div>

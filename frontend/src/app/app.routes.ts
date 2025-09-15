@@ -19,9 +19,13 @@ import { CategoriesAdminAddComponent } from './admin/categories-admin/categories
 import { CategoriesAdminEditComponent } from './admin/categories-admin/categories-admin-edit.component';
 import { ProductsAdminComponent } from './admin/products-admin/products-admin';
 
-// 👉 thêm brand admin
+// Brands admin
 import { BrandAdminListComponent } from './admin/brands-admin/brand-admin-list';
 import { BrandAdminFormComponent } from './admin/brands-admin/brand-admin-form';
+
+// Suppliers admin
+import { SupplierAdminListComponent } from './admin/suppliers-admin/supplier-admin-list';
+import { SupplierAdminFormComponent } from './admin/suppliers-admin/supplier-admin-form';
 
 export const routes: Routes = [
   // Customer layout
@@ -44,27 +48,39 @@ export const routes: Routes = [
     path: 'admin',
     component: AdminLayout,
     children: [
-      { path: 'dashboard', component: Dashboard },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: Dashboard },
 
       { path: 'products', component: ProductsAdminComponent },
 
-      { path: 'categories', children: [
+      {
+        path: 'categories',
+        children: [
           { path: '', component: CategoriesAdminListComponent },
           { path: 'add', component: CategoriesAdminAddComponent },
           { path: 'edit/:id', component: CategoriesAdminEditComponent }
         ]
       },
 
-      // 👉 brands admin
-      { path: 'brands', children: [
+      // Brands admin
+      {
+        path: 'brands',
+        children: [
           { path: '', component: BrandAdminListComponent },
           { path: 'new', component: BrandAdminFormComponent },
           { path: ':id', component: BrandAdminFormComponent }
         ]
       },
 
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+      // Suppliers admin
+      {
+        path: 'suppliers',
+        children: [
+          { path: '', component: SupplierAdminListComponent },
+          { path: 'new', component: SupplierAdminFormComponent },
+          { path: ':id', component: SupplierAdminFormComponent }
+        ]
+      }
     ]
   },
 
