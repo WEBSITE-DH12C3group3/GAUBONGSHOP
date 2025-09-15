@@ -52,34 +52,21 @@ public class SecurityConfig {
                         "/api/product-attributes/**",
                         "/api/brands/**",
                         "/api/attributes/**",
+                        "/api/imports/**",
+                        "/api/import-details/**",
                         "/uploads/**"
                 ).permitAll()
-
-
-// <<<<<<< HEAD
                 .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/brands/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/attributes/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/reviews/products/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/imports/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/import-details/**").permitAll()
 
                 // Reviews
                 .requestMatchers(HttpMethod.GET, "/api/reviews/products/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/reviews/products/**").hasRole("CUSTOMER")
-
-
-                // --- Admin API ---
-// =======
-//                 // --- Cho phép GET categories trong admin công khai ---
-//                 .requestMatchers(HttpMethod.GET, "/api/admin/categories", "/api/admin/categories/**").permitAll()
-
-//                 // --- Chỉ ADMIN mới được CRUD categories ---
-//                 .requestMatchers(HttpMethod.POST, "/api/admin/categories/**").hasRole("ADMIN")
-//                 .requestMatchers(HttpMethod.PUT, "/api/admin/categories/**").hasRole("ADMIN")
-//                 .requestMatchers(HttpMethod.DELETE, "/api/admin/categories/**").hasRole("ADMIN")
-
-//                 // --- Các API admin khác: chỉ ADMIN ---
-// >>>>>>> 3ae76a28004dc97b4d247e1cafc42a7ea3428870
 
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
