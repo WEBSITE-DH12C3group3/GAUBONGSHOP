@@ -24,11 +24,13 @@ public class AdminProductController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) Integer brandId,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<ProductResponse> data = service.listPaged(keyword, categoryId, brandId, pageable);
+        Page<ProductResponse> data = service.listPaged(keyword, categoryId, brandId, minPrice, maxPrice, pageable);
 
         return ResponseEntity.ok(Map.of(
                 "items", data.getContent(),
@@ -42,6 +44,7 @@ public class AdminProductController {
     // Chi tiết 1 sản phẩm
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Integer id) {
+        // Trả full detail
         return ResponseEntity.ok(service.getDetail(id));
     }
 

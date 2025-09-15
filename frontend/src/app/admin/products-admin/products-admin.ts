@@ -1,159 +1,213 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductAdminService } from '../../shared/services/product-admin.service';
 import { CategoryAdminService } from '../../shared/services/category_admin.service';
 import { BrandAdminService } from '../../shared/services/brand-admin.service';
+import { Product } from '../../models/product.model';
+import { Page } from '../../models/page.model';
+import { Brand } from '../../models/brand.model';
+import { Category } from '../../models/category.model';
 
 @Component({
   selector: 'app-products-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyPipe],
+  imports: [CommonModule, FormsModule, CurrencyPipe, NgOptimizedImage],
   templateUrl: './products-admin.html',
   styleUrls: ['./products-admin.css']
 })
 export class ProductsAdminComponent implements OnInit {
-  products: any[] = [];
-  categories: any[] = [];
-  brands: any[] = [];
 
+  // dữ liệu
+  items: Product[] = [];
+  categories: { id:number; name:string }[] = [];
+  brands: { id:number; name:string }[] = [];
+
+  // filter
   keyword = '';
   categoryId: number | null = null;
   brandId: number | null = null;
+  minPrice: number | null = null;
+  maxPrice: number | null = null;
 
+  // phân trang
   page = 0;
   size = 10;
   totalPages = 0;
   totalElements = 0;
   pages: number[] = [];
 
+  // UI state
+  loading = false;
+  error: string | null = null;
+
   showModal = false;
-  isEditMode = false;
-  currentProduct: any = {
-    name: '',
-    categoryId: null,
-    brandId: null,
-    price: 0,
-    stock: 0,
-    description: ''
-  };
+  isEdit = false;
+  current: Partial<Product> = this.emptyProduct();
+
+  showDetail = false;
+  detailItem: Product | null = null;
 
   constructor(
-    private productService: ProductAdminService,
-    private categoryService: CategoryAdminService,
-    private brandService: BrandAdminService,
-    private cdr: ChangeDetectorRef
+    private api: ProductAdminService,
+    private catAdmin: CategoryAdminService,
+    private brandAdmin: BrandAdminService,
+    private cdr: ChangeDetectorRef            // ✅ inject CDR
   ) {}
 
   ngOnInit(): void {
-    this.loadCategories();
-    this.loadBrands();
-    this.searchProducts();
+    this.loadFilters();
+    this.fetch(0);
   }
 
-  loadCategories(page: number = 0, size: number = 10) {
-    this.categoryService.getAll(page, size).subscribe({
-      next: (res) => {
-        this.categories = res.content;
-        this.cdr.detectChanges();   // 👈 đảm bảo UI cập nhật
-      },
-      error: (err) => console.error('Lỗi khi tải danh mục:', err)
-    });
-  }
-
-  loadBrands() {
-    this.brandService.getBrands().subscribe({
-      next: (res) => {
-        this.brands = res.items || res;
-        this.cdr.detectChanges();   // 👈
-      },
-      error: (err) => console.error('Lỗi khi tải thương hiệu:', err)
-    });
-  }
-
-  searchProducts() {
-    this.productService.listPaged(
-      this.keyword,
-      this.categoryId ?? undefined,
-      this.brandId ?? undefined,
-      this.page,
-      this.size
-    ).subscribe({
-      next: (res) => {
-        this.products = res.items;
-        this.page = res.page;
-        this.size = res.size;
-        this.totalPages = res.totalPages;
-        this.totalElements = res.totalElements;
-        this.pages = Array.from({ length: this.totalPages }, (_, i) => i);
-        this.cdr.detectChanges();   // 👈
-      },
-      error: (err) => console.error('Lỗi khi tải sản phẩm:', err)
-    });
-  }
-
-  changePage(newPage: number) {
-    if (newPage >= 0 && newPage < this.totalPages) {
-      this.page = newPage;
-      this.searchProducts();
-    }
-  }
-
-  openCreateModal() {
-    this.isEditMode = false;
-    this.currentProduct = {
+  emptyProduct(): Partial<Product> {
+    return {
       name: '',
-      categoryId: null,
-      brandId: null,
+      description: '',
       price: 0,
       stock: 0,
-      description: ''
+      imageUrl: '',
+      active: true as any
+    } as any;
+  }
+
+  loadFilters(): void {
+    // lấy tối đa 1000 item cho dropdown (tuỳ dữ liệu thực tế)
+    this.catAdmin.getAll(0, 1000).subscribe({
+      next: (res: Page<Category>) => {
+        this.categories = (res?.content ?? []).map((c: Category) => ({ id: c.id, name: c.name }));
+        this.cdr.detectChanges();       // ✅
+      },
+      error: (e: unknown) => { console.error('Lỗi load categories:', e); this.cdr.detectChanges(); }
+    });
+
+    this.brandAdmin.getAll(0, 1000).subscribe({
+      next: (res: Page<Brand>) => {
+        this.brands = (res?.content ?? []).map((b: Brand) => ({ id: b.id, name: b.name }));
+        this.cdr.detectChanges();       // ✅
+      },
+      error: (e: unknown) => { console.error('Lỗi load brands:', e); this.cdr.detectChanges(); }
+    });
+  }
+
+  fetch(page = this.page): void {
+    this.loading = true; this.error = null;
+    this.cdr.detectChanges();           // ✅ phản ánh trạng thái loading sớm
+
+    this.api.listPaged(
+      this.keyword || undefined,
+      this.categoryId ?? undefined,
+      this.brandId ?? undefined,
+      page,
+      this.size,
+      this.minPrice ?? undefined,
+      this.maxPrice ?? undefined
+    ).subscribe({
+      next: (res) => {
+        this.items = res.items || [];
+        this.totalPages = res.totalPages ?? 0;
+        this.totalElements = res.totalElements ?? 0;
+        this.page = res.page ?? 0;
+        this.size = res.size ?? this.size;
+        this.pages = Array.from({ length: this.totalPages }, (_, i) => i);
+        this.loading = false;
+        this.cdr.detectChanges();       // ✅
+      },
+      error: (err) => {
+        this.error = 'Không thể tải dữ liệu sản phẩm';
+        console.error(err);
+        this.loading = false;
+        this.cdr.detectChanges();       // ✅
+      }
+    });
+  }
+
+  resetFilters(): void {
+    this.keyword = '';
+    this.categoryId = null;
+    this.brandId = null;
+    this.minPrice = null;
+    this.maxPrice = null;
+    this.cdr.detectChanges();           // ✅
+    this.fetch(0);
+  }
+
+  openCreate(): void {
+    this.isEdit = false;
+    this.current = this.emptyProduct();
+    this.showModal = true;
+    this.cdr.detectChanges();           // ✅
+  }
+
+  openEdit(p: Product): void {
+    this.isEdit = true;
+    this.current = {
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      price: p.price,
+      stock: p.stock,
+      imageUrl: p.imageUrl,
+      categoryId: p.categoryId ?? this.findCategoryIdByName(p.categoryName),
+      brandId: p.brandId ?? this.findBrandIdByName(p.brandName)
     };
     this.showModal = true;
-    this.cdr.detectChanges();   // 👈
+    this.cdr.detectChanges();           // ✅
   }
 
-  openEditModal(product: any) {
-    this.isEditMode = true;
-    this.currentProduct = { ...product };
-    this.showModal = true;
-    this.cdr.detectChanges();   // 👈
+  openDetail(p: Product): void {
+    this.detailItem = null;
+    this.showDetail = true;
+    this.cdr.detectChanges();           // ✅ mở drawer ngay
+
+    this.api.getDetail(p.id).subscribe({
+      next: (d) => { this.detailItem = d; this.cdr.detectChanges(); },   // ✅
+      error: (e) => { console.error(e); this.detailItem = p; this.cdr.detectChanges(); } // ✅
+    });
   }
 
-  closeModal() {
-    this.showModal = false;
-    this.cdr.detectChanges();   // 👈
+  save(): void {
+    const body: any = {
+      name: this.current.name,
+      description: this.current.description,
+      price: this.current.price,
+      imageUrl: this.current.imageUrl,
+      stock: this.current.stock ?? 0,
+      categoryId: this.current.categoryId ?? null,
+      brandId: this.current.brandId ?? null
+    };
+
+    const obs = (this.isEdit && this.current.id)
+      ? this.api.update(this.current.id as number, body)
+      : this.api.create(body);
+
+    obs.subscribe({
+      next: () => {
+        this.showModal = false;
+        this.cdr.detectChanges();       // ✅ đóng modal ngay
+        this.fetch();
+      },
+      error: (e) => { console.error('Lưu sản phẩm lỗi:', e); this.cdr.detectChanges(); } // ✅
+    });
   }
 
-  saveProduct() {
-    if (this.isEditMode) {
-      this.productService.update(this.currentProduct.id, this.currentProduct).subscribe({
-        next: () => {
-          this.closeModal();
-          this.searchProducts();
-        },
-        error: (err) => console.error('Lỗi khi cập nhật sản phẩm:', err)
-      });
-    } else {
-      this.productService.create(this.currentProduct).subscribe({
-        next: () => {
-          this.closeModal();
-          this.searchProducts();
-        },
-        error: (err) => console.error('Lỗi khi thêm sản phẩm:', err)
-      });
-    }
+  remove(p: Product): void {
+    if (!confirm(`Xoá sản phẩm "${p.name}"?`)) return;
+    this.api.delete(p.id).subscribe({
+      next: () => { this.fetch(); /* fetch tự detectChanges ở next */ },
+      error: (e) => { console.error('Xoá lỗi:', e); this.cdr.detectChanges(); } // ✅
+    });
   }
 
-  deleteProduct(id: number) {
-    if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
-      this.productService.delete(id).subscribe({
-        next: () => {
-          this.searchProducts();
-          this.cdr.detectChanges();   // 👈
-        },
-        error: (err) => console.error('Lỗi khi xóa sản phẩm:', err)
-      });
-    }
+  private findCategoryIdByName(name?: string | null): number | undefined {
+    if (!name) return undefined;
+    const found = this.categories.find(c => c.name === name);
+    return found?.id;
+  }
+
+  private findBrandIdByName(name?: string | null): number | undefined {
+    if (!name) return undefined;
+    const found = this.brands.find(b => b.name === name);
+    return found?.id;
   }
 }

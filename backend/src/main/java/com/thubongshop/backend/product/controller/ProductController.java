@@ -19,26 +19,35 @@ public class ProductController {
         this.service = service;
     }
 
-    // Danh sách sản phẩm (phân trang, tìm kiếm, lọc)
-    @GetMapping
-    public ResponseEntity<?> list(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer categoryId,
-            @RequestParam(required = false) Integer brandId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size
-    ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<ProductResponse> data = service.search(keyword, categoryId, brandId, pageable);
+ // Danh sách sản phẩm (phân trang, tìm kiếm, lọc)
+@GetMapping
+public ResponseEntity<?> list(
+        @RequestParam(required = false) String keyword,
+        @RequestParam(required = false, name = "q") String q,   // alias cho keyword (nếu FE gửi q)
+        @RequestParam(required = false) Integer categoryId,
+        @RequestParam(required = false) Integer brandId,
+        @RequestParam(required = false) Double minPrice,
+        @RequestParam(required = false) Double maxPrice,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "12") int size
+) {
+    // Ưu tiên keyword, nếu rỗng thì dùng q
+    String kw = (keyword != null && !keyword.isBlank())
+            ? keyword
+            : (q != null && !q.isBlank() ? q : null);
 
-        return ResponseEntity.ok(Map.of(
-                "items", data.getContent(),
-                "page", data.getNumber(),
-                "size", data.getSize(),
-                "totalPages", data.getTotalPages(),
-                "totalElements", data.getTotalElements()
-        ));
-    }
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<ProductResponse> data = service.search(kw, categoryId, brandId, minPrice, maxPrice, pageable);
+
+    return ResponseEntity.ok(Map.of(
+            "items", data.getContent(),
+            "page", data.getNumber(),
+            "size", data.getSize(),
+            "totalPages", data.getTotalPages(),
+            "totalElements", data.getTotalElements()
+    ));
+}
+
 
     // Chi tiết sản phẩm (bao gồm attributes + reviews)
     @GetMapping("/{id}")

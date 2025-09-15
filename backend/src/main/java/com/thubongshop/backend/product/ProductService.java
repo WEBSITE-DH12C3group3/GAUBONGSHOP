@@ -46,8 +46,9 @@ public class ProductService {
 
     // -------------------- Client --------------------
 
-    public Page<ProductResponse> search(String keyword, Integer categoryId, Integer brandId, Pageable pageable) {
-        return repo.search(keyword, categoryId, brandId, pageable)
+    public Page<ProductResponse> search(String keyword, Integer categoryId, Integer brandId,
+                                        Double minPrice, Double maxPrice, Pageable pageable) {
+        return repo.search(keyword, categoryId, brandId, minPrice, maxPrice, pageable)
                    .map(this::mapToResponseBasic);
     }
 
@@ -106,15 +107,16 @@ public class ProductService {
 
     // -------------------- Admin --------------------
 
-    public Page<ProductResponse> listPaged(String keyword, Integer categoryId, Integer brandId, Pageable pageable) {
-        return repo.search(keyword, categoryId, brandId, pageable).map(this::mapToResponseBasic);
-    }
+    public Page<ProductResponse> listPaged(String keyword, Integer categoryId, Integer brandId,
+                                            Double minPrice, Double maxPrice, Pageable pageable) {
+            return repo.search(keyword, categoryId, brandId, minPrice, maxPrice, pageable)
+                    .map(this::mapToResponseBasic);
+        }
 
-    public ProductResponse getDetail(Integer id) {
-        Product product = repo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
-        return mapToResponseBasic(product);
-    }
+        public ProductResponse getDetail(Integer id) {
+            // Trả luôn FULL detail cho Admin để panel chi tiết giàu thông tin
+            return getFullDetail(id);
+        }
 
     /**
      * Thêm mới sản phẩm cơ bản (không attributes/images).
@@ -183,6 +185,16 @@ public class ProductService {
     // -------------------- Helpers --------------------
 
     private ProductResponse mapToResponseBasic(Product p) {
+        String brandName = null;
+        String categoryName = null;
+        if (p.getBrandId() != null) {
+            brandName = brandRepo.findById(p.getBrandId()).map(Brand::getName).orElse(null);
+        }
+        if (p.getCategoryId() != null) {
+            categoryName = categoryRepo.findById(p.getCategoryId().longValue())
+                                       .map(Category::getName).orElse(null);
+        }
+
         return ProductResponse.builder()
                 .id(p.getId())
                 .name(p.getName())
@@ -191,8 +203,8 @@ public class ProductService {
                 .imageUrl(p.getImageUrl())
                 .stock(p.getStock())
                 .createdAt(p.getCreatedAt())
-                .brandName("TODO")     // lấy từ brand service
-                .categoryName("TODO")  // lấy từ category service
+                .brandName(brandName)
+                .categoryName(categoryName)
                 .build();
     }
 } 

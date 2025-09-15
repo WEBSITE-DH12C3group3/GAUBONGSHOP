@@ -1,126 +1,229 @@
-<div class="bg-white shadow rounded-lg p-6">
+<div class="p-6 space-y-6">
   <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-bold text-gray-800">Quản lý sản phẩm</h2>
-    <button 
-      class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
-      (click)="openCreateModal()">
-      + Thêm sản phẩm
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold">Quản lý sản phẩm</h1>
+      <p class="text-sm text-gray-500">CRUD • Lọc danh mục/brand/giá • Xem chi tiết</p>
+    </div>
+    <button (click)="openCreate()"
+      class="inline-flex items-center gap-2 rounded-2xl px-4 py-2 bg-pink-600 text-white hover:bg-pink-700 shadow">
+      <!-- plus icon -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+        stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+      Thêm sản phẩm
     </button>
   </div>
 
-  <!-- Search & Filter -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-    <input type="text" [(ngModel)]="keyword" (input)="searchProducts()"
-      placeholder="Tìm kiếm sản phẩm..."
-      class="border rounded-lg px-3 py-2 w-full focus:outline-pink-500" />
+  <!-- Filter Bar -->
+  <div class="grid grid-cols-1 lg:grid-cols-6 gap-3 bg-white p-4 rounded-2xl shadow">
+    <div class="lg:col-span-2 flex items-center gap-2">
+      <div class="relative flex-1">
+        <input [(ngModel)]="keyword" (keyup.enter)="fetch(0)" type="text"
+          placeholder="Tìm tên / mô tả…"
+          class="w-full rounded-xl border px-4 py-2 pr-9">
+        <svg class="w-5 h-5 absolute right-3 top-2.5 text-gray-400" fill="none" stroke="currentColor"
+          viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"/></svg>
+      </div>
+      <button (click)="fetch(0)" class="rounded-xl px-3 py-2 bg-gray-900 text-white hover:bg-black">Lọc</button>
+    </div>
 
-    <select [(ngModel)]="categoryId" (change)="searchProducts()"
-      class="border rounded-lg px-3 py-2 w-full focus:outline-pink-500">
-      <option value="">Tất cả danh mục</option>
-      <option *ngFor="let category of categories" [value]="category.id">
-        {{ category.name }}
-      </option>
+    <select [(ngModel)]="categoryId" class="rounded-xl border px-3 py-2">
+      <option [ngValue]="null">Danh mục</option>
+      <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
     </select>
 
-    <select [(ngModel)]="brandId" (change)="searchProducts()"
-      class="border rounded-lg px-3 py-2 w-full focus:outline-pink-500">
-      <option value="">Tất cả thương hiệu</option>
-      <option *ngFor="let brand of brands" [value]="brand.id">
-        {{ brand.name }}
-      </option>
+    <select [(ngModel)]="brandId" class="rounded-xl border px-3 py-2">
+      <option [ngValue]="null">Thương hiệu</option>
+      <option *ngFor="let b of brands" [ngValue]="b.id">{{ b.name }}</option>
     </select>
+
+    <div class="flex items-center gap-2">
+      <input [(ngModel)]="minPrice" type="number" min="0" placeholder="Giá từ" class="w-full rounded-xl border px-3 py-2">
+      <span class="text-gray-400">—</span>
+      <input [(ngModel)]="maxPrice" type="number" min="0" placeholder="đến" class="w-full rounded-xl border px-3 py-2">
+    </div>
+
+    <div class="lg:col-span-6 flex justify-end gap-2">
+      <button (click)="resetFilters()" class="rounded-xl px-3 py-2 bg-gray-100 hover:bg-gray-200">Đặt lại</button>
+    </div>
   </div>
 
-  <!-- Products Table -->
-  <div class="overflow-x-auto">
-    <table class="min-w-full table-auto border-collapse">
-      <thead class="bg-gray-100">
+  <!-- Table -->
+  <div class="bg-white rounded-2xl shadow overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 text-gray-600">
         <tr>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">ID</th>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Tên sản phẩm</th>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Danh mục</th>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Thương hiệu</th>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Giá</th>
-          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Tồn kho</th>
-          <th class="px-4 py-2 text-sm font-semibold text-gray-600">Thao tác</th>
+          <th class="text-left px-4 py-3">#</th>
+          <th class="text-left px-4 py-3">Sản phẩm</th>
+          <th class="text-left px-4 py-3">Danh mục</th>
+          <th class="text-left px-4 py-3">Thương hiệu</th>
+          <th class="text-right px-4 py-3">Giá</th>
+          <th class="text-center px-4 py-3">Tồn</th>
+          <th class="text-right px-4 py-3">Thao tác</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let product of products" class="border-b hover:bg-gray-50">
-          <td class="px-4 py-2 text-sm">{{ product.id }}</td>
-          <td class="px-4 py-2 text-sm font-medium text-gray-800">{{ product.name }}</td>
-          <td class="px-4 py-2 text-sm">{{ product.categoryName }}</td>
-          <td class="px-4 py-2 text-sm">{{ product.brandName }}</td>
-          <td class="px-4 py-2 text-sm text-pink-600 font-semibold">{{ product.price | currency:'VND' }}</td>
-          <td class="px-4 py-2 text-sm">{{ product.stock }}</td>
-          <td class="px-4 py-2 text-sm">
-            <button class="text-blue-600 hover:underline mr-3" (click)="openEditModal(product)">Sửa</button>
-            <button class="text-red-600 hover:underline" (click)="deleteProduct(product.id)">Xóa</button>
+        <tr *ngFor="let p of items" class="border-t hover:bg-gray-50">
+          <td class="px-4 py-3">{{ p.id }}</td>
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-3">
+              <img [ngSrc]="p.imageUrl || 'https://placehold.co/64x64'" width="48" height="48"
+                   class="w-12 h-12 object-cover rounded-xl border" />
+              <div>
+                <div class="font-medium">{{ p.name }}</div>
+                <div class="text-xs text-gray-500 line-clamp-1">{{ p.description || '—' }}</div>
+              </div>
+            </div>
           </td>
+          <td class="px-4 py-3">{{ p.categoryName || '—' }}</td>
+          <td class="px-4 py-3">{{ p.brandName || '—' }}</td>
+          <td class="px-4 py-3 text-right"><span class="font-semibold">{{ p.price | currency:'VND':'symbol':'1.0-0' }}</span></td>
+          <td class="px-4 py-3 text-center">{{ p.stock ?? 0 }}</td>
+          <td class="px-4 py-3">
+            <div class="flex justify-end gap-2">
+              <!-- view -->
+              <button (click)="openDetail(p)" class="p-2 rounded-xl border hover:bg-gray-100" title="Chi tiết">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M2.25 12s3.75-6.75 9.75-6.75 9.75 6.75 9.75 6.75-3.75 6.75-9.75 6.75S2.25 12 2.25 12zm7.5 0a2.25 2.25 0 1 0 4.5 0 2.25 2.25 0 0 0-4.5 0z"/>
+                </svg>
+              </button>
+              <!-- edit -->
+              <button (click)="openEdit(p)" class="p-2 rounded-xl border hover:bg-gray-100" title="Sửa">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.75 20.902 3 21.75l.848-3.75L16.862 4.487z"/>
+                </svg>
+              </button>
+              <!-- delete -->
+              <button (click)="remove(p)" class="p-2 rounded-xl border hover:bg-gray-100" title="Xoá">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.108 1.022.169m-1.022-.17L18.16 19.673A2.25 2.25 0 0115.916 21.75H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .566c.34-.061.68-.117 1.022-.169m0 0L7.5 4.5m0 0A1.5 1.5 0 019 3h6a1.5 1.5 0 011.5 1.5m-10.5 0v0m10.5 0v0"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        <tr *ngIf="!loading && items.length === 0">
+          <td colspan="7" class="px-4 py-6 text-center text-gray-500">Không có dữ liệu</td>
         </tr>
       </tbody>
     </table>
-  </div>
 
-  <!-- Pagination -->
-  <div class="flex justify-between items-center mt-4">
-    <span class="text-sm text-gray-600">
-      Hiển thị {{ (page * size) + 1 }} - {{ (page * size) + products.length }} trong tổng số {{ totalElements }} sản phẩm
-    </span>
-    <div class="flex space-x-1">
-      <button class="px-3 py-1 border rounded" [disabled]="page===0" (click)="changePage(page-1)">Trước</button>
-      <button *ngFor="let p of pages"
-              class="px-3 py-1 border rounded"
-              [class.bg-pink-600]="p===page"
-              [class.text-white]="p===page"
-              (click)="changePage(p)">
-        {{ p+1 }}
-      </button>
-      <button class="px-3 py-1 border rounded" [disabled]="page===totalPages-1" (click)="changePage(page+1)">Sau</button>
+    <div class="p-4 flex items-center justify-between">
+      <div class="text-sm text-gray-500">Tổng: {{ totalElements }} sản phẩm</div>
+      <div class="flex gap-1">
+        <button *ngFor="let i of pages" (click)="fetch(i)"
+          [class.bg-gray-900]="i===page" [class.text-white]="i===page"
+          class="px-3 py-1 rounded-lg border hover:bg-gray-100">{{ i + 1 }}</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Modal -->
-<div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-  <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
-    <h3 class="text-xl font-semibold mb-4">{{ isEditMode ? 'Sửa sản phẩm' : 'Thêm sản phẩm' }}</h3>
-    <form class="space-y-4">
-      <input type="text" [(ngModel)]="currentProduct.name" name="name"
-             placeholder="Tên sản phẩm"
-             class="w-full border rounded px-3 py-2" />
+  <!-- Modal Create/Update -->
+  <div *ngIf="showModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold">{{ isEdit ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm' }}</h2>
+        <button (click)="showModal=false" class="p-2 rounded-xl hover:bg-gray-100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
 
-      <select [(ngModel)]="currentProduct.categoryId" name="categoryId"
-              class="w-full border rounded px-3 py-2">
-        <option *ngFor="let category of categories" [value]="category.id">
-          {{ category.name }}
-        </option>
-      </select>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm text-gray-600">Tên</label>
+          <input [(ngModel)]="current.name" type="text" class="w-full rounded-xl border px-3 py-2"/>
+        </div>
+        <div>
+          <label class="text-sm text-gray-600">Giá</label>
+          <input [(ngModel)]="current.price" type="number" min="0" class="w-full rounded-xl border px-3 py-2"/>
+        </div>
+        <div>
+          <label class="text-sm text-gray-600">Danh mục</label>
+          <select [(ngModel)]="current.categoryId" class="w-full rounded-xl border px-3 py-2">
+            <option [ngValue]="null">Chọn danh mục</option>
+            <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm text-gray-600">Thương hiệu</label>
+          <select [(ngModel)]="current.brandId" class="w-full rounded-xl border px-3 py-2">
+            <option [ngValue]="null">Chọn thương hiệu</option>
+            <option *ngFor="let b of brands" [ngValue]="b.id">{{ b.name }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm text-gray-600">Tồn kho</label>
+          <input [(ngModel)]="current.stock" type="number" min="0" class="w-full rounded-xl border px-3 py-2"/>
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-sm text-gray-600">Ảnh đại diện (URL)</label>
+          <input [(ngModel)]="current.imageUrl" type="text" class="w-full rounded-xl border px-3 py-2"/>
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-sm text-gray-600">Mô tả</label>
+          <textarea [(ngModel)]="current.description" rows="3" class="w-full rounded-xl border px-3 py-2"></textarea>
+        </div>
+      </div>
 
-      <select [(ngModel)]="currentProduct.brandId" name="brandId"
-              class="w-full border rounded px-3 py-2">
-        <option *ngFor="let brand of brands" [value]="brand.id">
-          {{ brand.name }}
-        </option>
-      </select>
+      <div class="flex justify-end gap-2">
+        <button (click)="showModal=false" class="rounded-xl px-4 py-2 bg-gray-100 hover:bg-gray-200">Huỷ</button>
+        <button (click)="save()" class="rounded-xl px-4 py-2 bg-gray-900 text-white hover:bg-black">Lưu</button>
+      </div>
+    </div>
+  </div>
 
-      <input type="number" [(ngModel)]="currentProduct.price" name="price"
-             placeholder="Giá" class="w-full border rounded px-3 py-2" />
+  <!-- Drawer Detail -->
+  <div *ngIf="showDetail" class="fixed inset-0 z-40">
+    <div class="absolute inset-0 bg-black/40" (click)="showDetail=false"></div>
+    <div class="absolute right-0 top-0 h-full w-full max-w-xl bg-white shadow-xl p-6 overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-semibold">Chi tiết sản phẩm</h3>
+        <button (click)="showDetail=false" class="p-2 rounded-xl hover:bg-gray-100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
 
-      <input type="number" [(ngModel)]="currentProduct.stock" name="stock"
-             placeholder="Tồn kho" class="w-full border rounded px-3 py-2" />
+      <ng-container *ngIf="detailItem as d">
+        <div class="flex items-start gap-4">
+          <img [ngSrc]="d.imageUrl || 'https://placehold.co/160x160'" width="160" height="160"
+               class="w-40 h-40 object-cover rounded-2xl border" />
+          <div class="space-y-1">
+            <div class="text-2xl font-bold">{{ d.name }}</div>
+            <div class="text-sm text-gray-500">Danh mục: {{ d.categoryName || '—' }} • Thương hiệu: {{ d.brandName || '—' }}</div>
+            <div class="text-lg font-semibold">Giá: {{ d.price | currency:'VND':'symbol':'1.0-0' }}</div>
+            <div class="text-sm text-gray-500">Tồn kho: {{ d.stock ?? 0 }}</div>
+            <div class="text-sm text-gray-500" *ngIf="d.avgRating">Đánh giá: {{ d.avgRating }}⭐ ({{ d.totalReviews }} đánh giá)</div>
+          </div>
+        </div>
 
-      <textarea [(ngModel)]="currentProduct.description" name="description"
-                placeholder="Mô tả sản phẩm"
-                class="w-full border rounded px-3 py-2"></textarea>
-    </form>
+        <div class="mt-4">
+          <h4 class="font-medium mb-2">Mô tả</h4>
+          <p class="text-sm text-gray-700 whitespace-pre-line">{{ d.description || '—' }}</p>
+        </div>
 
-    <div class="flex justify-end space-x-2 mt-6">
-      <button class="px-4 py-2 bg-gray-300 rounded" (click)="closeModal()">Hủy</button>
-      <button class="px-4 py-2 bg-pink-600 text-white rounded" (click)="saveProduct()">
-        {{ isEditMode ? 'Cập nhật' : 'Thêm' }}
-      </button>
+        <div class="mt-4" *ngIf="d.attributes?.length">
+          <h4 class="font-medium mb-2">Thuộc tính</h4>
+          <div class="bg-gray-50 rounded-xl border">
+            <div class="grid grid-cols-3 text-xs font-medium text-gray-600 border-b">
+              <div class="p-2">Mã thuộc tính</div>
+              <div class="p-2">Tên thuộc tính</div>
+              <div class="p-2">Giá trị</div>
+            </div>
+            <div *ngFor="let a of d.attributes" class="grid grid-cols-3 text-sm">
+              <div class="p-2">{{ a.attributeId }}</div>
+              <div class="p-2">{{ a.attributeName }}</div>
+              <div class="p-2">{{ a.value }}</div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
     </div>
   </div>
 </div>

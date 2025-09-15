@@ -17,6 +17,10 @@ export interface Product {
   stock: number;
   createdAt: string;
 
+    // Để CRUD:
+  categoryId?: number;
+  brandId?: number;
+
   // Các trường BE map thêm khi trả ra (có thể vắng)
   brandName?: string;
   categoryName?: string;
