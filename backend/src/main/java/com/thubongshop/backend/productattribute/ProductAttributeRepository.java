@@ -1,13 +1,10 @@
-package com.thubongshop.backend.attribute;
+package com.thubongshop.backend.productattribute;
 
-import com.thubongshop.backend.attribute.ProductAttribute.ProductAttributeKey;
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 import java.util.Optional;
 
-public interface ProductAttributeRepository
-        extends JpaRepository<ProductAttribute, ProductAttributeKey> {
+public interface ProductAttributeRepository extends JpaRepository<ProductAttribute, ProductAttributeKey> {
 
     List<ProductAttribute> findByIdProductId(Integer productId);
 

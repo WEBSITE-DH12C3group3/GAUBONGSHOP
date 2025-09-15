@@ -1,1 +1,126 @@
-<p>products-admin works!</p>
+<div class="bg-white shadow rounded-lg p-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">Quản lý sản phẩm</h2>
+    <button 
+      class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+      (click)="openCreateModal()">
+      + Thêm sản phẩm
+    </button>
+  </div>
+
+  <!-- Search & Filter -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <input type="text" [(ngModel)]="keyword" (input)="searchProducts()"
+      placeholder="Tìm kiếm sản phẩm..."
+      class="border rounded-lg px-3 py-2 w-full focus:outline-pink-500" />
+
+    <select [(ngModel)]="categoryId" (change)="searchProducts()"
+      class="border rounded-lg px-3 py-2 w-full focus:outline-pink-500">
+      <option value="">Tất cả danh mục</option>
+      <option *ngFor="let category of categories" [value]="category.id">
+        {{ category.name }}
+      </option>
+    </select>
+
+    <select [(ngModel)]="brandId" (change)="searchProducts()"
+      class="border rounded-lg px-3 py-2 w-full focus:outline-pink-500">
+      <option value="">Tất cả thương hiệu</option>
+      <option *ngFor="let brand of brands" [value]="brand.id">
+        {{ brand.name }}
+      </option>
+    </select>
+  </div>
+
+  <!-- Products Table -->
+  <div class="overflow-x-auto">
+    <table class="min-w-full table-auto border-collapse">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">ID</th>
+          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Tên sản phẩm</th>
+          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Danh mục</th>
+          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Thương hiệu</th>
+          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Giá</th>
+          <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Tồn kho</th>
+          <th class="px-4 py-2 text-sm font-semibold text-gray-600">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of products" class="border-b hover:bg-gray-50">
+          <td class="px-4 py-2 text-sm">{{ product.id }}</td>
+          <td class="px-4 py-2 text-sm font-medium text-gray-800">{{ product.name }}</td>
+          <td class="px-4 py-2 text-sm">{{ product.categoryName }}</td>
+          <td class="px-4 py-2 text-sm">{{ product.brandName }}</td>
+          <td class="px-4 py-2 text-sm text-pink-600 font-semibold">{{ product.price | currency:'VND' }}</td>
+          <td class="px-4 py-2 text-sm">{{ product.stock }}</td>
+          <td class="px-4 py-2 text-sm">
+            <button class="text-blue-600 hover:underline mr-3" (click)="openEditModal(product)">Sửa</button>
+            <button class="text-red-600 hover:underline" (click)="deleteProduct(product.id)">Xóa</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="flex justify-between items-center mt-4">
+    <span class="text-sm text-gray-600">
+      Hiển thị {{ (page * size) + 1 }} - {{ (page * size) + products.length }} trong tổng số {{ totalElements }} sản phẩm
+    </span>
+    <div class="flex space-x-1">
+      <button class="px-3 py-1 border rounded" [disabled]="page===0" (click)="changePage(page-1)">Trước</button>
+      <button *ngFor="let p of pages"
+              class="px-3 py-1 border rounded"
+              [class.bg-pink-600]="p===page"
+              [class.text-white]="p===page"
+              (click)="changePage(p)">
+        {{ p+1 }}
+      </button>
+      <button class="px-3 py-1 border rounded" [disabled]="page===totalPages-1" (click)="changePage(page+1)">Sau</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
+    <h3 class="text-xl font-semibold mb-4">{{ isEditMode ? 'Sửa sản phẩm' : 'Thêm sản phẩm' }}</h3>
+    <form class="space-y-4">
+      <input type="text" [(ngModel)]="currentProduct.name" name="name"
+             placeholder="Tên sản phẩm"
+             class="w-full border rounded px-3 py-2" />
+
+      <select [(ngModel)]="currentProduct.categoryId" name="categoryId"
+              class="w-full border rounded px-3 py-2">
+        <option *ngFor="let category of categories" [value]="category.id">
+          {{ category.name }}
+        </option>
+      </select>
+
+      <select [(ngModel)]="currentProduct.brandId" name="brandId"
+              class="w-full border rounded px-3 py-2">
+        <option *ngFor="let brand of brands" [value]="brand.id">
+          {{ brand.name }}
+        </option>
+      </select>
+
+      <input type="number" [(ngModel)]="currentProduct.price" name="price"
+             placeholder="Giá" class="w-full border rounded px-3 py-2" />
+
+      <input type="number" [(ngModel)]="currentProduct.stock" name="stock"
+             placeholder="Tồn kho" class="w-full border rounded px-3 py-2" />
+
+      <textarea [(ngModel)]="currentProduct.description" name="description"
+                placeholder="Mô tả sản phẩm"
+                class="w-full border rounded px-3 py-2"></textarea>
+    </form>
+
+    <div class="flex justify-end space-x-2 mt-6">
+      <button class="px-4 py-2 bg-gray-300 rounded" (click)="closeModal()">Hủy</button>
+      <button class="px-4 py-2 bg-pink-600 text-white rounded" (click)="saveProduct()">
+        {{ isEditMode ? 'Cập nhật' : 'Thêm' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,9 +1,11 @@
 package com.thubongshop.backend.brand.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.thubongshop.backend.brand.BrandRequest;
 import com.thubongshop.backend.brand.BrandResponse;
 import com.thubongshop.backend.brand.BrandService;
 
@@ -11,17 +13,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/brands")
+@RequestMapping("/api/admin/brands")
 @CrossOrigin(origins = "*")
-public class BrandController {
+public class AdminBrandController {
 
     private final BrandService service;
 
-    public BrandController(BrandService service) {
+    public AdminBrandController(BrandService service) {
         this.service = service;
     }
 
-    // GET /api/brands?q=&page=0&size=10&sort=id,desc
+    // GET /api/admin/brands?q=&page=0&size=10&sort=id,desc
     @GetMapping
     public ResponseEntity<?> list(
             @RequestParam(required = false) String q,
@@ -40,10 +42,29 @@ public class BrandController {
         return ResponseEntity.ok(resp);
     }
 
-    // GET /api/brands/{id}
+    // GET /api/admin/brands/{id}
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Integer id) {
         return ResponseEntity.ok(Map.of("brand", service.get(id)));
+    }
+
+    // POST /api/admin/brands
+    @PostMapping
+    public ResponseEntity<?> create(@Valid @RequestBody BrandRequest req) {
+        return ResponseEntity.ok(Map.of("brand", service.create(req)));
+    }
+
+    // PUT /api/admin/brands/{id}
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Integer id, @Valid @RequestBody BrandRequest req) {
+        return ResponseEntity.ok(Map.of("brand", service.update(id, req)));
+    }
+
+    // DELETE /api/admin/brands/{id}
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Integer id) {
+        service.delete(id);
+        return ResponseEntity.ok(Map.of("message", "Deleted"));
     }
 
     private Pageable buildPageable(int page, int size, String sort) {

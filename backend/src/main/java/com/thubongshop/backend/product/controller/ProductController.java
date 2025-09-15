@@ -1,15 +1,11 @@
 package com.thubongshop.backend.product.controller;
 
-import jakarta.validation.Valid;
+import com.thubongshop.backend.product.*;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.thubongshop.backend.product.ProductRequest;
-import com.thubongshop.backend.product.ProductResponse;
-import com.thubongshop.backend.product.ProductService;
-
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -23,58 +19,45 @@ public class ProductController {
         this.service = service;
     }
 
+    // Danh sách sản phẩm (phân trang, tìm kiếm, lọc)
     @GetMapping
     public ResponseEntity<?> list(
-            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) Integer brandId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id,desc") String sort
+            @RequestParam(defaultValue = "12") int size
     ) {
-        Pageable pageable = buildPageable(page, size, sort);
-        Page<ProductResponse> data = service.list(q, categoryId, brandId, pageable);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<ProductResponse> data = service.search(keyword, categoryId, brandId, pageable);
 
-        Map<String, Object> resp = new HashMap<>();
-        resp.put("items", data.getContent());
-        resp.put("page", data.getNumber());
-        resp.put("size", data.getSize());
-        resp.put("totalPages", data.getTotalPages());
-        resp.put("totalElements", data.getTotalElements());
-
-        return ResponseEntity.ok(resp);
+        return ResponseEntity.ok(Map.of(
+                "items", data.getContent(),
+                "page", data.getNumber(),
+                "size", data.getSize(),
+                "totalPages", data.getTotalPages(),
+                "totalElements", data.getTotalElements()
+        ));
     }
 
+    // Chi tiết sản phẩm (bao gồm attributes + reviews)
     @GetMapping("/{id}")
-    public ResponseEntity<?> get(@PathVariable Integer id) {
-        return ResponseEntity.ok(Map.of("product", service.get(id)));
+    public ResponseEntity<?> getDetail(@PathVariable Integer id) {
+        return ResponseEntity.ok(service.getFullDetail(id));
     }
 
-    @PostMapping
-    public ResponseEntity<?> create(@Valid @RequestBody ProductRequest req) {
-        return ResponseEntity.ok(Map.of("product", service.create(req)));
+    // Lấy sản phẩm mới nhất
+    @GetMapping("/latest")
+    public ResponseEntity<?> getLatest(@RequestParam(defaultValue = "5") int limit) {
+        List<ProductResponse> items = service.getLatest(limit);
+        return ResponseEntity.ok(Map.of("items", items));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Integer id, @Valid @RequestBody ProductRequest req) {
-        return ResponseEntity.ok(Map.of("product", service.update(id, req)));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Integer id) {
-        service.delete(id);
-        return ResponseEntity.ok(Map.of("message", "Deleted"));
-    }
-
-    // Helper build Pageable
-    private Pageable buildPageable(int page, int size, String sort) {
-        try {
-            String[] sp = sort.split(",");
-            String field = sp[0];
-            Sort.Direction dir = (sp.length > 1) ? Sort.Direction.fromString(sp[1]) : Sort.Direction.DESC;
-            return PageRequest.of(page, size, Sort.by(dir, field));
-        } catch (Exception e) {
-            return PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-        }
+    // Lấy sản phẩm liên quan cùng danh mục
+    @GetMapping("/{id}/related")
+    public ResponseEntity<?> getRelated(@PathVariable Integer id,
+                                        @RequestParam(defaultValue = "4") int limit) {
+        List<ProductResponse> items = service.getRelated(id, limit);
+        return ResponseEntity.ok(Map.of("items", items));
     }
 }

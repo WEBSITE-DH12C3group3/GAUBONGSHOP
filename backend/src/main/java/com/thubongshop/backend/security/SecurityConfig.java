@@ -2,6 +2,7 @@ package com.thubongshop.backend.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -45,8 +46,22 @@ public class SecurityConfig {
                         "/api/users/login",
                         "/api/products/**",
                         "/api/categories/**",
+                        "/api/product-attributes/**",
+                        "/api/brands/**",
+                        "/api/attributes/**",
                         "/uploads/**"
                 ).permitAll()
+
+                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/brands/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/attributes/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/reviews/products/**").permitAll()
+
+                // Reviews
+                .requestMatchers(HttpMethod.GET, "/api/reviews/products/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/reviews/products/**").hasRole("CUSTOMER")
+
 
                 // --- Admin API ---
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")

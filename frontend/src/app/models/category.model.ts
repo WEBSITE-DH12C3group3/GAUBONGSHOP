@@ -5,3 +5,9 @@ export interface Category {
   isFeatured: boolean;
   createdAt: string;
 }
+export interface CategoryResponse {
+  items: Category[];
+  totalPages: number;
+  size: number;
+  page: number;
+}

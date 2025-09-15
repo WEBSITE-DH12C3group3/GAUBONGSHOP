@@ -1,31 +1,22 @@
 package com.thubongshop.backend.product;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.thubongshop.backend.productattribute.ProductAttributeRequest;
 import jakarta.validation.constraints.*;
-import java.math.BigDecimal;
 
-@Getter
-@Setter
-public class ProductRequest {
-    @NotBlank
-    @Size(max = 255)
-    private String name;
+import java.util.List;
 
-    @Size(max = 10_000)
-    private String description;
+public record ProductRequest(
+        @NotBlank String name,
+        String description,
+        @NotNull Double price,
+        String imageUrl,
+        @NotNull Integer categoryId,
+        @NotNull Integer brandId,
+        @NotNull Integer stock,
 
-    @NotNull
-    @DecimalMin("0.0")
-    private BigDecimal price;
+        // Thuộc tính sản phẩm
+        List<ProductAttributeRequest> attributes,
 
-    @Size(max = 255)
-    private String imageUrl;
-
-    private Integer categoryId;
-    private Integer brandId;
-
-    @NotNull
-    @Min(0)
-    private Integer stock;
-}
+        // Danh sách ảnh sản phẩm
+        List<ProductImageRequest> images
+) {}
