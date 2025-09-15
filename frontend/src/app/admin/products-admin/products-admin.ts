@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductAdminService } from '../../shared/services/product-admin.service';
-import { CategoryAdminService } from '../../shared/services/category-admin.service';
+import { CategoryAdminService } from '../../shared/services/category_admin.service';
 import { BrandAdminService } from '../../shared/services/brand-admin.service';
 
 @Component({
@@ -17,19 +17,16 @@ export class ProductsAdminComponent implements OnInit {
   categories: any[] = [];
   brands: any[] = [];
 
-  // Filters
   keyword = '';
   categoryId: number | null = null;
   brandId: number | null = null;
 
-  // Pagination
   page = 0;
   size = 10;
   totalPages = 0;
   totalElements = 0;
   pages: number[] = [];
 
-  // Modal state
   showModal = false;
   isEditMode = false;
   currentProduct: any = {
@@ -44,7 +41,8 @@ export class ProductsAdminComponent implements OnInit {
   constructor(
     private productService: ProductAdminService,
     private categoryService: CategoryAdminService,
-    private brandService: BrandAdminService
+    private brandService: BrandAdminService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -54,46 +52,46 @@ export class ProductsAdminComponent implements OnInit {
   }
 
   loadCategories(page: number = 0, size: number = 10) {
-    this.categoryService.getAll({ page, size }).subscribe({
+    this.categoryService.getAll(page, size).subscribe({
       next: (res) => {
-        this.categories = res.content;       // ✅ dùng content thay vì items
-        this.totalPages = res.totalPages;
-        this.totalElements = res.totalElements;
-        this.page = res.number;
-        this.size = res.size;
+        this.categories = res.content;
+        this.cdr.detectChanges();   // 👈 đảm bảo UI cập nhật
       },
       error: (err) => console.error('Lỗi khi tải danh mục:', err)
     });
   }
 
-
-
-  // Load thương hiệu
   loadBrands() {
     this.brandService.getBrands().subscribe({
       next: (res) => {
         this.brands = res.items || res;
+        this.cdr.detectChanges();   // 👈
       },
       error: (err) => console.error('Lỗi khi tải thương hiệu:', err)
     });
   }
 
-// Tìm kiếm sản phẩm
-searchProducts() {
-  this.productService.listPaged(this.keyword, this.categoryId ?? undefined, this.brandId ?? undefined, this.page, this.size)
-    .subscribe({
-      next: (res: any) => {
+  searchProducts() {
+    this.productService.listPaged(
+      this.keyword,
+      this.categoryId ?? undefined,
+      this.brandId ?? undefined,
+      this.page,
+      this.size
+    ).subscribe({
+      next: (res) => {
         this.products = res.items;
+        this.page = res.page;
+        this.size = res.size;
         this.totalPages = res.totalPages;
         this.totalElements = res.totalElements;
         this.pages = Array.from({ length: this.totalPages }, (_, i) => i);
+        this.cdr.detectChanges();   // 👈
       },
-      error: (err: any) => console.error('Lỗi khi tải sản phẩm:', err)
+      error: (err) => console.error('Lỗi khi tải sản phẩm:', err)
     });
-}
+  }
 
-
-  // Đổi trang
   changePage(newPage: number) {
     if (newPage >= 0 && newPage < this.totalPages) {
       this.page = newPage;
@@ -101,7 +99,6 @@ searchProducts() {
     }
   }
 
-  // Mở modal thêm sản phẩm
   openCreateModal() {
     this.isEditMode = false;
     this.currentProduct = {
@@ -113,21 +110,21 @@ searchProducts() {
       description: ''
     };
     this.showModal = true;
+    this.cdr.detectChanges();   // 👈
   }
 
-  // Mở modal sửa sản phẩm
   openEditModal(product: any) {
     this.isEditMode = true;
     this.currentProduct = { ...product };
     this.showModal = true;
+    this.cdr.detectChanges();   // 👈
   }
 
-  // Đóng modal
   closeModal() {
     this.showModal = false;
+    this.cdr.detectChanges();   // 👈
   }
 
-  // Lưu sản phẩm
   saveProduct() {
     if (this.isEditMode) {
       this.productService.update(this.currentProduct.id, this.currentProduct).subscribe({
@@ -148,11 +145,13 @@ searchProducts() {
     }
   }
 
-  // Xóa sản phẩm
   deleteProduct(id: number) {
     if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
       this.productService.delete(id).subscribe({
-        next: () => this.searchProducts(),
+        next: () => {
+          this.searchProducts();
+          this.cdr.detectChanges();   // 👈
+        },
         error: (err) => console.error('Lỗi khi xóa sản phẩm:', err)
       });
     }

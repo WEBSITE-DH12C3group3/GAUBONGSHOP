@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CategoryAdminService } from '../../shared/services/category-admin.service';
+import { CategoryAdminService } from '../../shared/services/category_admin.service';
 import { Category } from '../../models/category.model';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';

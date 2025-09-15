@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Category } from '../../models/category.model';
+import { Category, CategoryResponse } from '../../models/category.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CategoryService {
-  private apiUrl = `${environment.apiUrl}/categories`; // 👈 lấy từ environment
+  private apiUrl = `${environment.apiUrl}/categories`;
 
   constructor(private http: HttpClient) {}
 
@@ -17,9 +17,9 @@ export class CategoryService {
     return this.http.get<Category[]>(`${this.apiUrl}/featured`);
   }
 
-  // Lấy tất cả danh mục
-  getCategories(): Observable<Category[]> {
-    return this.http.get<Category[]>(this.apiUrl);
+  // Lấy tất cả danh mục (trả về object có content)
+  getCategories(): Observable<CategoryResponse> {
+    return this.http.get<CategoryResponse>(this.apiUrl);
   }
 
   // Lấy chi tiết 1 danh mục

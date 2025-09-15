@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -21,30 +20,31 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
-    // Các endpoint public không cần filter
-    private static final List<String> PUBLIC_ENDPOINTS = List.of(
-            "/api/users/login",
-            "/api/users/register",
-            "/uploads"
-    );
-
     public JwtFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
+    }
+
+    /**
+     * Bỏ qua filter cho các endpoint public
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/api/users/login")
+            || path.startsWith("/api/users/register")
+            || path.startsWith("/api/products")
+            || path.startsWith("/api/categories")
+            || path.startsWith("/api/brands")
+            || path.startsWith("/api/attributes")
+            || path.startsWith("/uploads")
+            || path.startsWith("/error"); // quan trọng: tránh /error bị 403
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-
-        String path = request.getServletPath();
-
-        // Nếu path nằm trong public endpoint thì bỏ qua
-        if (PUBLIC_ENDPOINTS.stream().anyMatch(path::startsWith)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         try {
             String authHeader = request.getHeader("Authorization");

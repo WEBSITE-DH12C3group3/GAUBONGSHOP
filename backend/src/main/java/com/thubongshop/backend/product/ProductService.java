@@ -99,8 +99,9 @@ public class ProductService {
         Product product = repo.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
         Pageable pageable = PageRequest.of(0, limit);
-        return repo.findTopByCategoryIdAndIdNot(product.getCategoryId(), product.getId(), pageable)
-                   .stream().map(this::mapToResponseBasic).toList();
+        return repo.findByCategoryIdAndIdNot(product.getCategoryId(), product.getId(), pageable)
+           .stream().map(this::mapToResponseBasic).toList();
+
     }
 
     // -------------------- Admin --------------------
@@ -194,4 +195,4 @@ public class ProductService {
                 .categoryName("TODO")  // lấy từ category service
                 .build();
     }
-}
+} 

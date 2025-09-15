@@ -1,13 +1,15 @@
 export interface Category {
   id: number;
   name: string;
-  description: string;
-  isFeatured: boolean;
-  createdAt: string;
+  description?: string;
+  isFeatured?: boolean;
+  createdAt?: string;
 }
+
 export interface CategoryResponse {
-  items: Category[];
-  totalPages: number;
-  size: number;
-  page: number;
+  content: Category[];
+  totalPages?: number;
+  totalElements?: number;
+  size?: number;
+  page?: number;
 }

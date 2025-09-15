@@ -13,20 +13,34 @@ export class ProductService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Lấy tất cả sản phẩm (có phân trang)
+   * 🔹 Lấy danh sách sản phẩm (có phân trang, filter, search)
    */
-  getAllProducts(page: number = 0, size: number = 12): Observable<ProductResponse> {
-    const params = new HttpParams()
+  getAllProducts(
+    page: number = 0,
+    size: number = 12,
+    keyword?: string,
+    categoryId?: number,
+    brandId?: number
+  ): Observable<ProductResponse> {
+    let params = new HttpParams()
       .set('page', page)
       .set('size', size);
+
+    if (keyword) params = params.set('keyword', keyword);
+    if (categoryId) params = params.set('categoryId', categoryId);
+    if (brandId) params = params.set('brandId', brandId);
 
     return this.http.get<ProductResponse>(this.apiUrl, { params });
   }
 
   /**
-   * Lấy sản phẩm theo category (có phân trang)
+   * 🔹 Lấy sản phẩm theo category (có phân trang)
    */
-  getProductsByCategory(categoryId: number, page: number = 0, size: number = 12): Observable<ProductResponse> {
+  getProductsByCategory(
+    categoryId: number,
+    page: number = 0,
+    size: number = 12
+  ): Observable<ProductResponse> {
     const params = new HttpParams()
       .set('categoryId', categoryId)
       .set('page', page)
@@ -36,19 +50,15 @@ export class ProductService {
   }
 
   /**
-   * Lấy sản phẩm mới nhất
+   * 🔹 Lấy sản phẩm mới nhất (API `/products/latest`)
    */
-  getNewProducts(limit: number = 6): Observable<ProductResponse> {
-    const params = new HttpParams()
-      .set('page', 0)
-      .set('size', limit)
-      .set('sort', 'createdAt,desc');
-
-    return this.http.get<ProductResponse>(this.apiUrl, { params });
+  getNewProducts(limit: number = 6): Observable<any> {
+    const params = new HttpParams().set('limit', limit);
+    return this.http.get<any>(`${this.apiUrl}/latest`, { params });
   }
 
   /**
-   * Lấy sản phẩm nổi bật
+   * 🔹 Lấy sản phẩm nổi bật (nếu BE hỗ trợ filter featured)
    */
   getFeaturedProducts(limit: number = 6): Observable<ProductResponse> {
     const params = new HttpParams()
@@ -60,26 +70,38 @@ export class ProductService {
   }
 
   /**
-   * Tìm kiếm sản phẩm theo tên / keyword
+   * 🔹 Tìm kiếm sản phẩm theo tên / keyword
    */
-  searchProducts(keyword: string, page: number = 0, size: number = 12): Observable<ProductResponse> {
+  searchProducts(
+    keyword: string,
+    page: number = 0,
+    size: number = 12
+  ): Observable<ProductResponse> {
     const params = new HttpParams()
       .set('keyword', keyword)
       .set('page', page)
       .set('size', size);
 
-    return this.http.get<ProductResponse>(`${this.apiUrl}/search`, { params });
+    return this.http.get<ProductResponse>(this.apiUrl, { params });
   }
 
   /**
-   * Lấy chi tiết sản phẩm theo ID
+   * 🔹 Lấy chi tiết sản phẩm theo ID
    */
   getProductById(productId: number): Observable<Product> {
     return this.http.get<Product>(`${this.apiUrl}/${productId}`);
   }
 
   /**
-   * Lấy chi tiết sản phẩm theo slug (SEO friendly)
+   * 🔹 Lấy sản phẩm liên quan cùng danh mục
+   */
+  getRelatedProducts(productId: number, limit: number = 4): Observable<any> {
+    const params = new HttpParams().set('limit', limit);
+    return this.http.get<any>(`${this.apiUrl}/${productId}/related`, { params });
+  }
+
+  /**
+   * 🔹 Lấy chi tiết sản phẩm theo slug (SEO friendly)
    */
   getProductBySlug(slug: string): Observable<Product> {
     return this.http.get<Product>(`${this.apiUrl}/slug/${slug}`);

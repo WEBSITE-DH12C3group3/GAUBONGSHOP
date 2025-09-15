@@ -5,6 +5,7 @@ import {
   inject,
   PLATFORM_ID
 } from '@angular/core';
+import {withRouterConfig } from '@angular/router';
 import { provideRouter } from '@angular/router';
 import {
   provideClientHydration,
@@ -74,14 +75,18 @@ export const errorInterceptorFn: HttpInterceptorFn = (req, next) => {
           localStorage.removeItem('user');
           window.location.href = '/login';
         } else if (err.status === 403) {
-          // ⚠️ 403: chỉ redirect khi không phải API admin
-          if (!req.url.includes('/api/admin/')) {
-            console.warn('403 Forbidden, redirect login...');
+          // ⚠️ 403: chỉ redirect khi gọi API admin
+          if (req.url.includes('/api/admin/')) {
+            console.warn('403 Forbidden on admin API, redirect login...');
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = '/login';
+          } else {
+            // Public API bị 403 thì chỉ log, không redirect
+            console.warn('403 Forbidden on public API, để component tự xử lý.');
           }
         }
+
         // ⚠️ 400, 409: để component xử lý (không redirect)
       }
       return throwError(() => err);
@@ -96,12 +101,15 @@ export const errorInterceptorFn: HttpInterceptorFn = (req, next) => {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideZonelessChangeDetection(), // nếu không muốn zoneless thì bỏ dòng này
-    provideRouter(routes),
+    provideZonelessChangeDetection(),
+    provideRouter(
+      routes,
+      withRouterConfig({ onSameUrlNavigation: 'reload' }) // ✅ Thêm tùy chọn này
+    ),
     provideClientHydration(withEventReplay()),
     provideHttpClient(
       withFetch(),
-      withInterceptors([authInterceptorFn, errorInterceptorFn]), // interceptor cho mọi request
+      withInterceptors([authInterceptorFn, errorInterceptorFn])
     ),
   ]
 };

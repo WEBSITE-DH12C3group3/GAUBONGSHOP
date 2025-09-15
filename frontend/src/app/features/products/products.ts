@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../shared/services/product.service';
 import { CategoryService } from '../../shared/services/category.service';
 
+
 @Component({
   selector: 'app-products',
   standalone: true,
@@ -71,17 +72,22 @@ export class ProductsComponent implements OnInit {
   loadCategories() {
     this.categoryService.getCategories().subscribe({
       next: (res) => {
-        this.categories = res;
+        this.categories = res.content || [];
+
         if (this.categoryId) {
-          this.selectedCategory = this.categories.find(c => c.id === this.categoryId);
+          this.selectedCategory = this.categories.find(c => c.id === this.categoryId) || null;
           this.selectedCategories = [this.categoryId];
+          this.cdr.detectChanges();
         }
       },
       error: (err) => {
         console.error('Lỗi khi tải danh mục:', err);
+        this.categories = [];
       }
     });
   }
+
+
 
   loadProducts() {
     this.isLoading = true;

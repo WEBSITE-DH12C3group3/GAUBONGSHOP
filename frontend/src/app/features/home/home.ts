@@ -19,7 +19,7 @@ import { Product } from '../../models/product.model';
 })
 export class HomeComponent implements OnInit {
   featuredCategories: Category[] = [];
-  categoriesWithProducts: any[] = [];
+  categoriesWithProducts: any[] = [];   
   newProducts: Product[] = [];
   isLoading = true;
 
@@ -76,10 +76,11 @@ export class HomeComponent implements OnInit {
   }
 
   /** Sản phẩm mới nhất - lấy 10 sản phẩm mới nhất */
+/** Sản phẩm mới nhất */
   loadNewProducts() {
-    this.productService.getNewProducts(8).subscribe({ // Đổi thành 10 sản phẩm
+    this.productService.getNewProducts(8).subscribe({
       next: (response) => {
-        this.newProducts = (response.items || []) as Product[];
+        this.newProducts = response.items || [];
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -88,6 +89,7 @@ export class HomeComponent implements OnInit {
       }
     });
   }
+
 
   // Mảng màu pastel cho danh mục
   private categoryColors = [

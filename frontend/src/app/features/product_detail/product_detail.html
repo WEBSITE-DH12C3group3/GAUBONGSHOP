@@ -1,174 +1,172 @@
-<div class="product-detail-container" *ngIf="product() as p">
+<div class="max-w-7xl mx-auto px-4 py-6" *ngIf="product() as p; else loading">
   <!-- Breadcrumb -->
-  <nav class="breadcrumb">
-    <a routerLink="/">Trang chủ</a>
-    <i class="fas fa-chevron-right"></i>
-    <a routerLink="/categories/{{ p.categoryId }}">{{ p.categoryName }}</a>
-    <i class="fas fa-chevron-right"></i>
-    <span>{{ p.name }}</span>
+  <nav class="flex items-center text-sm text-gray-500 space-x-2 mb-6">
+    <a routerLink="/" class="hover:text-blue-600 transition">Trang chủ</a>
+    <span>/</span>
+    <span>{{ p.categoryName }}</span>
+    <span>/</span>
+    <span class="text-gray-900 font-medium">{{ p.name }}</span>
   </nav>
 
-  <div class="product-main">
-    <!-- Hình ảnh -->
-    <div class="product-gallery">
-      <div class="product-badge" *ngIf="p.discountPercent > 0">GIẢM {{ p.discountPercent }}%</div>
-      <div class="main-image-container">
-        <img [src]="'http://localhost:8080' + p.imageUrl" [alt]="p.name" class="main-image" />
+  <!-- Product -->
+  <div class="bg-white rounded-xl shadow-md overflow-hidden md:flex md:space-x-6">
+    <!-- Gallery -->
+    <div class="md:w-5/12 p-6">
+      <div class="relative group rounded-lg overflow-hidden border">
+        <img [src]="'http://localhost:8080' + p.imageUrl" [alt]="p.name"
+             class="w-full h-96 object-contain transition-transform duration-300 group-hover:scale-105" />
+        <span *ngIf="p.discountPercent && p.discountPercent > 0" class="line-through text-gray-400">
+          {{ p.price | number }}₫
+        </span>
+
       </div>
-      <div class="thumbnail-list">
-        <div class="thumbnail-item active">
-          <img [src]="'http://localhost:8080' + p.imageUrl" [alt]="p.name" />
+
+      <!-- Thumbnail -->
+      <div class="flex gap-3 mt-4">
+        <div class="w-16 h-16 border rounded-md overflow-hidden cursor-pointer hover:ring-2 hover:ring-blue-500">
+          <img [src]="'http://localhost:8080' + p.imageUrl" [alt]="p.name" class="w-full h-full object-cover" />
         </div>
-        <!-- Có thể thêm các thumbnail khác nếu có -->
       </div>
     </div>
 
-    <!-- Thông tin -->
-    <div class="product-info">
-      <h1 class="product-title">{{ p.name }}</h1>
+    <!-- Info -->
+    <div class="md:w-7/12 p-6 space-y-4">
+      <h1 class="text-2xl font-semibold text-gray-900">{{ p.name }}</h1>
 
-      <div class="rating-container">
-        <div class="rating-stars">
-          <i class="fas fa-star" *ngFor="let star of getStars(p.avgRating || 0)"></i>
+      <!-- Rating -->
+      <div class="flex items-center space-x-2">
+        <div class="flex text-yellow-400">
+          <i class="fas fa-star" *ngFor="let s of getStars(p.avgRating || 0)"></i>
         </div>
-        <span class="rating-value">{{ p.avgRating || 0 | number:'1.1-1' }}</span>
-        <span class="rating-count">({{ p.totalReviews || 0 }} đánh giá)</span>
+        <span class="text-gray-600 text-sm">({{ p.totalReviews || 0 }} đánh giá)</span>
       </div>
 
-      <div class="price-container">
-        <div class="current-price">
-          {{ calculateDiscountPrice(p.price, p.discountPercent) | number }}₫
-          <span class="original-price" *ngIf="p.discountPercent > 0">{{ p.price | number }}₫</span>
-          <span class="discount-percent" *ngIf="p.discountPercent > 0">-{{ p.discountPercent }}%</span>
-        </div>
+      <!-- Price -->
+      <div class="flex items-center space-x-3">
+        <span *ngIf="p.discountPercent && p.discountPercent > 0" class="line-through text-gray-400">
+          {{ p.price | number }}₫
+        </span>
+
       </div>
 
-      <div class="promotion-container" *ngIf="p.promotions && p.promotions.length > 0">
-        <div class="promotion-title">
-          <i class="fas fa-gift"></i>
-          Khuyến mãi
-        </div>
-        <ul class="promotion-list">
-          <li *ngFor="let promo of p.promotions">{{ promo }}</li>
-        </ul>
-      </div>
-
-      <div class="meta">
-        <p><strong>Thương hiệu:</strong> {{ p.brandName }}</p>
-        <p><strong>Danh mục:</strong> {{ p.categoryName }}</p>
+      <!-- Meta -->
+      <div class="text-sm text-gray-600 space-y-1">
+        <p><strong>Thương hiệu:</strong> {{ p.brandName || 'Đang cập nhật' }}</p>
+        <p><strong>Danh mục:</strong> {{ p.categoryName || 'Đang cập nhật' }}</p>
         <p><strong>Mã sản phẩm:</strong> SP-{{ p.id }}</p>
       </div>
 
-      <div class="quantity-container">
-        <div class="quantity-title">Số lượng:</div>
-        <div class="quantity-control">
-          <button class="quantity-btn" (click)="decreaseQuantity()">-</button>
-          <input type="number" class="quantity-input" [value]="quantity" min="1" [max]="p.stock" readonly>
-          <button class="quantity-btn" (click)="increaseQuantity()">+</button>
+      <!-- Quantity -->
+      <div class="flex items-center space-x-4">
+        <span class="font-medium">Số lượng:</span>
+        <div class="flex items-center border rounded-lg">
+          <button (click)="decreaseQuantity()" class="px-3 py-1 bg-gray-100 hover:bg-gray-200">-</button>
+          <input type="number" [value]="quantity" readonly
+                 class="w-12 text-center border-x font-medium" />
+          <button (click)="increaseQuantity()" class="px-3 py-1 bg-gray-100 hover:bg-gray-200">+</button>
         </div>
-        <div class="stock-status" [class.in-stock]="p.stock > 0" [class.out-of-stock]="p.stock === 0">
+        <span [class.text-green-600]="p.stock>0" [class.text-red-500]="p.stock===0">
           {{ p.stock > 0 ? 'Còn ' + p.stock + ' sản phẩm' : 'Hết hàng' }}
-        </div>
+        </span>
       </div>
 
-      <div class="action-buttons">
-        <button class="btn btn-add-cart" (click)="addToCart(p)" [disabled]="p.stock === 0">
-          <i class="fas fa-shopping-cart"></i>
-          Thêm vào giỏ
+      <!-- Actions -->
+      <div class="flex gap-4">
+        <button (click)="addToCart(p)"
+                class="flex-1 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium shadow transition disabled:opacity-50"
+                [disabled]="p.stock===0">
+          <i class="fas fa-cart-plus mr-2"></i> Thêm vào giỏ
         </button>
-        <button class="btn btn-buy-now" [disabled]="p.stock === 0">Mua ngay</button>
-      </div>
-
-      <div class="delivery-info">
-        <div class="delivery-title">Giao hàng:</div>
-        <div class="delivery-options">
-          <div class="delivery-option">
-            <i class="fas fa-truck"></i>
-            <span>Giao hàng nhanh trong 2 giờ</span>
-          </div>
-          <div class="delivery-option">
-            <i class="fas fa-store"></i>
-            <span>Nhận tại cửa hàng</span>
-          </div>
-        </div>
+        <button class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium shadow transition"
+                [disabled]="p.stock===0">
+          Mua ngay
+        </button>
       </div>
     </div>
   </div>
 
   <!-- Tabs -->
-  <div class="product-tabs">
-    <div class="tabs-header">
-      <button (click)="setActiveTab('desc')" [class.active]="activeTab==='desc'" class="tab-button">Mô tả sản phẩm</button>
-      <button (click)="setActiveTab('attr')" [class.active]="activeTab==='attr'" class="tab-button">Thông số kỹ thuật</button>
-      <button (click)="setActiveTab('review')" [class.active]="activeTab==='review'" class="tab-button">Đánh giá ({{ p.totalReviews || 0 }})</button>
+  <div class="bg-white rounded-lg shadow mt-8">
+    <div class="flex border-b">
+      <button (click)="setActiveTab('desc')" [class.text-blue-600]="activeTab==='desc'"
+              class="flex-1 py-3 text-center font-medium hover:bg-gray-50">Mô tả</button>
+      <button (click)="setActiveTab('attr')" [class.text-blue-600]="activeTab==='attr'"
+              class="flex-1 py-3 text-center font-medium hover:bg-gray-50">Thông số</button>
+      <button (click)="setActiveTab('review')" [class.text-blue-600]="activeTab==='review'"
+              class="flex-1 py-3 text-center font-medium hover:bg-gray-50">
+        Đánh giá ({{ p.totalReviews || 0 }})
+      </button>
     </div>
 
-    <div class="tab-content">
-      <div class="tab-pane" [class.active]="activeTab==='desc'">
-        <div class="description-content">
-          <p>{{ p.description }}</p>
-        </div>
+    <div class="p-6">
+      <!-- Mô tả -->
+      <div *ngIf="activeTab==='desc'">
+        <p class="text-gray-700 leading-relaxed">{{ p.description }}</p>
       </div>
 
-      <div class="tab-pane" [class.active]="activeTab==='attr'">
-        <table class="attributes-table">
-          <tr *ngFor="let a of p.attributes">
-            <th>{{ a.attributeName }}:</th>
-            <td>{{ a.value }}</td>
+      <!-- Attributes -->
+      <div *ngIf="activeTab==='attr'">
+        <table *ngIf="p.attributes && p.attributes.length > 0; else noAttr"
+               class="w-full border divide-y text-sm">
+          <tr *ngFor="let a of p.attributes" class="hover:bg-gray-50">
+            <th class="p-3 text-gray-600 text-left w-1/3">{{ a.attributeName }}</th>
+             <!-- <th>{{a.attributeName}}</th> -->
+              <td>{{ a.value }}</td>
           </tr>
         </table>
+        <ng-template #noAttr>
+          <p class="text-gray-500 italic">Chưa có thông số kỹ thuật.</p>
+        </ng-template>
       </div>
 
-      <div class="tab-pane" [class.active]="activeTab==='review'">
-        <div class="reviews-container">
-          <div *ngFor="let r of reviews" class="review-item">
-            <div class="review-avatar">
-              {{ r.userName ? (r.userName | slice:0:1 | uppercase) : '?' }}
+      <!-- Reviews -->
+      <div *ngIf="activeTab==='review'">
+        <div *ngIf="reviews.length>0; else noReview" class="space-y-6">
+          <div *ngFor="let r of reviews" class="border-b pb-4">
+            <div class="flex justify-between">
+              <span class="font-medium">{{ r.userName || 'Ẩn danh' }}</span>
+              <span class="text-yellow-400">
+                <i class="fas fa-star" *ngFor="let s of getStars(r.rating)"></i>
+              </span>
             </div>
-            <div class="review-content">
-              <div class="review-header">
-                <div class="review-author">{{ r.userName }}</div>
-                <div class="review-rating">
-                  <i class="fas fa-star" *ngFor="let star of getStars(r.rating)"></i>
-                </div>
-              </div>
-              <div class="review-date">{{ r.createdAt | date:'dd/MM/yyyy' }}</div>
-              <p class="review-text">{{ r.comment }}</p>
-            </div>
-          </div>
-
-          <div *ngIf="reviews.length === 0" class="no-reviews">
-            Chưa có đánh giá nào cho sản phẩm này.
+            <p class="text-gray-600 text-sm">{{ r.createdAt | date:'dd/MM/yyyy' }}</p>
+            <p class="mt-2 text-gray-800">{{ r.comment }}</p>
           </div>
         </div>
+        <ng-template #noReview>
+          <p class="text-gray-500 italic">Chưa có đánh giá nào cho sản phẩm này.</p>
+        </ng-template>
       </div>
-
     </div>
   </div>
 
-  <!-- Sản phẩm liên quan -->
-  <div class="related-products" *ngIf="related && related.length > 0">
-    <h2 class="section-title">Sản phẩm liên quan</h2>
-    <div class="related-grid">
-      <div *ngFor="let rp of related" class="product-card" routerLink="/products/{{ rp.id }}">
-        <img [src]="'http://localhost:8080' + rp.imageUrl" [alt]="rp.name" class="product-card-image" />
-        <div class="product-card-body">
-          <h3 class="product-card-title">{{ rp.name }}</h3>
-          <div class="product-card-price">
-            <span class="product-card-current">{{ calculateDiscountPrice(rp.price, rp.discountPercent) | number }}₫</span>
-            <span class="product-card-original" *ngIf="rp.discountPercent > 0">{{ rp.price | number }}₫</span>
+  <!-- Related Products -->
+  <div class="mt-10" *ngIf="related.length>0">
+    <h2 class="text-lg font-semibold mb-4">Sản phẩm liên quan</h2>
+    <div class="grid md:grid-cols-4 sm:grid-cols-2 gap-6">
+      <div *ngFor="let rp of related" [routerLink]="['/products', rp.id]"
+           class="bg-white rounded-lg shadow hover:shadow-lg cursor-pointer transition transform hover:-translate-y-1">
+        <img [src]="'http://localhost:8080' + rp.imageUrl" [alt]="rp.name"
+             class="w-full h-48 object-contain p-3" />
+        <div class="p-3">
+          <h3 class="text-sm font-medium line-clamp-2">{{ rp.name }}</h3>
+          <div class="text-red-500 font-semibold">
+            {{ calculateDiscountPrice(rp.price, rp.discountPercent || 0) | number }}₫
           </div>
-          <div class="product-card-rating">
-            <i class="fas fa-star"></i>
-            <span>{{ rp.avgRating || 0 | number:'1.1-1' }} ({{ rp.totalReviews || 0 }})</span>
-          </div>
+            <div *ngIf="(rp.discountPercent ?? 0) > 0" class="text-gray-400 line-through text-sm">
+              {{ rp.price | number }}₫
+            </div>
+
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<div *ngIf="!product()" class="loading-container">
-  <div class="loading-spinner"></div>
-  <p>Đang tải thông tin sản phẩm...</p>
-</div>
+<!-- Loading -->
+<ng-template #loading>
+  <div class="flex flex-col items-center justify-center h-64 text-gray-500">
+    <div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    <p class="mt-3">Đang tải sản phẩm...</p>
+  </div>
+</ng-template>

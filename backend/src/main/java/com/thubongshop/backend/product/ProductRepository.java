@@ -18,7 +18,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
                          @Param("brandId") Integer brandId,
                          Pageable pageable);
 
-    List<Product> findTopByCategoryIdAndIdNot(Integer categoryId, Integer excludeId, Pageable pageable);
+    // List<Product> findTopByCategoryIdAndIdNot(Integer categoryId, Integer excludeId, Pageable pageable);
+    List<Product> findByCategoryIdAndIdNot(Integer categoryId, Integer id, Pageable pageable);
 
     List<Product> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }
