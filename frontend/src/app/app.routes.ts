@@ -17,13 +17,11 @@ import { Dashboard } from './admin/dashboard/dashboard';
 import { CategoriesAdminListComponent } from './admin/categories-admin/categories-admin-list.component';
 import { CategoriesAdminAddComponent } from './admin/categories-admin/categories-admin-add.component';
 import { CategoriesAdminEditComponent } from './admin/categories-admin/categories-admin-edit.component';
-
-
 import { ProductsAdminComponent } from './admin/products-admin/products-admin';
 
-
-
-
+// 👉 thêm brand admin
+import { BrandAdminListComponent } from './admin/brands-admin/brand-admin-list';
+import { BrandAdminFormComponent } from './admin/brands-admin/brand-admin-form';
 
 export const routes: Routes = [
   // Customer layout
@@ -36,14 +34,8 @@ export const routes: Routes = [
       { path: 'login', component: Login },
       { path: 'register', component: RegisterComponent },
       { path: 'profile', component: ProfileComponent },
-
-
       { path: 'products', component: ProductsComponent },
-
-      // 👉 Route chi tiết sản phẩm
       { path: 'product/:id', component: ProductDetailComponent }
-
-
     ]
   },
 
@@ -53,10 +45,9 @@ export const routes: Routes = [
     component: AdminLayout,
     children: [
       { path: 'dashboard', component: Dashboard },
-
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'products', component: ProductsAdminComponent },
 
+      { path: 'products', component: ProductsAdminComponent },
 
       { path: 'categories', children: [
           { path: '', component: CategoriesAdminListComponent },
@@ -64,13 +55,19 @@ export const routes: Routes = [
           { path: 'edit/:id', component: CategoriesAdminEditComponent }
         ]
       },
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
 
+      // 👉 brands admin
+      { path: 'brands', children: [
+          { path: '', component: BrandAdminListComponent },
+          { path: 'new', component: BrandAdminFormComponent },
+          { path: ':id', component: BrandAdminFormComponent }
+        ]
+      },
+
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
 
   // Catch all
   { path: '**', redirectTo: 'home' }
-
 ];
-

@@ -1,0 +1,63 @@
+<div class="p-6 space-y-4">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <h2 class="text-xl font-bold">Quản trị Thương hiệu</h2>
+
+    <div class="flex gap-2 items-center">
+      <input [(ngModel)]="q" (keyup.enter)="search()" type="search"
+             placeholder="Tìm theo tên..." class="border rounded-xl px-3 py-2 w-64" />
+      <select [(ngModel)]="sort" (change)="onChangeSort()" class="border rounded-xl px-3 py-2">
+        <option value="id,desc">Mới tạo → Cũ</option>
+        <option value="id,asc">Cũ → Mới tạo</option>
+        <option value="name,asc">Tên A→Z</option>
+        <option value="name,desc">Tên Z→A</option>
+      </select>
+      <a routerLink="/admin/brands/new" class="px-3 py-2 rounded-xl bg-black text-white">+ Thêm</a>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="text-sm opacity-70">Đang tải...</div>
+
+  <div class="overflow-auto rounded-xl border">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="text-left px-4 py-2">Logo</th>
+          <th class="text-left px-4 py-2">Tên</th>
+          <th class="text-left px-4 py-2">Website</th>
+          <th class="text-left px-4 py-2">Mô tả</th>
+          <th class="text-right px-4 py-2">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let b of items()" class="border-t">
+          <td class="px-4 py-2">
+            <img *ngIf="logoOf(b)" [src]="logoOf(b)!" [alt]="b.name" class="h-10 object-contain">
+          </td>
+          <td class="px-4 py-2 font-medium">{{ b.name }}</td>
+          <td class="px-4 py-2">
+            <a *ngIf="websiteOf(b)" [href]="websiteOf(b)" class="underline" target="_blank" rel="noopener">
+              {{ websiteOf(b) }}
+            </a>
+          </td>
+          <td class="px-4 py-2 max-w-[360px] truncate" [title]="b.description || ''">
+            {{ b.description }}
+          </td>
+          <td class="px-4 py-2 text-right space-x-2">
+            <a [routerLink]="['/admin/brands', b.id]" class="px-2 py-1 border rounded">Sửa</a>
+            <button (click)="confirmDelete(b.id)" class="px-2 py-1 border rounded text-red-600">Xoá</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!items().length && !loading()">
+          <td colspan="5" class="px-4 py-8 text-center text-gray-500">Không có dữ liệu</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flex items-center justify-center gap-2" *ngIf="totalPages() > 1">
+    <button class="px-3 py-1 border rounded" (click)="prev()" [disabled]="page()===0">Trước</button>
+    <span class="text-sm">Trang {{ pageDisplay() }} / {{ totalPages() }}</span>
+    <button class="px-3 py-1 border rounded" (click)="next()" [disabled]="pageDisplay()===totalPages()">Sau</button>
+  </div>
+</div>
