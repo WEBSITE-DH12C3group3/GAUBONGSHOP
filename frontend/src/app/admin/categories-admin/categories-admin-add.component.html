@@ -1,22 +1,23 @@
-<div class="p-6 max-w-lg mx-auto">
-  <h2 class="text-2xl font-bold text-pink-600 mb-4">➕ Thêm danh mục</h2>
-  
-  <form (ngSubmit)="save()" class="space-y-4">
-    <div>
-      <label class="block mb-1">Tên danh mục</label>
-      <input [(ngModel)]="category.name" name="name"
-             class="w-full border rounded p-2 focus:ring focus:ring-pink-300" required />
+<div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow">
+  <h2 class="text-2xl font-bold mb-4 text-pink-600">➕ Thêm danh mục</h2>
+
+  <form (ngSubmit)="save()" #form="ngForm">
+    <div class="mb-3">
+      <label class="block font-medium mb-1">Tên danh mục</label>
+      <input [(ngModel)]="category.name" name="name" required
+             class="w-full border rounded px-3 py-2 focus:ring focus:ring-pink-300">
     </div>
 
-    <div>
-      <label class="block mb-1">Mô tả</label>
+    <div class="mb-3">
+      <label class="block font-medium mb-1">Mô tả</label>
       <textarea [(ngModel)]="category.description" name="description"
-                class="w-full border rounded p-2 focus:ring focus:ring-pink-300"></textarea>
+                class="w-full border rounded px-3 py-2 focus:ring focus:ring-pink-300"></textarea>
     </div>
 
-    <div class="flex items-center">
-      <input type="checkbox" [(ngModel)]="category.isFeatured" name="isFeatured" class="mr-2" />
-      <label>Nổi bật</label>
+    <div class="mb-3 flex items-center">
+      <input type="checkbox" [(ngModel)]="category.isFeatured" name="isFeatured"
+             class="mr-2">
+      <label class="font-medium">Nổi bật</label>
     </div>
 
     <button type="submit"

@@ -1,10 +1,11 @@
+
 import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 import { Category } from '../../models/category.model';
-import { CategoryAdminService } from '../../shared/services/category-admin.service';
+import { CategoryAdminService } from '../../shared/services/category_admin.service';
 
 @Component({
   selector: 'app-categories-admin-list',
@@ -23,7 +24,7 @@ export class CategoriesAdminListComponent implements OnInit {
     private categoryService: CategoryAdminService,
     private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -41,7 +42,7 @@ export class CategoriesAdminListComponent implements OnInit {
     ).subscribe({
       next: (data) => {
         console.log("✅ API response:", data);
-        this.categories = data.content ?? [];
+        this.categories = data.content ?? data.items ?? [];
         this.page = data.number;
         this.totalPages = data.totalPages;
         this.pages = Array.from({ length: this.totalPages }, (_, i) => i); // 👈 tạo mảng số trang

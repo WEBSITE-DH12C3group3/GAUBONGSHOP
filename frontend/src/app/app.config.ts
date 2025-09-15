@@ -65,16 +65,30 @@ export const errorInterceptorFn: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((err: HttpErrorResponse) => {
-      if ((err.status === 401 || err.status === 403) && isPlatformBrowser(platformId)) {
-        console.warn('⚠️ Token hết hạn hoặc không hợp lệ → redirect login...');
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login'; // redirect login
+      // Nếu đang ở browser
+      if (isPlatformBrowser(platformId)) {
+        if (err.status === 401) {
+          // ❌ Token hết hạn -> bắt buộc đăng nhập lại
+          console.warn('401 Unauthorized, redirect login...');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+        } else if (err.status === 403) {
+          // ⚠️ 403: chỉ redirect khi không phải API admin
+          if (!req.url.includes('/api/admin/')) {
+            console.warn('403 Forbidden, redirect login...');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+          }
+        }
+        // ⚠️ 400, 409: để component xử lý (không redirect)
       }
       return throwError(() => err);
     })
   );
 };
+
 
 //
 // ✅ Cấu hình toàn bộ app
