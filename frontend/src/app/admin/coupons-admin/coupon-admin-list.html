@@ -1,0 +1,75 @@
+<div class="p-6">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-xl font-semibold">Phiếu giảm giá</h1>
+    <a routerLink="/admin/coupons/new" class="px-3 py-2 rounded bg-pink-600 text-white hover:bg-pink-700">
+      + Tạo mới
+    </a>
+  </div>
+
+  <div class="flex items-center gap-2 mb-4">
+    <input [(ngModel)]="q" (keyup.enter)="search()" class="border px-3 py-2 rounded w-64" placeholder="Tìm mã..." />
+    <button (click)="search()" class="px-3 py-2 rounded border">Tìm</button>
+
+    <select [(ngModel)]="sort" (change)="onChangeSort()" class="ml-auto border px-2 py-2 rounded">
+      <option value="id,desc">Mới nhất</option>
+      <option value="code,asc">Mã (A→Z)</option>
+      <option value="startDate,desc">Ngày bắt đầu ↓</option>
+    </select>
+  </div>
+
+  <div *ngIf="loading()" class="text-gray-500">Đang tải...</div>
+
+  <table *ngIf="!loading()" class="w-full bg-white border rounded">
+    <thead>
+      <tr class="bg-gray-100">
+        <th class="text-left p-2 border">ID</th>
+        <th class="text-left p-2 border">Mã</th>
+        <th class="text-left p-2 border">Loại</th>
+        <th class="text-right p-2 border">Giá trị</th>
+        <th class="text-right p-2 border">Đã dùng / Giới hạn</th>
+        <th class="text-center p-2 border">Hiệu lực</th>
+        <th class="text-center p-2 border">Trạng thái</th>
+        <th class="text-center p-2 border">Thao tác</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of items()">
+        <td class="p-2 border">{{ c.id }}</td>
+        <td class="p-2 border font-mono">{{ c.code }}</td>
+        <td class="p-2 border">{{ c.discountType === 'percent' ? 'Phần trăm' : 'Cố định' }}</td>
+        <td class="p-2 border text-right">
+          {{ c.discountType === 'percent' ? (c.discountValue + '%') : (c.discountValue | number) }}
+        </td>
+        <td class="p-2 border text-right">{{ c.usedCount || 0 }} / {{ c.maxUses ?? '∞' }}</td>
+        <td class="p-2 border text-center">
+          <div *ngIf="c.startDate || c.endDate; else unlimited">
+            {{ c.startDate || '...' }} → {{ c.endDate || '...' }}
+          </div>
+          <ng-template #unlimited>Không giới hạn</ng-template>
+        </td>
+        <td class="p-2 border text-center">
+          <span class="px-2 py-1 rounded text-white" [class.bg-green-500]="c.active" [class.bg-gray-400]="!c.active">
+            {{ c.active ? 'Đang bật' : 'Tắt' }}
+          </span>
+        </td>
+        <td class="p-2 border text-center">
+          <button class="px-2 py-1 border rounded mr-2" (click)="toggleActive(c)">
+            {{ c.active ? 'Tắt' : 'Bật' }}
+          </button>
+          <a [routerLink]="['/admin/coupons', c.id]" class="px-2 py-1 border rounded mr-2">Sửa</a>
+          <button class="px-2 py-1 border rounded text-red-600" (click)="confirmDelete(c.id)">Xoá</button>
+        </td>
+      </tr>
+      <tr *ngIf="items().length === 0">
+        <td colspan="8" class="p-4 text-center text-gray-500">Không có dữ liệu</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- phân trang -->
+  <div class="flex items-center justify-center gap-3 mt-4">
+    <button class="px-3 py-1 border rounded" (click)="prev()" [disabled]="page() === 0">« Trước</button>
+    <span>Trang {{ pageDisplay() }} / {{ totalPages() }}</span>
+    <button class="px-3 py-1 border rounded" (click)="next()" [disabled]="page() + 1 >= totalPages()">Sau »</button>
+  </div>
+</div>

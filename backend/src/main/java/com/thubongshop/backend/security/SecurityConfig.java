@@ -54,7 +54,8 @@ public class SecurityConfig {
                         "/api/attributes/**",
                         "/api/imports/**",
                         "/api/import-details/**",
-                        "/uploads/**"
+                        "/uploads/**",
+                        "/api/coupons/**" // 👉 ADD: public cho apply coupon (không ảnh hưởng /api/admin/**)
                 ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
@@ -90,8 +91,16 @@ public class SecurityConfig {
 
         // Cho phép Angular FE gọi API
         configuration.setAllowedOrigins(List.of("http://localhost:4200"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+        configuration.setAllowedMethods(List.of(
+                "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD" // 👉 ADD: PATCH, HEAD
+        ));
+        configuration.setAllowedHeaders(List.of(
+                "Authorization", "Content-Type", "Accept",
+                "Origin", "X-Requested-With" // 👉 ADD: bổ sung header hay dùng trong preflight
+        ));
+        configuration.setExposedHeaders(List.of(
+                "Authorization", "Content-Type" // 👉 ADD: không bắt buộc, giúp FE đọc header
+        ));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L); // cache preflight 1h
 

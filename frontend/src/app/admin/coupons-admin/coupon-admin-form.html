@@ -1,0 +1,66 @@
+<div class="p-6 max-w-3xl mx-auto">
+  <h1 class="text-xl font-semibold mb-4">{{ title() }}</h1>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4 bg-white p-4 rounded border">
+    <div>
+      <label class="block mb-1">Mã <span class="text-red-500">*</span></label>
+      <input formControlName="code" class="border px-3 py-2 rounded w-full" placeholder="VD: SALE10" />
+      <div *ngIf="form.controls.code.touched && form.controls.code.invalid" class="text-red-600 text-sm">
+        Vui lòng nhập mã hợp lệ
+      </div>
+    </div>
+
+    <div>
+      <label class="block mb-1">Mô tả</label>
+      <textarea formControlName="description" class="border px-3 py-2 rounded w-full" rows="2"></textarea>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block mb-1">Loại giảm</label>
+        <select formControlName="discountType" class="border px-3 py-2 rounded w-full">
+          <option value="percent">Phần trăm (%)</option>
+          <option value="fixed">Cố định (VND)</option>
+        </select>
+      </div>
+      <div>
+        <label class="block mb-1">Giá trị giảm</label>
+        <input type="number" formControlName="discountValue" class="border px-3 py-2 rounded w-full" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block mb-1">Đơn tối thiểu (VND)</label>
+        <input type="number" formControlName="minOrderAmount" class="border px-3 py-2 rounded w-full" />
+      </div>
+      <div>
+        <label class="block mb-1">Giới hạn lượt dùng</label>
+        <input type="number" formControlName="maxUses" class="border px-3 py-2 rounded w-full" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block mb-1">Bắt đầu</label>
+        <input type="datetime-local" formControlName="startDate" class="border px-3 py-2 rounded w-full" />
+      </div>
+      <div>
+        <label class="block mb-1">Kết thúc</label>
+        <input type="datetime-local" formControlName="endDate" class="border px-3 py-2 rounded w-full" />
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <input id="active" type="checkbox" formControlName="active" />
+      <label for="active">Kích hoạt</label>
+    </div>
+
+    <div class="flex gap-3">
+      <button [disabled]="submitting()" class="px-4 py-2 rounded bg-pink-600 text-white hover:bg-pink-700">
+        Lưu
+      </button>
+      <a routerLink="/admin/coupons" class="px-4 py-2 rounded border">Hủy</a>
+    </div>
+  </form>
+</div>
