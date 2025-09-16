@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 13, 2025 at 04:40 PM
+-- Generation Time: Sep 16, 2025 at 08:38 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -41,7 +41,10 @@ CREATE TABLE `attributes` (
 INSERT INTO `attributes` (`id`, `name`, `description`, `created_at`) VALUES
 (1, 'Màu sắc', 'Màu sắc của sản phẩm', '2025-08-25 14:50:57'),
 (2, 'Kích thước', 'Kích thước của sản phẩm', '2025-08-25 14:50:57'),
-(3, 'Chất liệu', 'Chất liệu làm sản phẩm', '2025-08-25 14:50:57');
+(3, 'Chất liệu', 'Chất liệu làm sản phẩm', '2025-08-25 14:50:57'),
+(4, 'Hình dạng', 'Hình dạng tổng thể của sản phẩm', '2025-09-14 10:00:00'),
+(5, 'Phong cách', 'Phong cách thiết kế của sản phẩm', '2025-09-14 10:00:00'),
+(6, 'Đối tượng sử dụng', 'Đối tượng phù hợp với sản phẩm', '2025-09-14 10:00:00');
 
 -- --------------------------------------------------------
 
@@ -63,10 +66,7 @@ CREATE TABLE `brands` (
 --
 
 INSERT INTO `brands` (`id`, `name`, `description`, `logo_url`, `website_url`, `created_at`) VALUES
-(1, 'Teddy', 'Thương hiệu gấu bông cao cấp', '/Brandimg/1756284670991-82964158-OIP.webp', 'https://www.teddy.it/en/home/', '2025-08-25 14:50:57'),
-(2, 'Kuromi', 'Thương hiệu thú bông nhân vật hoạt hình', '/Brandimg/1756284599669-261707982-download (1).webp', 'https://kuromi.co.uk/what-animal-is-kuromi/', '2025-08-25 14:50:57'),
-(3, 'OEM', 'Thương hiệu sản xuất chung', '/Brandimg/1756284502761-606171162-download.webp', 'https://thunhoibongthanhdat.com/', '2025-08-25 14:50:57'),
-(4, 'Steiff', 'Hãng gấu bông cao cấp đến từ Đức', '/Brandimg/1756284427104-458305385-OIF.webp', 'https://www.steiff.com/en', '2025-08-27 08:47:07');
+(7, 'cccccc', 'ccccc', '', 'ccccc', '2025-09-15 00:34:59');
 
 -- --------------------------------------------------------
 
@@ -109,6 +109,89 @@ INSERT INTO `categories` (`id`, `name`, `description`, `created_at`, `is_feature
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `coupons`
+--
+
+CREATE TABLE `coupons` (
+  `id` int(11) NOT NULL,
+  `code` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL,
+  `discount_type` enum('percent','fixed') NOT NULL,
+  `discount_value` decimal(10,2) NOT NULL,
+  `max_discount_amount` decimal(10,2) DEFAULT NULL,
+  `min_order_amount` decimal(10,2) DEFAULT NULL,
+  `exclude_discounted_items` tinyint(1) NOT NULL DEFAULT 0,
+  `applicable_payment_methods` varchar(255) DEFAULT NULL,
+  `applicable_roles` varchar(255) DEFAULT NULL,
+  `region_include` varchar(255) DEFAULT NULL,
+  `region_exclude` varchar(255) DEFAULT NULL,
+  `first_order_only` tinyint(1) NOT NULL DEFAULT 0,
+  `stackable` tinyint(1) NOT NULL DEFAULT 0,
+  `max_uses` int(11) DEFAULT NULL,
+  `used_count` int(11) NOT NULL DEFAULT 0,
+  `max_uses_per_user` int(11) DEFAULT NULL,
+  `start_date` timestamp NULL DEFAULT NULL,
+  `end_date` timestamp NULL DEFAULT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `coupons`
+--
+
+INSERT INTO `coupons` (`id`, `code`, `description`, `discount_type`, `discount_value`, `max_discount_amount`, `min_order_amount`, `exclude_discounted_items`, `applicable_payment_methods`, `applicable_roles`, `region_include`, `region_exclude`, `first_order_only`, `stackable`, `max_uses`, `used_count`, `max_uses_per_user`, `start_date`, `end_date`, `active`, `created_at`, `updated_at`) VALUES
+(1, 'WELCOME10', 'Giảm 10% cho đơn đầu tiên', 'percent', 10.00, 50000.00, 200000.00, 0, 'COD,e_wallet', 'Customer', NULL, NULL, 1, 0, 1000, 0, 1, '2025-08-31 03:00:00', '2025-12-31 02:59:00', 1, '2025-09-16 04:06:41', '2025-09-15 23:34:15');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `coupon_brands`
+--
+
+CREATE TABLE `coupon_brands` (
+  `coupon_id` int(11) NOT NULL,
+  `brand_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `coupon_categories`
+--
+
+CREATE TABLE `coupon_categories` (
+  `coupon_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `coupon_products`
+--
+
+CREATE TABLE `coupon_products` (
+  `coupon_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `coupon_uses`
+--
+
+CREATE TABLE `coupon_uses` (
+  `coupon_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `used_count` int(11) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `favorites`
 --
 
@@ -140,10 +223,10 @@ CREATE TABLE `imports` (
 --
 
 INSERT INTO `imports` (`id`, `import_date`, `total_cost`, `status`, `notes`, `created_at`, `supplier_id`) VALUES
-(1, '2025-08-24 17:00:00', 0.00, 'completed', 'Nhập lô gấu Teddy mới', '2025-08-25 14:50:57', 1),
-(2, '2025-08-24 17:00:00', 0.00, 'pending', 'Chờ kiểm tra chất lượng', '2025-08-25 14:50:57', 1),
-(3, '2025-08-26 17:00:00', 2000000.00, 'pending', NULL, '2025-08-27 13:47:30', 1),
-(4, '2025-08-26 17:00:00', 5210000.00, 'pending', NULL, '2025-08-27 14:31:57', 1);
+(1, '2025-08-24 17:00:00', 0.00, 'completed', 'Nhập lô gấu Teddy mới', '2025-08-25 14:50:57', NULL),
+(2, '2025-08-24 17:00:00', 0.00, 'pending', 'Chờ kiểm tra chất lượng', '2025-08-25 14:50:57', NULL),
+(3, '2025-08-26 17:00:00', 2000000.00, 'pending', NULL, '2025-08-27 13:47:30', NULL),
+(4, '2025-08-26 17:00:00', 5210000.00, 'pending', NULL, '2025-08-27 14:31:57', NULL);
 
 -- --------------------------------------------------------
 
@@ -165,7 +248,6 @@ CREATE TABLE `import_details` (
 
 INSERT INTO `import_details` (`id`, `import_id`, `product_id`, `quantity`, `unit_price`) VALUES
 (4, 3, 4, 10, 200000.00),
-(5, 4, 6, 13, 130000.00),
 (6, 4, 4, 11, 200000.00),
 (7, 4, 14, 11, 120000.00);
 
@@ -206,6 +288,18 @@ INSERT INTO `orders` (`id`, `user_id`, `order_date`, `status`, `total_amount`) V
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `order_coupons`
+--
+
+CREATE TABLE `order_coupons` (
+  `order_id` int(11) NOT NULL,
+  `coupon_id` int(11) NOT NULL,
+  `discount_amount` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `order_items`
 --
 
@@ -224,6 +318,18 @@ CREATE TABLE `order_items` (
 INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `price`) VALUES
 (1, 1, NULL, 2, 445000.00),
 (2, 2, NULL, 1, 250000.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_shipping_vouchers`
+--
+
+CREATE TABLE `order_shipping_vouchers` (
+  `order_id` int(11) NOT NULL,
+  `voucher_id` int(11) NOT NULL,
+  `shipping_discount_amount` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -302,17 +408,17 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `name`, `description`, `price`, `image_url`, `category_id`, `brand_id`, `stock`, `created_at`) VALUES
-(4, 'gấu bông noel', 'hihi', 200000.00, '/uploads/1756279158686-303970204-memeandroid1.jpg', 1, 1, 43, '2025-08-27 07:05:09'),
-(5, 'GẤU HỒNG CUTE', 'NGOAN XINH YÊU', 130000.00, '/uploads/1756279804940-824896769-OIP (1).jpg', 1, 3, 11, '2025-08-27 07:30:04'),
-(6, 'GẤU NÂU MỀM MẠI', 'HIHI', 130000.00, '/uploads/1756279859283-580258136-OIP (1).webp', 1, 2, 24, '2025-08-27 07:30:59'),
-(7, 'GẤU NÂU MỀM MẠI', 'hhh', 130000.00, '/uploads/1756280319988-585411408-OIP (1).webp', 1, 2, 11, '2025-08-27 07:38:39'),
-(8, 'GẤU BUỒN NGỦ ', 'KKK', 130000.00, '/uploads/1756280527194-32202040-OIP (2).webp', 2, 3, 11, '2025-08-27 07:42:07'),
-(9, 'HỔ KAKA', 'WWWWW', 130000.00, '/uploads/1756280577416-563265173-OIP (3).webp', 2, 1, 11, '2025-08-27 07:42:57'),
-(10, 'GẤU TRÚC THIẾU NGỦ', 'HHH', 120000.00, '/uploads/1756280627818-112704816-OIP (4).webp', 2, 3, 12, '2025-08-27 07:43:47'),
-(11, 'GẤU TRÚC HAM ĂN', 'HHH', 130000.00, '/uploads/1756280679637-881067446-OIP9.jpg', 1, 3, 11, '2025-08-27 07:44:39'),
-(12, 'GẤU DÂU ĐÁNG YÊU', 'KKKK', 210000.00, '/uploads/1756280739648-379525019-OIP (5).webp', NULL, 1, 22, '2025-08-27 07:45:39'),
-(13, 'THỎ ĐÀO NGỌT NGÀO', 'HHH', 210000.00, '/uploads/1756280802618-785400663-OIP (7).webp', NULL, 3, 22, '2025-08-27 07:46:42'),
-(14, 'TIỂU ĐÀO ĐÀO', 'HHH', 120000.00, '/uploads/1756280863080-210403397-OIP (6).webp', NULL, 3, 22, '2025-08-27 07:47:43');
+(4, 'gấu bông noel', 'hihi', 200000.00, '/uploads/1756279158686-303970204-memeandroid1.jpg', 1, NULL, 43, '2025-08-27 07:05:09'),
+(5, 'GẤU HỒNG CUTE', 'NGOAN XINH YÊU', 130000.00, '/uploads/1756279804940-824896769-OIP (1).jpg', 1, NULL, 11, '2025-08-27 07:30:04'),
+(7, 'GẤU NÂU MỀM MẠI', 'hhh', 130000.00, '/uploads/1756280319988-585411408-OIP (1).webp', 1, NULL, 11, '2025-08-27 07:38:39'),
+(8, 'GẤU BUỒN NGỦ ', 'KKK', 130000.00, '/uploads/1756280527194-32202040-OIP (2).webp', 2, NULL, 11, '2025-08-27 07:42:07'),
+(9, 'HỔ KAKA', 'WWWWW', 130000.00, '/uploads/1756280577416-563265173-OIP (3).webp', 2, NULL, 11, '2025-08-27 07:42:57'),
+(10, 'GẤU TRÚC THIẾU NGỦ', 'HHH', 120000.00, '/uploads/1756280627818-112704816-OIP (4).webp', 2, NULL, 12, '2025-08-27 07:43:47'),
+(11, 'GẤU TRÚC HAM ĂN', 'HHH', 130000.00, '/uploads/1756280679637-881067446-OIP9.jpg', 1, NULL, 11, '2025-08-27 07:44:39'),
+(12, 'GẤU DÂU ĐÁNG YÊU', 'KKKK', 210000.00, '/uploads/1756280739648-379525019-OIP (5).webp', NULL, NULL, 22, '2025-08-27 07:45:39'),
+(13, 'THỎ ĐÀO NGỌT NGÀO', 'HHH', 210000.00, '/uploads/1756280802618-785400663-OIP (7).webp', NULL, NULL, 22, '2025-08-27 07:46:42'),
+(14, 'TIỂU ĐÀO ĐÀO', 'HHH', 120000.00, '/uploads/1756280863080-210403397-OIP (6).webp', NULL, NULL, 22, '2025-08-27 07:47:43'),
+(18, 'Gấu bông Panda', 'Gấu trúc size XL', 450000.00, '/uploads/panda-main.jpg', 5, 7, 15, '2025-09-14 19:14:32');
 
 -- --------------------------------------------------------
 
@@ -331,39 +437,68 @@ CREATE TABLE `product_attributes` (
 --
 
 INSERT INTO `product_attributes` (`product_id`, `attribute_id`, `value`) VALUES
-(4, 1, 'đỏ'),
-(4, 2, '30cm'),
-(4, 3, 'len'),
-(5, 1, 'đỏ'),
+(4, 1, 'Đỏ, Trắng'),
+(4, 2, 'XL'),
+(4, 3, 'Vải bông'),
+(4, 4, 'Gấu'),
+(4, 5, 'Dễ thương'),
+(4, 6, 'Trẻ em'),
+(5, 1, 'Hồng'),
 (5, 2, '30cm'),
-(5, 3, 'len'),
-(6, 1, 'đỏ'),
-(6, 2, '30cm'),
-(6, 3, 'len'),
-(7, 1, 'đỏ'),
+(5, 3, 'Len'),
+(5, 4, 'Gấu'),
+(5, 5, 'Dễ thương'),
+(5, 6, 'Tặng quà'),
+(7, 1, 'Nâu'),
 (7, 2, '30cm'),
-(7, 3, 'len'),
-(8, 1, 'đỏ'),
-(8, 2, '30cm'),
-(8, 3, 'len'),
-(9, 1, 'đỏ'),
-(9, 2, '30cm'),
-(9, 3, 'len'),
-(10, 1, 'đỏ'),
+(7, 3, 'Len'),
+(7, 4, 'Gấu'),
+(7, 5, 'Dễ thương'),
+(7, 6, 'Trẻ em'),
+(8, 1, 'Xám'),
+(8, 2, '25cm'),
+(8, 3, 'Vải bông'),
+(8, 4, 'Gấu'),
+(8, 5, 'Cổ điển'),
+(8, 6, 'Tặng quà'),
+(9, 1, 'Cam'),
+(9, 2, '40cm'),
+(9, 3, 'Vải nhung'),
+(9, 4, 'Hổ'),
+(9, 5, 'Dễ thương'),
+(9, 6, 'Trẻ em'),
+(10, 1, 'Đen, Trắng'),
 (10, 2, '30cm'),
-(10, 3, 'len'),
-(11, 1, 'đỏ'),
-(11, 2, '30cm'),
-(11, 3, 'len'),
-(12, 1, 'đỏ'),
-(12, 2, '30cm'),
-(12, 3, 'len'),
-(13, 1, 'đỏ'),
-(13, 2, '30cm'),
-(13, 3, 'len'),
-(14, 1, 'đỏ'),
-(14, 2, '30cm'),
-(14, 3, 'len');
+(10, 3, 'Len'),
+(10, 4, 'Gấu trúc'),
+(10, 5, 'Dễ thương'),
+(10, 6, 'Trẻ em'),
+(11, 1, 'Đen, Trắng'),
+(11, 2, '35cm'),
+(11, 3, 'Vải bông'),
+(11, 4, 'Gấu trúc'),
+(11, 5, 'Dễ thương'),
+(11, 6, 'Tặng quà'),
+(12, 1, 'Hồng'),
+(12, 2, '40cm'),
+(12, 3, 'Vải nhung'),
+(12, 4, 'Gấu'),
+(12, 5, 'Dễ thương'),
+(12, 6, 'Trẻ em'),
+(13, 1, 'Hồng'),
+(13, 2, '35cm'),
+(13, 3, 'Len'),
+(13, 4, 'Thỏ'),
+(13, 5, 'Dễ thương'),
+(13, 6, 'Tặng quà'),
+(14, 1, 'Hồng'),
+(14, 2, '35cm'),
+(14, 3, 'Vải nhung'),
+(14, 4, 'Thỏ'),
+(14, 5, 'Dễ thương'),
+(14, 6, 'Tặng quà'),
+(18, 1, 'Màu Trắng Đen'),
+(18, 2, 'Size XL');
 
 -- --------------------------------------------------------
 
@@ -379,6 +514,17 @@ CREATE TABLE `reviews` (
   `comment` text DEFAULT NULL,
   `review_date` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `reviews`
+--
+
+INSERT INTO `reviews` (`id`, `product_id`, `user_id`, `rating`, `comment`, `review_date`) VALUES
+(3, 4, 1, 5, 'Gấu bông Noel rất dễ thương, chất liệu mềm mại, phù hợp làm quà tặng!', '2025-09-14 10:00:00'),
+(4, 4, 26, 4, 'Sản phẩm đẹp, nhưng giao hàng hơi chậm.', '2025-09-14 10:05:00'),
+(5, 5, 28, 5, 'Gấu hồng siêu cute, bé nhà mình thích mê!', '2025-09-14 10:10:00'),
+(7, 10, 33, 4, 'Gấu trúc nhìn buồn ngủ rất ngộ nghĩnh, chất lượng tốt.', '2025-09-14 10:20:00'),
+(8, 14, 1, 5, 'Thỏ đào đáng yêu, mua tặng bạn gái rất hợp!', '2025-09-14 10:25:00');
 
 -- --------------------------------------------------------
 
@@ -465,6 +611,54 @@ INSERT INTO `shipping` (`id`, `order_id`, `address`, `shipping_method`, `trackin
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `shipping_vouchers`
+--
+
+CREATE TABLE `shipping_vouchers` (
+  `id` int(11) NOT NULL,
+  `code` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL,
+  `discount_type` enum('free','percent','fixed') NOT NULL,
+  `discount_value` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `max_discount_amount` decimal(10,2) DEFAULT NULL,
+  `min_order_amount` decimal(10,2) DEFAULT NULL,
+  `min_shipping_fee` decimal(10,2) DEFAULT NULL,
+  `applicable_carriers` varchar(255) DEFAULT NULL,
+  `region_include` varchar(255) DEFAULT NULL,
+  `region_exclude` varchar(255) DEFAULT NULL,
+  `max_uses` int(11) DEFAULT NULL,
+  `used_count` int(11) NOT NULL DEFAULT 0,
+  `max_uses_per_user` int(11) DEFAULT NULL,
+  `start_date` timestamp NULL DEFAULT NULL,
+  `end_date` timestamp NULL DEFAULT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `shipping_vouchers`
+--
+
+INSERT INTO `shipping_vouchers` (`id`, `code`, `description`, `discount_type`, `discount_value`, `max_discount_amount`, `min_order_amount`, `min_shipping_fee`, `applicable_carriers`, `region_include`, `region_exclude`, `max_uses`, `used_count`, `max_uses_per_user`, `start_date`, `end_date`, `active`, `created_at`, `updated_at`) VALUES
+(1, 'FREESHIPHN', 'Miễn phí ship nội thành Hà Nội', 'free', 0.00, NULL, 150000.00, 15000.00, 'GHTK,Viettel Post', 'Hà Nội', NULL, 500, 0, 3, '2025-08-31 17:00:00', '2025-12-31 16:59:59', 1, '2025-09-16 03:18:10', '2025-09-15 20:34:49'),
+(2, 'ANHHAMC', 'phiếu giảm giá của anhhamc', 'free', 0.00, NULL, 100000.00, 200000.00, 'Express', 'Hà Nội', NULL, 200, 0, 2, '2025-09-15 13:40:00', '2025-09-16 13:40:00', 1, '2025-09-15 20:40:46', '2025-09-15 20:40:46');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `shipping_voucher_uses`
+--
+
+CREATE TABLE `shipping_voucher_uses` (
+  `voucher_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `used_count` int(11) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `suppliers`
 --
 
@@ -484,7 +678,8 @@ CREATE TABLE `suppliers` (
 --
 
 INSERT INTO `suppliers` (`id`, `name`, `contact_person`, `phone`, `email`, `address`, `created_at`, `updated_at`) VALUES
-(1, 'công ty trách nhiệm hữu hạn một mình tao', 'phùng thị trang', '0349459165', 'phungtrang19012004@gmail.com', 'fffffff', '2025-08-27 13:46:25', '2025-08-27 13:47:03');
+(2, 'hehe', 'hà pro', '0366379629', 'anhha19052004@gmail.com', 'nhà số 3', '2025-09-15 01:25:14', '2025-09-15 01:25:14'),
+(3, 'aaaaa', 'aaaa', '222222', 'anhhaaaaaa@gmail.com', '1111', '2025-09-15 01:25:53', '2025-09-15 01:25:53');
 
 -- --------------------------------------------------------
 
@@ -530,7 +725,8 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `address`, `phone`, 
 (34, 'ad', '$2a$10$527LwUd3c3shgkMpfowDg.DNiiM7Cy4NfwYBxpJLCIbeuw1oOgYsO', 'phu19012004@gmail.com', 'fffffff', '0349459165', '2025-09-11 13:24:45'),
 (35, 'tiendat', '$2a$10$Hh05Mbc2C/i5cgwqKUhZ5OpjpUa9/m6nTv111/YMxhNXwpzBck55C', 'atest@example.com', NULL, NULL, '2025-09-11 14:19:56'),
 (36, 'tiendatngu', '$2a$10$iqs9cMI36IfRmgr9l/PjvORx.1v919EsLp5yYKyqAyqENxKVgCO8u', 'tiendat9012004@gmail.com', 'ha noi', '0349459165', '2025-09-11 14:29:02'),
-(37, 'tiendatngu', '$2a$10$tOmpK/6WzSSG3Iya/O1H2epxi.Dmy1i3IuU.BO7YTNP7nFtfoQZq2', 'dat9012004@gmail.com', 'fffffff', '0349459165', '2025-09-11 16:54:02');
+(37, 'tiendatngu', '$2a$10$tOmpK/6WzSSG3Iya/O1H2epxi.Dmy1i3IuU.BO7YTNP7nFtfoQZq2', 'dat9012004@gmail.com', 'fffffff', '0349459165', '2025-09-11 16:54:02'),
+(38, 'admin', '$2a$10$XlBBwNHpNEO2.eyK.Qjh6OsnvCzkTuqySfkRPr.sR1xswp8yiggDm', 'anhha19052004@gmail.com', 'Đông Dương Nam Sơn Tp.Bắc Ninh', '0366379629', '2025-09-14 23:05:32');
 
 -- --------------------------------------------------------
 
@@ -556,14 +752,15 @@ INSERT INTO `user_roles` (`user_id`, `role_id`) VALUES
 (27, 3),
 (28, 1),
 (29, 1),
-(30, 2),
+(30, 1),
 (31, 2),
 (32, 2),
 (33, 3),
 (34, 2),
 (35, 2),
 (36, 2),
-(37, 3);
+(37, 3),
+(38, 3);
 
 --
 -- Indexes for dumped tables
@@ -597,6 +794,42 @@ ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `coupons`
+--
+ALTER TABLE `coupons`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_coupon_code` (`code`),
+  ADD KEY `idx_coupon_active_window` (`active`,`start_date`,`end_date`);
+
+--
+-- Indexes for table `coupon_brands`
+--
+ALTER TABLE `coupon_brands`
+  ADD PRIMARY KEY (`coupon_id`,`brand_id`),
+  ADD KEY `fk_cb_brand` (`brand_id`);
+
+--
+-- Indexes for table `coupon_categories`
+--
+ALTER TABLE `coupon_categories`
+  ADD PRIMARY KEY (`coupon_id`,`category_id`),
+  ADD KEY `fk_cc_cate` (`category_id`);
+
+--
+-- Indexes for table `coupon_products`
+--
+ALTER TABLE `coupon_products`
+  ADD PRIMARY KEY (`coupon_id`,`product_id`),
+  ADD KEY `fk_cp_product` (`product_id`);
+
+--
+-- Indexes for table `coupon_uses`
+--
+ALTER TABLE `coupon_uses`
+  ADD PRIMARY KEY (`coupon_id`,`user_id`),
+  ADD KEY `fk_cu_user` (`user_id`);
+
+--
 -- Indexes for table `favorites`
 --
 ALTER TABLE `favorites`
@@ -628,12 +861,26 @@ ALTER TABLE `orders`
   ADD KEY `idx_order_status` (`status`);
 
 --
+-- Indexes for table `order_coupons`
+--
+ALTER TABLE `order_coupons`
+  ADD PRIMARY KEY (`order_id`,`coupon_id`),
+  ADD KEY `fk_oc_coupon` (`coupon_id`);
+
+--
 -- Indexes for table `order_items`
 --
 ALTER TABLE `order_items`
   ADD PRIMARY KEY (`id`),
   ADD KEY `order_id` (`order_id`),
   ADD KEY `product_id` (`product_id`);
+
+--
+-- Indexes for table `order_shipping_vouchers`
+--
+ALTER TABLE `order_shipping_vouchers`
+  ADD PRIMARY KEY (`order_id`,`voucher_id`),
+  ADD KEY `fk_osv_voucher` (`voucher_id`);
 
 --
 -- Indexes for table `payments`
@@ -695,6 +942,21 @@ ALTER TABLE `shipping`
   ADD KEY `order_id` (`order_id`);
 
 --
+-- Indexes for table `shipping_vouchers`
+--
+ALTER TABLE `shipping_vouchers`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_ship_voucher_code` (`code`),
+  ADD KEY `idx_ship_voucher_active_window` (`active`,`start_date`,`end_date`);
+
+--
+-- Indexes for table `shipping_voucher_uses`
+--
+ALTER TABLE `shipping_voucher_uses`
+  ADD PRIMARY KEY (`voucher_id`,`user_id`),
+  ADD KEY `fk_svu_user` (`user_id`);
+
+--
 -- Indexes for table `suppliers`
 --
 ALTER TABLE `suppliers`
@@ -723,13 +985,13 @@ ALTER TABLE `user_roles`
 -- AUTO_INCREMENT for table `attributes`
 --
 ALTER TABLE `attributes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `brands`
 --
 ALTER TABLE `brands`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `carts`
@@ -742,6 +1004,12 @@ ALTER TABLE `carts`
 --
 ALTER TABLE `categories`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `coupons`
+--
+ALTER TABLE `coupons`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `favorites`
@@ -789,13 +1057,13 @@ ALTER TABLE `permissions`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `reviews`
 --
 ALTER TABLE `reviews`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `roles`
@@ -810,16 +1078,22 @@ ALTER TABLE `shipping`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `shipping_vouchers`
+--
+ALTER TABLE `shipping_vouchers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `suppliers`
 --
 ALTER TABLE `suppliers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- Constraints for dumped tables
@@ -831,6 +1105,34 @@ ALTER TABLE `users`
 ALTER TABLE `carts`
   ADD CONSTRAINT `carts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `carts_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `coupon_brands`
+--
+ALTER TABLE `coupon_brands`
+  ADD CONSTRAINT `fk_cb_brand` FOREIGN KEY (`brand_id`) REFERENCES `brands` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_cb_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `coupon_categories`
+--
+ALTER TABLE `coupon_categories`
+  ADD CONSTRAINT `fk_cc_cate` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_cc_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `coupon_products`
+--
+ALTER TABLE `coupon_products`
+  ADD CONSTRAINT `fk_cp_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_cp_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `coupon_uses`
+--
+ALTER TABLE `coupon_uses`
+  ADD CONSTRAINT `fk_cu_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_cu_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `favorites`
@@ -859,11 +1161,25 @@ ALTER TABLE `orders`
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
+-- Constraints for table `order_coupons`
+--
+ALTER TABLE `order_coupons`
+  ADD CONSTRAINT `fk_oc_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_oc_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `order_items`
 --
 ALTER TABLE `order_items`
   ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `order_shipping_vouchers`
+--
+ALTER TABLE `order_shipping_vouchers`
+  ADD CONSTRAINT `fk_osv_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_osv_voucher` FOREIGN KEY (`voucher_id`) REFERENCES `shipping_vouchers` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `payments`
@@ -904,6 +1220,13 @@ ALTER TABLE `role_permissions`
 --
 ALTER TABLE `shipping`
   ADD CONSTRAINT `shipping_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `shipping_voucher_uses`
+--
+ALTER TABLE `shipping_voucher_uses`
+  ADD CONSTRAINT `fk_svu_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_svu_voucher` FOREIGN KEY (`voucher_id`) REFERENCES `shipping_vouchers` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `user_roles`
