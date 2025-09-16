@@ -16,7 +16,7 @@ export class CouponAdminFormComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
-  id = signal<number | null>(null);
+  id = signal<number|null>(null);
   loading = signal(false);
   submitting = signal(false);
   title = signal('Tạo phiếu giảm giá');
@@ -24,13 +24,32 @@ export class CouponAdminFormComponent {
   form = this.fb.group({
     code: ['', [Validators.required, Validators.maxLength(50)]],
     description: [''],
-    discountType: ['percent', [Validators.required]],     // percent | fixed
-    discountValue: [0, [Validators.required, Validators.min(0)]],
+
+    discountType: ['percent', Validators.required],
+    discountValue: [10, [Validators.required, Validators.min(0)]],
+    maxDiscountAmount: [null as number | null, [Validators.min(0)]],
+
     minOrderAmount: [null as number | null, [Validators.min(0)]],
+    excludeDiscountedItems: [false],
+
+    applicablePaymentMethods: [''],
+    applicableRoles: [''],
+    regionInclude: [''],
+    regionExclude: [''],
+
+    firstOrderOnly: [false],
+    stackable: [false],
+
     maxUses: [null as number | null, [Validators.min(0)]],
+    maxUsesPerUser: [null as number | null, [Validators.min(0)]],
+
     startDate: [null as string | null],
     endDate: [null as string | null],
-    active: [true]
+    active: [true],
+
+    categoryIdsCsv: [''],
+    brandIdsCsv: [''],
+    productIdsCsv: ['']
   });
 
   ngOnInit() {
@@ -51,11 +70,23 @@ export class CouponAdminFormComponent {
           description: c.description ?? '',
           discountType: c.discountType,
           discountValue: c.discountValue,
+          maxDiscountAmount: c.maxDiscountAmount ?? null,
           minOrderAmount: c.minOrderAmount ?? null,
+          excludeDiscountedItems: c.excludeDiscountedItems,
+          applicablePaymentMethods: c.applicablePaymentMethods ?? '',
+          applicableRoles: c.applicableRoles ?? '',
+          regionInclude: c.regionInclude ?? '',
+          regionExclude: c.regionExclude ?? '',
+          firstOrderOnly: c.firstOrderOnly,
+          stackable: c.stackable,
           maxUses: c.maxUses ?? null,
-          startDate: c.startDate ? c.startDate.substring(0,16) : null, // ISO -> yyyy-MM-ddTHH:mm
+          maxUsesPerUser: c.maxUsesPerUser ?? null,
+          startDate: c.startDate ? c.startDate.substring(0,16) : null,
           endDate: c.endDate ? c.endDate.substring(0,16) : null,
-          active: c.active
+          active: c.active,
+          categoryIdsCsv: (c.categoryIds ?? []).join(','),
+          brandIdsCsv: (c.brandIds ?? []).join(','),
+          productIdsCsv: (c.productIds ?? []).join(',')
         });
         this.loading.set(false);
       },
@@ -63,22 +94,41 @@ export class CouponAdminFormComponent {
     });
   }
 
+  private parseCsvNumbers(s?: string | null): number[] {
+    if (!s) return [];
+    return s.split(',').map(x => x.trim()).filter(Boolean).map(x => +x).filter(n => !isNaN(n));
+  }
+
   save() {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-    // convert datetime-local to ISO string (backend LocalDateTime)
-    const payload = { ...this.form.value };
-    const conv = (v: any) => v ? new Date(v).toISOString().slice(0,19) : null;
-    (payload as any).startDate = conv(payload.startDate);
-    (payload as any).endDate = conv(payload.endDate);
+    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    const v = this.form.value as any;
+
+    const payload: any = {
+      code: v.code,
+      description: v.description,
+      discountType: v.discountType,
+      discountValue: +v.discountValue,
+      maxDiscountAmount: v.maxDiscountAmount != null ? +v.maxDiscountAmount : null,
+      minOrderAmount: v.minOrderAmount != null ? +v.minOrderAmount : null,
+      excludeDiscountedItems: !!v.excludeDiscountedItems,
+      applicablePaymentMethods: v.applicablePaymentMethods || null,
+      applicableRoles: v.applicableRoles || null,
+      regionInclude: v.regionInclude || null,
+      regionExclude: v.regionExclude || null,
+      firstOrderOnly: !!v.firstOrderOnly,
+      stackable: !!v.stackable,
+      maxUses: v.maxUses != null ? +v.maxUses : null,
+      maxUsesPerUser: v.maxUsesPerUser != null ? +v.maxUsesPerUser : null,
+      startDate: v.startDate ? new Date(v.startDate).toISOString().slice(0,19) : null,
+      endDate: v.endDate ? new Date(v.endDate).toISOString().slice(0,19) : null,
+      active: !!v.active,
+      categoryIds: this.parseCsvNumbers(v.categoryIdsCsv),
+      brandIds: this.parseCsvNumbers(v.brandIdsCsv),
+      productIds: this.parseCsvNumbers(v.productIdsCsv)
+    };
 
     this.submitting.set(true);
-    const obs = this.id()
-      ? this.api.update(this.id()!, payload)
-      : this.api.create(payload);
-
+    const obs = this.id() ? this.api.update(this.id()!, payload) : this.api.create(payload);
     obs.subscribe({
       next: _ => this.router.navigateByUrl('/admin/coupons'),
       error: err => { alert(err?.error?.error || 'Lưu thất bại'); this.submitting.set(false); }

@@ -31,6 +31,11 @@ import { SupplierAdminFormComponent } from './admin/suppliers-admin/supplier-adm
 import { CouponAdminListComponent } from './admin/coupons-admin/coupon-admin-list';
 import { CouponAdminFormComponent } from './admin/coupons-admin/coupon-admin-form';
 
+//shipping-vochers-admin
+import { ShipVoucherAdminListComponent } from './admin/shipping-vouchers-admin/ship-voucher-admin-list';
+import { ShipVoucherAdminFormComponent } from './admin/shipping-vouchers-admin/ship-voucher-admin-form';
+
+
 export const routes: Routes = [
   // Customer layout
   {
@@ -87,13 +92,18 @@ export const routes: Routes = [
       },
 
       // Coupons admin
-      {
-        path: 'coupons', children: [
-          { path: '', component: CouponAdminListComponent },
-          { path: 'new', component: CouponAdminFormComponent },
-          { path: ':id', component: CouponAdminFormComponent }
+      { path: 'coupons', children: [
+    { path: '', component: CouponAdminListComponent },
+    { path: 'new', component: CouponAdminFormComponent },
+    { path: ':id', component: CouponAdminFormComponent }
+    ]
+    },
+      { path: 'shipping-vouchers', children: [
+    { path: '', component: ShipVoucherAdminListComponent },
+    { path: 'new', component: ShipVoucherAdminFormComponent },
+    { path: ':id', component: ShipVoucherAdminFormComponent }
         ]
-      }
+      },
     ]
   },
 

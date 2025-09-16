@@ -1,8 +1,6 @@
-package com.thubongshop.backend.coupon;
+package com.thubongshop.backend.coupon.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-
+import lombok.Getter; import lombok.Setter;
 import java.math.BigDecimal;
 
 @Getter @Setter
@@ -11,6 +9,6 @@ public class ApplyCouponResponse {
     private String discountType;
     private BigDecimal discountValue;
     private BigDecimal discountAmount;
-    private BigDecimal finalAmount;
+    private BigDecimal finalTotal;
     private String message;
 }

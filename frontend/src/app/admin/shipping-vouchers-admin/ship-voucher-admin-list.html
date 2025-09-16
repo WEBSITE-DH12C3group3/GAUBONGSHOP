@@ -1,11 +1,13 @@
 <div class="p-6">
   <div class="flex items-center justify-between mb-4">
-    <h1 class="text-xl font-semibold">Phiếu giảm giá</h1>
-    <a routerLink="/admin/coupons/new" class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700">+ Tạo phiếu</a>
+    <h1 class="text-xl font-semibold">Phiếu vận chuyển</h1>
+    <a routerLink="/admin/shipping-vouchers/new"
+       class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700">+ Tạo phiếu</a>
   </div>
 
   <div class="flex gap-3 mb-4">
-    <input [(ngModel)]="q" (keyup.enter)="search()" class="border rounded-lg px-3 py-2 w-full" placeholder="Tìm theo mã..." />
+    <input [(ngModel)]="q" (keyup.enter)="search()"
+           class="border rounded-lg px-3 py-2 w-full" placeholder="Tìm theo mã (code)..." />
     <select [(ngModel)]="sort" (change)="onChangeSort()" class="border rounded-lg px-3 py-2">
       <option value="id,desc">Mới nhất</option>
       <option value="code,asc">Mã A→Z</option>
@@ -21,21 +23,24 @@
           <th class="px-4 py-2 text-left">Mã</th>
           <th class="px-4 py-2 text-left">Loại</th>
           <th class="px-4 py-2 text-left">Giá trị</th>
-          <th class="px-4 py-2 text-left">Đơn tối thiểu</th>
-          <th class="px-4 py-2 text-left">Giới hạn</th>
-          <th class="px-4 py-2 text-left">Điều kiện</th>
+          <th class="px-4 py-2 text-left">ĐH tối thiểu</th>
+          <th class="px-4 py-2 text-left">Phí ship tối thiểu</th>
           <th class="px-4 py-2 text-left">Hiệu lực</th>
+          <th class="px-4 py-2 text-left">Đã dùng / Giới hạn</th>
+          <th class="px-4 py-2 text-left">Hãng VC / Khu vực</th>
           <th class="px-4 py-2 text-left">Trạng thái</th>
           <th class="px-4 py-2"></th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngIf="loading()"><td colspan="9" class="px-4 py-6 text-center">Đang tải...</td></tr>
+        <tr *ngIf="loading()"><td colspan="10" class="px-4 py-6 text-center">Đang tải...</td></tr>
 
         <tr *ngFor="let v of items()" class="border-t hover:bg-gray-50">
           <td class="px-4 py-2 font-medium">{{ v.code }}</td>
           <td class="px-4 py-2">
             <span class="px-2 py-1 rounded text-xs"
+              [class.bg-indigo-100]="v.discountType==='free'"
+              [class.text-indigo-700]="v.discountType==='free'"
               [class.bg-blue-100]="v.discountType==='percent'"
               [class.text-blue-700]="v.discountType==='percent'"
               [class.bg-emerald-100]="v.discountType==='fixed'"
@@ -45,37 +50,49 @@
           </td>
           <td class="px-4 py-2">
             <ng-container [ngSwitch]="v.discountType">
-              <span *ngSwitchCase="'percent'">{{ v.discountValue }}% <span *ngIf="v.maxDiscountAmount"> (tối đa {{ v.maxDiscountAmount | number:'1.0-0' }}đ)</span></span>
+              <span *ngSwitchCase="'free'">Miễn phí ship</span>
+              <span *ngSwitchCase="'percent'">{{ v.discountValue }}% <span *ngIf="v.maxDiscountAmount"> (tối đa {{ v.maxDiscountAmount | number:'1.0-0' }} đ)</span></span>
               <span *ngSwitchCase="'fixed'">{{ v.discountValue | number:'1.0-0' }} đ</span>
             </ng-container>
           </td>
           <td class="px-4 py-2">{{ v.minOrderAmount != null ? ('≥ ' + (v.minOrderAmount | number:'1.0-0') + ' đ') : '—' }}</td>
-          <td class="px-4 py-2">{{ v.usedCount || 0 }} / {{ v.maxUses ?? '∞' }}</td>
-          <td class="px-4 py-2 text-xs">
-            <div><b>PM:</b> {{ v.applicablePaymentMethods || 'Tất cả' }}</div>
-            <div><b>Role:</b> {{ v.applicableRoles || 'Tất cả' }}</div>
-            <div><b>1st:</b> {{ v.firstOrderOnly ? 'Có' : 'Không' }} | <b>Stack:</b> {{ v.stackable ? 'Có' : 'Không' }}</div>
-          </td>
+          <td class="px-4 py-2">{{ v.minShippingFee != null ? ('≥ ' + (v.minShippingFee | number:'1.0-0') + ' đ') : '—' }}</td>
           <td class="px-4 py-2">
             <div class="flex flex-col">
               <span>Từ: {{ v.startDate ? (v.startDate | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
               <span>Đến: {{ v.endDate ? (v.endDate | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
             </div>
           </td>
+          <td class="px-4 py-2">{{ v.usedCount || 0 }} / {{ v.maxUses ?? '∞' }}</td>
+          <td class="px-4 py-2">
+            <div class="text-xs text-gray-700">
+              <div><b>Hãng:</b> {{ v.applicableCarriers || 'Tất cả' }}</div>
+              <div><b>KV:</b> +{{ v.regionInclude || 'Tất cả' }} <span *ngIf="v.regionExclude">/ -{{ v.regionExclude }}</span></div>
+            </div>
+          </td>
           <td class="px-4 py-2">
             <label class="inline-flex items-center gap-2">
               <input type="checkbox" [checked]="v.active" (change)="toggleActive(v)" class="h-4 w-4">
-              <span>{{ v.active ? 'Bật' : 'Tắt' }}</span>
+              <span>{{ v.active ? 'Đang bật' : 'Đang tắt' }}</span>
             </label>
           </td>
-          <td class="px-4 py-2 text-right">
-            <a [routerLink]="['/admin/coupons', v.id]" class="px-3 py-1 border rounded hover:bg-gray-50 mr-2">Sửa</a>
-            <button (click)="confirmDelete(v.id)" class="px-3 py-1 border rounded text-red-600 hover:bg-red-50">Xoá</button>
-          </td>
+          <td class="px-4 py-2">
+            <div class="flex justify-end gap-2">
+            <a [routerLink]="['/admin/shipping-vouchers', v.id]"
+            class="px-3 py-1 border rounded hover:bg-gray-50">
+             Sửa
+             </a>
+            <button (click)="confirmDelete(v.id)"
+            class="px-3 py-1 border rounded text-red-600 hover:bg-red-50">
+             Xoá
+            </button>
+                </div>
+                    </td>
+
         </tr>
 
         <tr *ngIf="!loading() && items().length===0">
-          <td colspan="9" class="px-4 py-6 text-center text-gray-500">Không có dữ liệu</td>
+          <td colspan="10" class="px-4 py-6 text-center text-gray-500">Không có dữ liệu</td>
         </tr>
       </tbody>
     </table>
@@ -85,7 +102,7 @@
     <div>Trang {{ pageDisplay() }} / {{ totalPages() }}</div>
     <div class="flex gap-2">
       <button (click)="prev()" class="px-3 py-2 border rounded" [disabled]="page()===0">Trước</button>
-      <button (click)="next()" class="px-3 py-2 border rounded" [disabled]="page()+1>=totalPages()">Sau</button>
+      <button (click)="next()" class="px-3 py-2 border rounded" [disabled]="page()+1 >= totalPages()">Sau</button>
     </div>
   </div>
 </div>

@@ -1,13 +1,14 @@
-package com.thubongshop.backend.coupon;
+package com.thubongshop.backend.shippingvoucher;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "coupons")
-public class Coupon {
-    public enum DiscountType { percent, fixed }
+@Table(name = "shipping_vouchers")
+public class ShipVoucher {
+
+    public enum DiscountType { free, percent, fixed }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,38 +17,56 @@ public class Coupon {
     @Column(nullable=false, unique=true, length=50)
     private String code;
 
-    @Column(columnDefinition="TEXT")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="discount_type", nullable=false, length=10)
+    @Column(name = "discount_type", nullable=false, length=10)
     private DiscountType discountType;
 
-    @Column(name="discount_value", nullable=false, precision=10, scale=2)
-    private BigDecimal discountValue;
+    @Column(name = "discount_value", nullable=false, precision=10, scale=2)
+    private BigDecimal discountValue = BigDecimal.ZERO;
 
-    @Column(name="min_order_amount", precision=10, scale=2)
+    @Column(name = "max_discount_amount", precision=10, scale=2)
+    private BigDecimal maxDiscountAmount;
+
+    @Column(name = "min_order_amount", precision=10, scale=2)
     private BigDecimal minOrderAmount;
 
-    @Column(name="max_uses")
+    @Column(name = "min_shipping_fee", precision=10, scale=2)
+    private BigDecimal minShippingFee;
+
+    @Column(name = "applicable_carriers", length = 255)
+    private String applicableCarriers; // CSV: "GHTK,Viettel Post"
+
+    @Column(name = "region_include", length = 255)
+    private String regionInclude; // CSV: "Hà Nội,Hồ Chí Minh"
+
+    @Column(name = "region_exclude", length = 255)
+    private String regionExclude;
+
+    @Column(name = "max_uses")
     private Integer maxUses;
 
-    @Column(name="used_count", nullable=false)
+    @Column(name = "used_count", nullable=false)
     private Integer usedCount = 0;
 
-    @Column(name="start_date")
+    @Column(name = "max_uses_per_user")
+    private Integer maxUsesPerUser;
+
+    @Column(name = "start_date")
     private LocalDateTime startDate;
 
-    @Column(name="end_date")
+    @Column(name = "end_date")
     private LocalDateTime endDate;
 
     @Column(nullable=false)
     private Boolean active = true;
 
-    @Column(name="created_at")
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name="updated_at")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist
@@ -73,12 +92,24 @@ public class Coupon {
     public void setDiscountType(DiscountType discountType) { this.discountType = discountType; }
     public BigDecimal getDiscountValue() { return discountValue; }
     public void setDiscountValue(BigDecimal discountValue) { this.discountValue = discountValue; }
+    public BigDecimal getMaxDiscountAmount() { return maxDiscountAmount; }
+    public void setMaxDiscountAmount(BigDecimal maxDiscountAmount) { this.maxDiscountAmount = maxDiscountAmount; }
     public BigDecimal getMinOrderAmount() { return minOrderAmount; }
     public void setMinOrderAmount(BigDecimal minOrderAmount) { this.minOrderAmount = minOrderAmount; }
+    public BigDecimal getMinShippingFee() { return minShippingFee; }
+    public void setMinShippingFee(BigDecimal minShippingFee) { this.minShippingFee = minShippingFee; }
+    public String getApplicableCarriers() { return applicableCarriers; }
+    public void setApplicableCarriers(String applicableCarriers) { this.applicableCarriers = applicableCarriers; }
+    public String getRegionInclude() { return regionInclude; }
+    public void setRegionInclude(String regionInclude) { this.regionInclude = regionInclude; }
+    public String getRegionExclude() { return regionExclude; }
+    public void setRegionExclude(String regionExclude) { this.regionExclude = regionExclude; }
     public Integer getMaxUses() { return maxUses; }
     public void setMaxUses(Integer maxUses) { this.maxUses = maxUses; }
     public Integer getUsedCount() { return usedCount; }
     public void setUsedCount(Integer usedCount) { this.usedCount = usedCount; }
+    public Integer getMaxUsesPerUser() { return maxUsesPerUser; }
+    public void setMaxUsesPerUser(Integer maxUsesPerUser) { this.maxUsesPerUser = maxUsesPerUser; }
     public LocalDateTime getStartDate() { return startDate; }
     public void setStartDate(LocalDateTime startDate) { this.startDate = startDate; }
     public LocalDateTime getEndDate() { return endDate; }
