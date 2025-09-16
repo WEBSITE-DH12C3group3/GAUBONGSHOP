@@ -56,7 +56,7 @@ export class ProductsAdminComponent implements OnInit {
     private catAdmin: CategoryAdminService,
     private brandAdmin: BrandAdminService,
     private cdr: ChangeDetectorRef            // ✅ inject CDR
-  ) {}cd
+  ) {}
 
     // Helper nối URL ảnh an toàn
   imageUrl(u?: string | null, placeholder = 'https://placehold.co/160x160'): string {
