@@ -14,6 +14,7 @@ import { Category } from '../../models/category.model';
   standalone: true,
   imports: [CommonModule, FormsModule, CurrencyPipe, NgOptimizedImage],
   templateUrl: './products-admin.html',
+  
   styleUrls: ['./products-admin.css']
 })
 export class ProductsAdminComponent implements OnInit {
@@ -22,6 +23,8 @@ export class ProductsAdminComponent implements OnInit {
   items: Product[] = [];
   categories: { id:number; name:string }[] = [];
   brands: { id:number; name:string }[] = [];
+  assetBase = 'http://localhost:8080';
+
 
   // filter
   keyword = '';
@@ -53,7 +56,13 @@ export class ProductsAdminComponent implements OnInit {
     private catAdmin: CategoryAdminService,
     private brandAdmin: BrandAdminService,
     private cdr: ChangeDetectorRef            // ✅ inject CDR
-  ) {}
+  ) {}cd
+
+    // Helper nối URL ảnh an toàn
+  imageUrl(u?: string | null, placeholder = 'https://placehold.co/160x160'): string {
+    if (!u || !u.trim()) return placeholder;
+    return u.startsWith('http') ? u : this.assetBase + u;
+  }
 
   ngOnInit(): void {
     this.loadFilters();
