@@ -1,0 +1,115 @@
+<div class="p-6 space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-xl font-semibold">Nhóm người dùng</h1>
+      <p class="text-sm text-gray-500">Tạo/đổi tên nhóm và quản lý thành viên.</p>
+    </div>
+    <button (click)="openCreate()" class="px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700">
+      <i class="fa-solid fa-plus mr-2"></i> Thêm nhóm
+    </button>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow">
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50 text-gray-600">
+          <tr>
+            <th class="px-4 py-3 text-left">#</th>
+            <th class="px-4 py-3 text-left">Tên nhóm</th>
+            <th class="px-4 py-3 text-right w-64">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of roles; let i = index" class="border-t">
+            <td class="px-4 py-3 text-gray-500">{{ i + 1 }}</td>
+            <td class="px-4 py-3 font-medium">{{ r.name }}</td>
+            <td class="px-4 py-3 text-right space-x-2">
+              <button (click)="openMembers(r)" class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200">
+                <i class="fa-solid fa-user-plus mr-1"></i> Thành viên
+              </button>
+              <button (click)="openRename(r)" class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200">
+                <i class="fa-solid fa-pen mr-1"></i> Đổi tên
+              </button>
+              <button (click)="remove(r)" class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100">
+                <i class="fa-solid fa-trash mr-1"></i> Xoá
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="!roles.length && !loading">
+            <td colspan="3" class="px-4 py-6 text-center text-gray-500">Chưa có nhóm nào</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div *ngIf="loading" class="p-6 text-center text-gray-500">Đang tải…</div>
+  </div>
+
+  <!-- Toast -->
+  <div *ngIf="toast" class="fixed bottom-6 right-6 bg-black text-white px-4 py-2 rounded-lg opacity-90 shadow">
+    {{ toast }}
+  </div>
+
+  <!-- Modal: create -->
+  <div *ngIf="showCreate" class="fixed inset-0 bg-black/40 grid place-items-center z-10">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 space-y-4">
+      <h3 class="font-semibold text-lg">Thêm nhóm</h3>
+      <input class="w-full border rounded-lg px-3 py-2" placeholder="Tên nhóm" [(ngModel)]="newName" />
+      <div class="flex justify-end space-x-2">
+        <button (click)="showCreate=false" class="px-3 py-2 rounded-lg">Huỷ</button>
+        <button (click)="create()" class="px-4 py-2 rounded-lg bg-pink-600 text-white">Tạo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: rename -->
+  <div *ngIf="showRename" class="fixed inset-0 bg-black/40 grid place-items-center z-10">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 space-y-4">
+      <h3 class="font-semibold text-lg">Đổi tên nhóm</h3>
+      <input class="w-full border rounded-lg px-3 py-2" [(ngModel)]="renameValue" />
+      <div class="flex justify-end space-x-2">
+        <button (click)="showRename=false" class="px-3 py-2 rounded-lg">Huỷ</button>
+        <button (click)="rename()" class="px-4 py-2 rounded-lg bg-pink-600 text-white">Lưu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawer: members -->
+  <div *ngIf="showMembers" class="fixed inset-0 flex z-20">
+    <div class="flex-1 bg-black/40" (click)="showMembers=false"></div>
+    <div class="w-full max-w-lg bg-white h-full shadow-xl p-6 overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="font-semibold text-lg">Thành viên nhóm</h3>
+          <p class="text-sm text-gray-500">{{ membersRole?.name }}</p>
+        </div>
+        <button class="text-gray-500 hover:text-black" (click)="showMembers=false"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+
+      <div class="mb-4">
+        <div class="flex">
+          <input [(ngModel)]="search" (keyup.enter)="lookupUsers()" class="flex-1 border rounded-l-lg px-3 py-2" placeholder="Tìm theo email / tên" />
+          <button (click)="lookupUsers()" class="px-4 rounded-r-lg bg-gray-900 text-white">Tìm</button>
+        </div>
+        <p class="text-xs text-gray-400 mt-1">Chọn người dùng để thêm vào nhóm này.</p>
+      </div>
+
+      <div class="space-y-2">
+        <div *ngFor="let u of candidates" class="flex items-center justify-between border rounded-xl p-3">
+          <div>
+            <div class="font-medium">{{ u.username || u.email }}</div>
+            <div class="text-xs text-gray-500">{{ u.email }}</div>
+          </div>
+          <div class="space-x-2">
+            <button (click)="addToRole(u)" [disabled]="addBusy" class="px-3 py-1.5 rounded-lg bg-pink-600 text-white hover:bg-pink-700 disabled:opacity-50">
+              <i class="fa-solid fa-user-plus mr-1"></i> Thêm
+            </button>
+            <button (click)="removeFromRole(u)" [disabled]="removeBusy[u.id]" class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50">
+              <i class="fa-solid fa-user-minus mr-1"></i> Gỡ
+            </button>
+          </div>
+        </div>
+        <div *ngIf="!candidates.length" class="text-sm text-gray-500">Nhập từ khoá để tìm người dùng…</div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,105 @@
+<div class="p-6 space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold">{{ isEdit ? 'Sửa sản phẩm' : 'Thêm sản phẩm' }}</h1>
+      <p class="text-sm text-gray-500">Thông tin cơ bản • Ảnh • Thuộc tính</p>
+    </div>
+    <div class="flex gap-2">
+      <button (click)="cancel()" class="rounded-xl px-4 py-2 bg-gray-100 hover:bg-gray-200">Hủy</button>
+      <button (click)="save()" [disabled]="saving"
+        class="rounded-2xl px-4 py-2 bg-pink-600 text-white hover:bg-pink-700 shadow disabled:opacity-60">
+        {{ saving ? 'Đang lưu...' : 'Lưu' }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="p-3 rounded-xl bg-red-50 text-red-600 border border-red-200">{{ error }}</div>
+  <div *ngIf="loading" class="p-3 rounded-xl bg-gray-50 border">Đang tải dữ liệu...</div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Cột trái -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Thông tin cơ bản -->
+      <div class="bg-white rounded-2xl shadow p-4 space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="text-sm text-gray-600">Tên sản phẩm</label>
+            <input [(ngModel)]="product.name" type="text" class="w-full rounded-xl border px-3 py-2"/>
+          </div>
+          <div>
+            <label class="text-sm text-gray-600">Giá</label>
+            <input [(ngModel)]="product.price" type="number" min="0" class="w-full rounded-xl border px-3 py-2"/>
+          </div>
+          <div>
+            <label class="text-sm text-gray-600">Danh mục</label>
+            <select [(ngModel)]="product.categoryId" class="w-full rounded-xl border px-3 py-2">
+              <option [ngValue]="null">Chọn danh mục</option>
+              <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm text-gray-600">Thương hiệu</label>
+            <select [(ngModel)]="product.brandId" class="w-full rounded-xl border px-3 py-2">
+              <option [ngValue]="null">Chọn thương hiệu</option>
+              <option *ngFor="let b of brands" [ngValue]="b.id">{{ b.name }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm text-gray-600">Tồn kho</label>
+            <input [(ngModel)]="product.stock" type="number" min="0" class="w-full rounded-xl border px-3 py-2"/>
+          </div>
+          <div class="md:col-span-2">
+            <label class="text-sm text-gray-600">Mô tả</label>
+            <textarea [(ngModel)]="product.description" rows="3" class="w-full rounded-xl border px-3 py-2"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thuộc tính -->
+      <div class="bg-white rounded-2xl shadow p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="font-semibold">Thuộc tính</h3>
+          <button (click)="addAttrRow()" class="px-3 py-2 rounded-xl bg-gray-900 text-white hover:bg-black">Thêm dòng</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3" *ngFor="let r of attrRows; let i = index">
+          <select [(ngModel)]="r.attributeId" (ngModelChange)="onAttrChange(r)" class="rounded-xl border px-3 py-2">
+            <option [ngValue]="null">Chọn thuộc tính</option>
+            <option *ngFor="let a of attributesCatalog" [ngValue]="a.id">{{ a.name }}</option>
+          </select>
+          <input [(ngModel)]="r.value" type="text" placeholder="Giá trị" class="rounded-xl border px-3 py-2"/>
+          <div class="flex items-center">
+            <button (click)="removeAttrRow(i)" class="px-3 py-2 rounded-xl border hover:bg-gray-50">Xóa</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cột phải -->
+    <div class="space-y-6">
+      <!-- Ảnh đại diện -->
+    <div class="bg-white rounded-2xl shadow p-4 space-y-3">
+    <h3 class="font-semibold">Ảnh đại diện</h3>
+
+    <img [ngSrc]="imageUrl(product.imageUrl)" width="320" height="320"
+        class="w-full aspect-square object-cover rounded-2xl border" />
+
+    <!-- Chọn file từ máy -->
+    <label class="block">
+        <span class="text-sm text-gray-600">Chọn ảnh từ máy (.jpg/.png/.webp/.gif)</span>
+        <input type="file" accept="image/*" (change)="onFileSelected($event)"
+            class="mt-1 block w-full text-sm file:mr-4 file:rounded-xl file:border-0
+                    file:bg-gray-900 file:text-white file:px-4 file:py-2 hover:file:bg-black
+                    rounded-xl border px-3 py-2"/>
+    </label>
+
+    <!-- hoặc nhập URL trực tiếp -->
+    <input [(ngModel)]="product.imageUrl" type="text" placeholder="/uploads/xxx.jpg hoặc URL đầy đủ"
+            class="w-full rounded-xl border px-3 py-2"/>
+
+    <div *ngIf="uploading" class="text-sm text-gray-500">Đang tải ảnh lên...</div>
+    </div>
+
+    </div>
+  </div>
+</div>

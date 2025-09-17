@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { Observable, catchError } from 'rxjs'; // 👈 sửa import: bỏ of, switchMap; thêm catchError
 
 @Injectable({ providedIn: 'root' })
 export class ProductAdminService {
@@ -32,4 +32,20 @@ export class ProductAdminService {
   create(product: any): Observable<any> { return this.http.post<any>(this.apiUrl, product); }
   update(id: number, product: any): Observable<any> { return this.http.put<any>(`${this.apiUrl}/${id}`, product); }
   delete(id: number): Observable<any> { return this.http.delete(`${this.apiUrl}/${id}`); }
+
+  createFull(body: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/full`, body);
+  }
+
+  // ✅ dùng catchError để fallback sang PUT thường nếu /full chưa có
+  updateFull(id: number, body: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}/full`, body).pipe(
+      catchError(() => this.http.put<any>(`${this.apiUrl}/${id}`, body))
+    );
+  }
+
+  // Gợi ý: trả any để dễ normalize nhiều kiểu payload
+  getAttributes(): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/attributes`);
+  }
 }

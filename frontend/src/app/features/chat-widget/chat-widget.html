@@ -1,0 +1,52 @@
+<!-- FAB -->
+<button
+  class="fixed bottom-5 right-5 h-14 w-14 rounded-full bg-pink-600 text-white shadow-2xl flex items-center justify-center hover:bg-pink-700 z-40"
+  (click)="toggle()"
+  aria-label="Live chat"
+>
+  <span class="material-icons">chat</span>
+</button>
+
+<!-- Panel -->
+<div *ngIf="open" class="fixed bottom-24 right-5 w-96 max-w-[95vw] bg-white rounded-2xl shadow-2xl border z-40 overflow-hidden">
+  <!-- Header -->
+  <div class="px-4 py-3 flex items-center justify-between bg-gradient-to-r from-pink-600 to-rose-600 text-white">
+    <div>
+      <div class="font-semibold">Thư Bông – Hỗ trợ trực tuyến</div>
+      <div class="text-xs opacity-90">Thường phản hồi trong vài phút</div>
+    </div>
+    <button (click)="toggle()" class="p-1 rounded-lg hover:bg-white/10">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div id="chatbox-scroll" class="h-80 overflow-y-auto px-3 py-4 space-y-3 bg-gray-50">
+    <div *ngIf="loading" class="text-sm text-gray-500 px-2">Đang khởi tạo cuộc trò chuyện…</div>
+
+    <ng-container *ngFor="let m of messages">
+      <div [class]="m.isMine ? 'flex justify-end' : 'flex justify-start'">
+        <div [class]="m.isMine
+            ? 'max-w-[80%] bg-pink-600 text-white rounded-2xl rounded-tr-sm px-3 py-2 shadow'
+            : 'max-w-[80%] bg-white text-gray-900 rounded-2xl rounded-tl-sm px-3 py-2 shadow border'">
+          <div class="whitespace-pre-wrap text-[15px] leading-snug">{{ m.text }}</div>
+          <div class="text-[11px] opacity-70 mt-1">{{ m.sentAt | date:'shortTime' }}</div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Composer -->
+  <div class="p-3 border-t bg-white">
+    <div class="flex items-center gap-2">
+      <input [(ngModel)]="draft"
+             (keydown.enter)="send()"
+             placeholder="Nhập tin nhắn…"
+             class="flex-1 rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"/>
+      <button (click)="send()" [disabled]="sending || !draft.trim()"
+              class="rounded-xl bg-pink-600 text-white px-4 py-2 hover:bg-pink-700 disabled:opacity-60">
+        Gửi
+      </button>
+    </div>
+  </div>
+</div>

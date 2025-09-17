@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, CurrencyPipe, NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ProductAdminService } from '../../shared/services/product-admin.service';
 import { CategoryAdminService } from '../../shared/services/category_admin.service';
 import { BrandAdminService } from '../../shared/services/brand-admin.service';
@@ -55,7 +56,8 @@ export class ProductsAdminComponent implements OnInit {
     private api: ProductAdminService,
     private catAdmin: CategoryAdminService,
     private brandAdmin: BrandAdminService,
-    private cdr: ChangeDetectorRef            // ✅ inject CDR
+    private cdr: ChangeDetectorRef,
+    private router: Router           // ✅ inject CDR
   ) {}
 
     // Helper nối URL ảnh an toàn
@@ -142,26 +144,11 @@ export class ProductsAdminComponent implements OnInit {
   }
 
   openCreate(): void {
-    this.isEdit = false;
-    this.current = this.emptyProduct();
-    this.showModal = true;
-    this.cdr.detectChanges();           // ✅
+    this.router.navigate(['/admin/products/new']);
   }
 
   openEdit(p: Product): void {
-    this.isEdit = true;
-    this.current = {
-      id: p.id,
-      name: p.name,
-      description: p.description,
-      price: p.price,
-      stock: p.stock,
-      imageUrl: p.imageUrl,
-      categoryId: p.categoryId ?? this.findCategoryIdByName(p.categoryName),
-      brandId: p.brandId ?? this.findBrandIdByName(p.brandName)
-    };
-    this.showModal = true;
-    this.cdr.detectChanges();           // ✅
+    this.router.navigate(['/admin/products', p.id]);
   }
 
   openDetail(p: Product): void {

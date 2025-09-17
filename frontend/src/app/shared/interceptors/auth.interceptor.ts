@@ -2,35 +2,69 @@
 import { inject, PLATFORM_ID } from '@angular/core';
 import { HttpInterceptorFn } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 export const authInterceptorFn: HttpInterceptorFn = (req, next) => {
   const platformId = inject(PLATFORM_ID);
 
-  // ✅ API public (không cần token)
-  const isPublicApi =
-    req.url.includes('/api/products') ||
-    req.url.includes('/api/categories/featured') || // ✅ chỉ cho featured là public
-    req.url.includes('/api/brands') ||
-    req.url.includes('/api/attributes') ||
-    req.url.includes('/api/reviews/products') ||
-    req.url.includes('/uploads');
-
-
-  if (isPublicApi) {
+  // Bỏ qua preflight
+  if ((req.method || '').toUpperCase() === 'OPTIONS') {
     return next(req);
   }
 
-  // ✅ Các API private → cần token
+  // Xác định có phải call API không (hỗ trợ cả absolute & relative)
+  const apiBase = environment.apiUrl.replace(/\/+$/, '');               // trim trailing slash
+  const isAbsoluteApi = req.url.startsWith(apiBase + '/');
+  const isRelativeApi = req.url.startsWith('/api/');
+  const isApiCall = isAbsoluteApi || isRelativeApi;
+  if (!isApiCall) return next(req);
+
+  // Lấy path tương đối để so khớp rule
+  const path = isAbsoluteApi ? req.url.substring(apiBase.length) : req.url; // vd: /api/...
+  const method = (req.method || 'GET').toUpperCase();
+
+  // --- PUBLIC EXPLICIT (không gắn token) ---
+  const isExplicitPublic =
+    (method === 'POST' && (
+      path.startsWith('/api/users/login') ||
+      path.startsWith('/api/users/register') ||
+      path.startsWith('/api/auth/guest')
+    )) ||
+    (method === 'GET' && (
+      path.startsWith('/uploads/') ||
+      path.startsWith('/brandimg/')
+    ));
+
+  // --- PUBLIC GET (catalog) ---
+  const isPublicGet =
+    method === 'GET' && (
+      path.startsWith('/api/products')   ||
+      path.startsWith('/api/categories') ||
+      path.startsWith('/api/brands')     ||
+      path.startsWith('/api/attributes') ||
+      path.startsWith('/api/reviews/products')
+    );
+
+  if (isExplicitPublic || isPublicGet) {
+    return next(req);
+  }
+
+  // --- PRIVATE: gắn token ---
   let token: string | null = null;
   if (isPlatformBrowser(platformId)) {
-    token = localStorage.getItem('token');
+    token =
+      localStorage.getItem('token') ||
+      localStorage.getItem('access_token') ||
+      localStorage.getItem('jwt') ||
+      sessionStorage.getItem('token') ||
+      sessionStorage.getItem('access_token') ||
+      null;
   }
 
-  if (token) {
-    req = req.clone({
-      setHeaders: { Authorization: `Bearer ${token}` }
-    });
+  if (token && !/^Bearer\s/i.test(token)) {
+    token = `Bearer ${token}`;
   }
 
-  return next(req);
+  const authReq = token ? req.clone({ setHeaders: { Authorization: token } }) : req;
+  return next(authReq);
 };

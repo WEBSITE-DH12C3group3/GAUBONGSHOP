@@ -134,4 +134,5 @@ export class HomeComponent implements OnInit {
   getCategoryHeaderTextColor(index: number): string {
     return this.categoryHeaderColors[index % this.categoryHeaderColors.length].text;
   }
+  
 }
