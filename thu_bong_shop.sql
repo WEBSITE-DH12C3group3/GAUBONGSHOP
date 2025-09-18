@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 17, 2025 at 03:11 PM
+-- Generation Time: Sep 18, 2025 at 04:27 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -131,6 +131,89 @@ CREATE TABLE `chat_sessions` (
 INSERT INTO `chat_sessions` (`id`, `participant1_id`, `participant2_id`, `status`, `created_at`, `updated_at`) VALUES
 (1, 1, 3, 'open', '2025-09-16 06:50:18', '2025-09-16 06:50:18'),
 (2, 1, 36, 'open', '2025-09-16 16:10:19', '2025-09-16 16:10:19');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `coupons`
+--
+
+CREATE TABLE `coupons` (
+  `id` int(11) NOT NULL,
+  `code` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL,
+  `discount_type` enum('percent','fixed') NOT NULL,
+  `discount_value` decimal(10,2) NOT NULL,
+  `max_discount_amount` decimal(10,2) DEFAULT NULL,
+  `min_order_amount` decimal(10,2) DEFAULT NULL,
+  `exclude_discounted_items` tinyint(1) NOT NULL DEFAULT 0,
+  `applicable_payment_methods` varchar(255) DEFAULT NULL,
+  `applicable_roles` varchar(255) DEFAULT NULL,
+  `region_include` varchar(255) DEFAULT NULL,
+  `region_exclude` varchar(255) DEFAULT NULL,
+  `first_order_only` tinyint(1) NOT NULL DEFAULT 0,
+  `stackable` tinyint(1) NOT NULL DEFAULT 0,
+  `max_uses` int(11) DEFAULT NULL,
+  `used_count` int(11) NOT NULL DEFAULT 0,
+  `max_uses_per_user` int(11) DEFAULT NULL,
+  `start_date` timestamp NULL DEFAULT NULL,
+  `end_date` timestamp NULL DEFAULT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `coupons`
+--
+
+INSERT INTO `coupons` (`id`, `code`, `description`, `discount_type`, `discount_value`, `max_discount_amount`, `min_order_amount`, `exclude_discounted_items`, `applicable_payment_methods`, `applicable_roles`, `region_include`, `region_exclude`, `first_order_only`, `stackable`, `max_uses`, `used_count`, `max_uses_per_user`, `start_date`, `end_date`, `active`, `created_at`, `updated_at`) VALUES
+(1, 'WELCOME10', 'Giảm 10% cho đơn đầu tiên', 'percent', 10.00, 50000.00, 200000.00, 0, 'COD,e_wallet', 'Customer', NULL, NULL, 1, 0, 1000, 0, 1, '2025-08-31 17:00:00', '2025-12-31 16:59:59', 1, '2025-09-18 02:26:43', '2025-09-18 02:26:43');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `coupon_brands`
+--
+
+CREATE TABLE `coupon_brands` (
+  `coupon_id` int(11) NOT NULL,
+  `brand_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `coupon_categories`
+--
+
+CREATE TABLE `coupon_categories` (
+  `coupon_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `coupon_products`
+--
+
+CREATE TABLE `coupon_products` (
+  `coupon_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `coupon_uses`
+--
+
+CREATE TABLE `coupon_uses` (
+  `coupon_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `used_count` int(11) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -279,6 +362,18 @@ INSERT INTO `orders` (`id`, `user_id`, `order_date`, `status`, `total_amount`) V
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `order_coupons`
+--
+
+CREATE TABLE `order_coupons` (
+  `order_id` int(11) NOT NULL,
+  `coupon_id` int(11) NOT NULL,
+  `discount_amount` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `order_items`
 --
 
@@ -297,6 +392,18 @@ CREATE TABLE `order_items` (
 INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `price`) VALUES
 (1, 1, NULL, 2, 445000.00),
 (2, 2, NULL, 1, 250000.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_shipping_vouchers`
+--
+
+CREATE TABLE `order_shipping_vouchers` (
+  `order_id` int(11) NOT NULL,
+  `voucher_id` int(11) NOT NULL,
+  `shipping_discount_amount` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -576,6 +683,53 @@ INSERT INTO `shipping` (`id`, `order_id`, `address`, `shipping_method`, `trackin
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `shipping_vouchers`
+--
+
+CREATE TABLE `shipping_vouchers` (
+  `id` int(11) NOT NULL,
+  `code` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL,
+  `discount_type` enum('free','percent','fixed') NOT NULL,
+  `discount_value` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `max_discount_amount` decimal(10,2) DEFAULT NULL,
+  `min_order_amount` decimal(10,2) DEFAULT NULL,
+  `min_shipping_fee` decimal(10,2) DEFAULT NULL,
+  `applicable_carriers` varchar(255) DEFAULT NULL,
+  `region_include` varchar(255) DEFAULT NULL,
+  `region_exclude` varchar(255) DEFAULT NULL,
+  `max_uses` int(11) DEFAULT NULL,
+  `used_count` int(11) NOT NULL DEFAULT 0,
+  `max_uses_per_user` int(11) DEFAULT NULL,
+  `start_date` timestamp NULL DEFAULT NULL,
+  `end_date` timestamp NULL DEFAULT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `shipping_vouchers`
+--
+
+INSERT INTO `shipping_vouchers` (`id`, `code`, `description`, `discount_type`, `discount_value`, `max_discount_amount`, `min_order_amount`, `min_shipping_fee`, `applicable_carriers`, `region_include`, `region_exclude`, `max_uses`, `used_count`, `max_uses_per_user`, `start_date`, `end_date`, `active`, `created_at`, `updated_at`) VALUES
+(1, 'FREESHIPHN', 'Miễn phí ship nội thành Hà Nội', 'free', 0.00, NULL, 150000.00, 15000.00, 'GHTK,Viettel Post', 'Hà Nội', NULL, 500, 0, 3, '2025-08-31 17:00:00', '2025-12-31 16:59:59', 1, '2025-09-18 02:26:14', '2025-09-18 02:26:14');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `shipping_voucher_uses`
+--
+
+CREATE TABLE `shipping_voucher_uses` (
+  `voucher_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `used_count` int(11) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `suppliers`
 --
 
@@ -707,6 +861,42 @@ ALTER TABLE `chat_sessions`
   ADD KEY `idx_participant2` (`participant2_id`);
 
 --
+-- Indexes for table `coupons`
+--
+ALTER TABLE `coupons`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_coupon_code` (`code`),
+  ADD KEY `idx_coupon_active_window` (`active`,`start_date`,`end_date`);
+
+--
+-- Indexes for table `coupon_brands`
+--
+ALTER TABLE `coupon_brands`
+  ADD PRIMARY KEY (`coupon_id`,`brand_id`),
+  ADD KEY `fk_cb_brand` (`brand_id`);
+
+--
+-- Indexes for table `coupon_categories`
+--
+ALTER TABLE `coupon_categories`
+  ADD PRIMARY KEY (`coupon_id`,`category_id`),
+  ADD KEY `fk_cc_cate` (`category_id`);
+
+--
+-- Indexes for table `coupon_products`
+--
+ALTER TABLE `coupon_products`
+  ADD PRIMARY KEY (`coupon_id`,`product_id`),
+  ADD KEY `fk_cp_product` (`product_id`);
+
+--
+-- Indexes for table `coupon_uses`
+--
+ALTER TABLE `coupon_uses`
+  ADD PRIMARY KEY (`coupon_id`,`user_id`),
+  ADD KEY `fk_cu_user` (`user_id`);
+
+--
 -- Indexes for table `favorites`
 --
 ALTER TABLE `favorites`
@@ -755,12 +945,26 @@ ALTER TABLE `orders`
   ADD KEY `idx_order_status` (`status`);
 
 --
+-- Indexes for table `order_coupons`
+--
+ALTER TABLE `order_coupons`
+  ADD PRIMARY KEY (`order_id`,`coupon_id`),
+  ADD KEY `fk_oc_coupon` (`coupon_id`);
+
+--
 -- Indexes for table `order_items`
 --
 ALTER TABLE `order_items`
   ADD PRIMARY KEY (`id`),
   ADD KEY `order_id` (`order_id`),
   ADD KEY `product_id` (`product_id`);
+
+--
+-- Indexes for table `order_shipping_vouchers`
+--
+ALTER TABLE `order_shipping_vouchers`
+  ADD PRIMARY KEY (`order_id`,`voucher_id`),
+  ADD KEY `fk_osv_voucher` (`voucher_id`);
 
 --
 -- Indexes for table `payments`
@@ -825,6 +1029,21 @@ ALTER TABLE `shipping`
   ADD KEY `order_id` (`order_id`);
 
 --
+-- Indexes for table `shipping_vouchers`
+--
+ALTER TABLE `shipping_vouchers`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_ship_voucher_code` (`code`),
+  ADD KEY `idx_ship_voucher_active_window` (`active`,`start_date`,`end_date`);
+
+--
+-- Indexes for table `shipping_voucher_uses`
+--
+ALTER TABLE `shipping_voucher_uses`
+  ADD PRIMARY KEY (`voucher_id`,`user_id`),
+  ADD KEY `fk_svu_user` (`user_id`);
+
+--
 -- Indexes for table `suppliers`
 --
 ALTER TABLE `suppliers`
@@ -879,6 +1098,12 @@ ALTER TABLE `categories`
 --
 ALTER TABLE `chat_sessions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `coupons`
+--
+ALTER TABLE `coupons`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `favorites`
@@ -965,6 +1190,12 @@ ALTER TABLE `shipping`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `shipping_vouchers`
+--
+ALTER TABLE `shipping_vouchers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `suppliers`
 --
 ALTER TABLE `suppliers`
@@ -999,6 +1230,34 @@ ALTER TABLE `carts`
 ALTER TABLE `chat_sessions`
   ADD CONSTRAINT `chat_sessions_ibfk_1` FOREIGN KEY (`participant1_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `chat_sessions_ibfk_2` FOREIGN KEY (`participant2_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `coupon_brands`
+--
+ALTER TABLE `coupon_brands`
+  ADD CONSTRAINT `fk_cb_brand` FOREIGN KEY (`brand_id`) REFERENCES `brands` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_cb_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `coupon_categories`
+--
+ALTER TABLE `coupon_categories`
+  ADD CONSTRAINT `fk_cc_cate` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_cc_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `coupon_products`
+--
+ALTER TABLE `coupon_products`
+  ADD CONSTRAINT `fk_cp_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_cp_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `coupon_uses`
+--
+ALTER TABLE `coupon_uses`
+  ADD CONSTRAINT `fk_cu_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_cu_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `favorites`
@@ -1041,11 +1300,25 @@ ALTER TABLE `orders`
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
+-- Constraints for table `order_coupons`
+--
+ALTER TABLE `order_coupons`
+  ADD CONSTRAINT `fk_oc_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_oc_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `order_items`
 --
 ALTER TABLE `order_items`
   ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `order_shipping_vouchers`
+--
+ALTER TABLE `order_shipping_vouchers`
+  ADD CONSTRAINT `fk_osv_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_osv_voucher` FOREIGN KEY (`voucher_id`) REFERENCES `shipping_vouchers` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `payments`
@@ -1086,6 +1359,13 @@ ALTER TABLE `role_permissions`
 --
 ALTER TABLE `shipping`
   ADD CONSTRAINT `shipping_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `shipping_voucher_uses`
+--
+ALTER TABLE `shipping_voucher_uses`
+  ADD CONSTRAINT `fk_svu_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_svu_voucher` FOREIGN KEY (`voucher_id`) REFERENCES `shipping_vouchers` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `user_roles`
