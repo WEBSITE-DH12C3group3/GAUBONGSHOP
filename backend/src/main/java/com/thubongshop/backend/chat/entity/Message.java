@@ -2,42 +2,27 @@ package com.thubongshop.backend.chat.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.Instant;
+import java.sql.Timestamp;
 
-@Entity
-@Table(name = "messages", indexes = {
-    @Index(name = "idx_session", columnList = "chat_session_id"),
-    @Index(name = "idx_sender", columnList = "sender_id"),
-    @Index(name = "idx_unread", columnList = "is_read")
-})
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Entity @Table(name="messages")
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Message {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
 
-  @Column(name = "chat_session_id", nullable = false)
-  private Integer chatSessionId;
+  @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name="chat_session_id", nullable=false)
+  private ChatSession session;
 
-  @Column(name = "sender_id", nullable = false)
+  @Column(name="sender_id", nullable=false)
   private Integer senderId;
 
-  @Lob
-  @Column(nullable = false)
+  @Column(columnDefinition = "TEXT", nullable=false)
   private String content;
 
-  @Builder.Default
-  @Column(name = "is_read", nullable = false)
-  private Boolean isRead = false;
+  @Column(name="is_read", nullable=false)
+  private boolean read = false;
 
-  @CreationTimestamp
-  @Column(name = "created_at", updatable = false, nullable = false)
-  private Instant createdAt;
+  @Column(name="created_at", insertable=false, updatable=false)
+  private Timestamp createdAt;
 }

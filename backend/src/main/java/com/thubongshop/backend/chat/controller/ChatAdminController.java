@@ -1,80 +1,54 @@
 package com.thubongshop.backend.chat.controller;
 
-import com.thubongshop.backend.chat.dto.ChatMessageRequest;
-import com.thubongshop.backend.chat.dto.ChatMessageResponse;
-import com.thubongshop.backend.chat.dto.ChatSessionResponse;
-import com.thubongshop.backend.chat.entity.ChatSession;
+import com.thubongshop.backend.chat.dto.*;
 import com.thubongshop.backend.chat.service.ChatService;
 import com.thubongshop.backend.security.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/chat")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')") // chỉ admin
 public class ChatAdminController {
-
   private final ChatService chat;
 
-  // Danh sách phiên chat (lọc theo status: open/closed/pending)
+  // Danh sách phiên chat theo trạng thái (open/pending/closed) + phân trang
   @GetMapping("/sessions")
-  public Page<ChatSessionResponse> listSessions(
-      @RequestParam(required = false) ChatSession.Status status,   // <— dùng enum
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "20") int size
-  ) {
-    return chat.sessionsForAdmin(                                  // <— gọi đúng tên hàm service
-        status,
-        PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"))
-    );
+  public PageResponse<ChatSessionDTO> list(@RequestParam(defaultValue="open") String status,
+                                           @RequestParam(defaultValue="0") int page,
+                                           @RequestParam(defaultValue="10") int size) {
+    var p = chat.adminList(status, PageRequest.of(page, size));
+    return PageResponse.map(p, x -> x);
   }
 
-  // Lấy tin nhắn trong 1 phiên (admin phải là participant)
-  @GetMapping("/sessions/{id}/messages")
-  public Page<ChatMessageResponse> messages(
-      @PathVariable Integer id,
-      @AuthenticationPrincipal UserPrincipal me,
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "50") int size
-  ) {
-    return chat.listMessages(
-        id,
-        PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id")),
-        me.getId()
-    );
+  // Xem tin nhắn trong 1 session
+  @GetMapping("/sessions/{sessionId}/messages")
+  public PageResponse<MessageDTO> messages(@AuthenticationPrincipal UserPrincipal admin,
+                                           @PathVariable Integer sessionId,
+                                           @RequestParam(defaultValue="0") int page,
+                                           @RequestParam(defaultValue="50") int size) {
+    var p = chat.messages(admin.getId().intValue(), sessionId, PageRequest.of(page, size));
+    return new PageResponse<>(p.getContent(), p.getNumber(), p.getSize(), p.getTotalElements(), p.getTotalPages());
   }
 
-  // Gửi tin trong 1 phiên
-  @PostMapping("/sessions/{id}/messages")
-  public ChatMessageResponse send(
-      @PathVariable Integer id,
-      @AuthenticationPrincipal UserPrincipal me,
-      @Valid @RequestBody ChatMessageRequest body
-  ) {
-    return chat.send(id, me.getId(), body.getContent());
+  // Trả lời khách
+  @PostMapping("/sessions/{sessionId}/reply")
+  public MessageDTO reply(@AuthenticationPrincipal UserPrincipal admin,
+                          @PathVariable Integer sessionId,
+                          @Valid @RequestBody SendMessageRequest req) {
+    return chat.sendFromAdmin(admin.getId().intValue(), sessionId, req.getContent());
   }
 
-  // Đổi trạng thái phiên: ?status=open|closed|pending
-  @PostMapping("/sessions/{id}/status")
-  public ResponseEntity<ChatSession.Status> updateStatus(          // <— trả về Status
-      @PathVariable Integer id,
-      @RequestParam ChatSession.Status status
-  ) {
-    return ResponseEntity.ok(chat.updateStatus(id, status));
-  }
-
-  // Đánh dấu đã đọc các tin từ phía còn lại
-  @PostMapping("/sessions/{id}/read")
-  public ResponseEntity<Integer> markRead(                         // <— trả về Integer
-      @PathVariable Integer id,
-      @AuthenticationPrincipal UserPrincipal me
-  ) {
-    return ResponseEntity.ok(chat.markRead(id, me.getId()));
+  // Đóng session
+  @PatchMapping("/sessions/{sessionId}/close")
+  public ResponseEntity<Void> close(@PathVariable Integer sessionId) {
+    chat.closeSession(sessionId);
+    return ResponseEntity.ok().build();
   }
 }

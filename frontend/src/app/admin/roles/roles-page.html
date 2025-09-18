@@ -1,114 +1,327 @@
-<div class="p-6 space-y-6">
+<div class="p-6 space-y-8">
+  <!-- Header -->
   <div class="flex items-center justify-between">
     <div>
-      <h1 class="text-xl font-semibold">Nhóm người dùng</h1>
-      <p class="text-sm text-gray-500">Tạo/đổi tên nhóm và quản lý thành viên.</p>
+      <h1 class="text-2xl font-semibold tracking-tight">Quản lý người dùng & nhóm</h1>
+      <p class="text-sm text-gray-500">Tổ chức người dùng theo nhóm, gán quyền, thêm tài khoản mới.</p>
     </div>
-    <button (click)="openCreate()" class="px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700">
-      <i class="fa-solid fa-plus mr-2"></i> Thêm nhóm
-    </button>
+
+    <div class="flex items-center gap-2">
+      <button (click)="openCreateUser()"
+              class="px-4 py-2 rounded-xl bg-gray-900 text-white hover:bg-black">
+        <i class="fa-solid fa-user-plus mr-2"></i> Thêm tài khoản
+      </button>
+      <button (click)="openCreateRole()"
+              class="px-4 py-2 rounded-xl bg-pink-600 text-white hover:bg-pink-700">
+        <i class="fa-solid fa-layer-group mr-2"></i> Thêm nhóm
+      </button>
+    </div>
   </div>
 
-  <div class="bg-white rounded-2xl shadow">
+  <!-- BLOCK 1: USERS -->
+  <section class="bg-white rounded-2xl shadow divide-y">
+    <!-- Filters -->
+    <div class="p-5 flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
+      <div class="flex-1 flex items-center gap-2">
+        <div class="relative flex-1">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
+          <input
+            [(ngModel)]="userQ"
+            (ngModelChange)="onUserSearchChange($event)"
+            (keyup.enter)="reloadUsers()"
+            class="..."
+            placeholder="Tìm theo email / tên" />
+
+        </div>
+
+        <div class="min-w-[220px]">
+          <select class="w-full border rounded-xl px-3 py-2"
+                  [(ngModel)]="filterRoleId"
+                  (change)="reloadUsers()">
+            <option [ngValue]="0">Tất cả nhóm</option>
+            <option *ngFor="let r of roles" [ngValue]="r.id" [disabled]="isSystemRole(r)">{{ r.name }}</option>
+          </select>
+        </div>
+
+        <button class="px-3 py-2 rounded-xl border hover:bg-gray-50"
+                (click)="resetUserFilters()">
+          <i class="fa-solid fa-rotate mr-2"></i> Đặt lại
+        </button>
+      </div>
+
+      <div class="text-sm text-gray-500">
+        {{ usersTotal }} tài khoản
+      </div>
+    </div>
+
+    <!-- Users table -->
     <div class="overflow-x-auto">
       <table class="min-w-full text-sm">
         <thead class="bg-gray-50 text-gray-600">
           <tr>
-            <th class="px-4 py-3 text-left">#</th>
-            <th class="px-4 py-3 text-left">Tên nhóm</th>
-            <th class="px-4 py-3 text-right w-64">Thao tác</th>
+            <th class="px-4 py-3 text-left">Người dùng</th>
+            <th class="px-4 py-3 text-left">Số điện thoại</th>
+            <th class="px-4 py-3 text-left">Email</th>
+            <th class="px-4 py-3 text-left">Nhóm</th>
+            <th class="px-4 py-3 text-right w-56">Thao tác</th>
           </tr>
         </thead>
-        <tbody>
-          <tr *ngFor="let r of roles; let i = index" class="border-t">
-            <td class="px-4 py-3 text-gray-500">{{ i + 1 }}</td>
-            <td class="px-4 py-3 font-medium">{{ r.name }}</td>
+        <tbody class="divide-y">
+          <tr *ngFor="let u of users" class="hover:bg-gray-50">
+            <td class="px-4 py-3">
+              <div class="font-medium">{{ u.username || '—' }}</div>
+              <div class="text-gray-500 text-xs">#{{ u.id }}</div>
+            </td>
+            <td class="px-4 py-3">{{ u.phone || '—' }}</td>
+            <td class="px-4 py-3">{{ u.email }}</td>
+            <td class="px-4 py-3">
+              <div class="flex flex-wrap gap-2">
+                <span *ngFor="let r of (u.roles || [])"
+                      class="px-2 py-0.5 rounded-lg bg-gray-100 text-gray-700 text-xs">
+                  {{ r.name }}
+                </span>
+                <span *ngIf="!u.roles?.length" class="text-gray-400 text-xs">Chưa có nhóm</span>
+              </div>
+            </td>
             <td class="px-4 py-3 text-right space-x-2">
-              <button (click)="openMembers(r)" class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200">
-                <i class="fa-solid fa-user-plus mr-1"></i> Thành viên
+              <button class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200"
+                      (click)="openAssignRoleForUser(u)">
+                <i class="fa-solid fa-user-gear mr-1"></i> Gán nhóm
               </button>
-              <button (click)="openRename(r)" class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200">
-                <i class="fa-solid fa-pen mr-1"></i> Đổi tên
-              </button>
-              <button (click)="remove(r)" class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100">
+              <button class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
+                      (click)="deleteUser(u)" [disabled]="isProtectedUser(u)">
                 <i class="fa-solid fa-trash mr-1"></i> Xoá
               </button>
             </td>
           </tr>
-          <tr *ngIf="!roles.length && !loading">
-            <td colspan="3" class="px-4 py-6 text-center text-gray-500">Chưa có nhóm nào</td>
+
+          <tr *ngIf="!users.length && !usersLoading">
+            <td colspan="5" class="px-4 py-8 text-center text-gray-500">Không có dữ liệu</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div *ngIf="loading" class="p-6 text-center text-gray-500">Đang tải…</div>
-  </div>
+
+    <!-- Pagination -->
+    <div class="p-4 flex items-center justify-between">
+      <div class="text-xs text-gray-500">
+        Trang {{ usersPage + 1 }} / {{ usersTotalPages || 1 }}
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="px-3 py-1.5 rounded-lg border"
+                (click)="prevUsersPage()" [disabled]="usersPage<=0">Trước</button>
+        <button class="px-3 py-1.5 rounded-lg border"
+                (click)="nextUsersPage()" [disabled]="(usersPage+1)>=usersTotalPages">Sau</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- BLOCK 2: ROLES + MEMBERS -->
+  <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- Left: roles -->
+    <div class="lg:col-span-4 space-y-3">
+      <div class="bg-white rounded-2xl shadow p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div class="font-semibold">Nhóm người dùng</div>
+          <button class="text-sm text-pink-600 hover:underline" (click)="openCreateRole()">
+            <i class="fa-solid fa-plus mr-1"></i> Thêm nhóm
+          </button>
+        </div>
+
+        <div class="divide-y">
+          <button *ngFor="let r of roles"
+                  class="w-full text-left py-3 px-2 rounded-lg hover:bg-gray-50 flex items-center justify-between"
+                  [class.bg-pink-50]="selectedRole?.id===r.id"
+                  (click)="selectRole(r)">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-layer-group text-gray-400"></i>
+              <div class="font-medium">{{ r.name }}</div>
+              <span *ngIf="isSystemRole(r)" class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">system</span>
+            </div>
+            <div class="text-xs text-gray-400">{{ roleMemberCount[r.id] ?? '—' }}</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow p-5">
+        <div class="font-semibold mb-2">Thao tác nhóm</div>
+        <div class="space-x-2">
+          <button class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200"
+                  (click)="openRenameRole()" [disabled]="!selectedRole || isSystemRole(selectedRole!)">
+            <i class="fa-solid fa-pen mr-1"></i> Đổi tên
+          </button>
+          <button class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
+                  (click)="deleteRole()" [disabled]="!selectedRole || isSystemRole(selectedRole!)">
+            <i class="fa-solid fa-trash mr-1"></i> Xoá
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: members of selected role -->
+    <div class="lg:col-span-8 bg-white rounded-2xl shadow">
+      <div class="p-5 flex items-center justify-between border-b">
+        <div>
+          <div class="font-semibold">{{ selectedRole?.name || '—' }}</div>
+          <div class="text-xs text-gray-500">Danh sách thành viên trong nhóm</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400"></i>
+            <input class="border rounded-xl pl-9 pr-3 py-2"
+                   placeholder="Tìm trong nhóm"
+                   [(ngModel)]="memberQ"
+                   (ngModelChange)="reloadMembers()" />
+          </div>
+          <button class="px-3 py-2 rounded-xl bg-gray-900 text-white hover:bg-black"
+                  (click)="openAddMember()" [disabled]="!selectedRole">
+            <i class="fa-solid fa-user-plus mr-2"></i> Thêm người dùng
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-gray-50 text-gray-600">
+          <tr>
+            <th class="px-4 py-3 text-left">Người dùng</th>
+            <th class="px-4 py-3 text-left">Số điện thoại</th>
+            <th class="px-4 py-3 text-left">Email</th>
+            <th class="px-4 py-3 text-right w-40">Thao tác</th>
+          </tr>
+          </thead>
+          <tbody class="divide-y">
+          <tr *ngFor="let u of roleMembers" class="hover:bg-gray-50">
+            <td class="px-4 py-3">
+              <div class="font-medium">{{ u.username || '—' }}</div>
+              <div class="text-gray-500 text-xs">#{{ u.id }}</div>
+            </td>
+            <td class="px-4 py-3">{{ u.phone || '—' }}</td>
+            <td class="px-4 py-3">{{ u.email }}</td>
+            <td class="px-4 py-3 text-right">
+              <button class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200"
+                      (click)="removeMember(u)">
+                <i class="fa-solid fa-user-minus mr-1"></i> Gỡ
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="!roleMembers.length && selectedRole && !membersLoading">
+            <td colspan="4" class="px-4 py-8 text-center text-gray-500">Nhóm chưa có thành viên</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="p-4 flex items-center justify-between">
+        <div class="text-xs text-gray-500">
+          Trang {{ membersPage + 1 }} / {{ membersTotalPages || 1 }}
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="px-3 py-1.5 rounded-lg border"
+                  (click)="prevMembersPage()" [disabled]="membersPage<=0">Trước</button>
+          <button class="px-3 py-1.5 rounded-lg border"
+                  (click)="nextMembersPage()"
+                  [disabled]="(membersPage+1)>=membersTotalPages">Sau</button>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Toast -->
   <div *ngIf="toast" class="fixed bottom-6 right-6 bg-black text-white px-4 py-2 rounded-lg opacity-90 shadow">
     {{ toast }}
   </div>
 
-  <!-- Modal: create -->
-  <div *ngIf="showCreate" class="fixed inset-0 bg-black/40 grid place-items-center z-10">
+  <!-- Modal: create role -->
+  <div *ngIf="showCreateRole" class="fixed inset-0 bg-black/40 grid place-items-center z-50">
     <div class="bg-white rounded-2xl w-full max-w-md p-6 space-y-4">
       <h3 class="font-semibold text-lg">Thêm nhóm</h3>
-      <input class="w-full border rounded-lg px-3 py-2" placeholder="Tên nhóm" [(ngModel)]="newName" />
-      <div class="flex justify-end space-x-2">
-        <button (click)="showCreate=false" class="px-3 py-2 rounded-lg">Huỷ</button>
-        <button (click)="create()" class="px-4 py-2 rounded-lg bg-pink-600 text-white">Tạo</button>
+      <input class="w-full border rounded-xl px-3 py-2" placeholder="Tên nhóm" [(ngModel)]="newRoleName" />
+      <div class="flex justify-end gap-2">
+        <button (click)="showCreateRole=false" class="px-3 py-2 rounded-xl">Huỷ</button>
+        <button (click)="createRole()" class="px-4 py-2 rounded-xl bg-pink-600 text-white">Tạo</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal: rename -->
-  <div *ngIf="showRename" class="fixed inset-0 bg-black/40 grid place-items-center z-10">
+  <!-- Modal: rename role -->
+  <div *ngIf="showRenameRole" class="fixed inset-0 bg-black/40 grid place-items-center z-50">
     <div class="bg-white rounded-2xl w-full max-w-md p-6 space-y-4">
       <h3 class="font-semibold text-lg">Đổi tên nhóm</h3>
-      <input class="w-full border rounded-lg px-3 py-2" [(ngModel)]="renameValue" />
-      <div class="flex justify-end space-x-2">
-        <button (click)="showRename=false" class="px-3 py-2 rounded-lg">Huỷ</button>
-        <button (click)="rename()" class="px-4 py-2 rounded-lg bg-pink-600 text-white">Lưu</button>
+      <input class="w-full border rounded-xl px-3 py-2" [(ngModel)]="renameRoleValue" />
+      <div class="flex justify-end gap-2">
+        <button (click)="showRenameRole=false" class="px-3 py-2 rounded-xl">Huỷ</button>
+        <button (click)="renameRole()" class="px-4 py-2 rounded-xl bg-pink-600 text-white">Lưu</button>
       </div>
     </div>
   </div>
 
-  <!-- Drawer: members -->
-  <div *ngIf="showMembers" class="fixed inset-0 flex z-20">
-    <div class="flex-1 bg-black/40" (click)="showMembers=false"></div>
-    <div class="w-full max-w-lg bg-white h-full shadow-xl p-6 overflow-y-auto">
+  <!-- Modal: add member (user picker) -->
+  <div *ngIf="showAddMember" class="fixed inset-0 bg-black/40 grid place-items-center z-50">
+    <div class="bg-white rounded-2xl w-full max-w-2xl p-6">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h3 class="font-semibold text-lg">Thành viên nhóm</h3>
-          <p class="text-sm text-gray-500">{{ membersRole?.name }}</p>
+          <h3 class="font-semibold text-lg">Thêm người dùng vào: {{ selectedRole?.name }}</h3>
+          <p class="text-xs text-gray-500">Chọn 1 tài khoản để thêm.</p>
         </div>
-        <button class="text-gray-500 hover:text-black" (click)="showMembers=false"><i class="fa-solid fa-xmark text-xl"></i></button>
+        <button class="text-gray-500 hover:text-black" (click)="showAddMember=false">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
       </div>
 
-      <div class="mb-4">
-        <div class="flex">
-          <input [(ngModel)]="search" (keyup.enter)="lookupUsers()" class="flex-1 border rounded-l-lg px-3 py-2" placeholder="Tìm theo email / tên" />
-          <button (click)="lookupUsers()" class="px-4 rounded-r-lg bg-gray-900 text-white">Tìm</button>
-        </div>
-        <p class="text-xs text-gray-400 mt-1">Chọn người dùng để thêm vào nhóm này.</p>
+      <div class="flex gap-2 mb-3">
+        <input class="flex-1 border rounded-xl px-3 py-2" placeholder="Tìm theo email / tên"
+               [(ngModel)]="pickerQ" (keyup.enter)="searchPicker()" />
+        <button class="px-4 py-2 rounded-xl bg-gray-900 text-white" (click)="searchPicker()">Tìm</button>
       </div>
 
-      <div class="space-y-2">
-        <div *ngFor="let u of candidates" class="flex items-center justify-between border rounded-xl p-3">
+      <div class="max-h-80 overflow-y-auto space-y-2">
+        <div *ngFor="let u of pickerUsers"
+             class="flex items-center justify-between border rounded-xl p-3">
           <div>
             <div class="font-medium">{{ u.username || u.email }}</div>
             <div class="text-xs text-gray-500">{{ u.email }}</div>
           </div>
-          <div class="space-x-2">
-            <button (click)="addToRole(u)" [disabled]="addBusy" class="px-3 py-1.5 rounded-lg bg-pink-600 text-white hover:bg-pink-700 disabled:opacity-50">
-              <i class="fa-solid fa-user-plus mr-1"></i> Thêm
-            </button>
-            <button (click)="removeFromRole(u)" [disabled]="removeBusy[u.id]" class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50">
-              <i class="fa-solid fa-user-minus mr-1"></i> Gỡ
-            </button>
-          </div>
+          <button class="px-3 py-1.5 rounded-lg bg-pink-600 text-white hover:bg-pink-700"
+                  (click)="addMember(u)">
+            <i class="fa-solid fa-user-plus mr-1"></i> Thêm
+          </button>
         </div>
-        <div *ngIf="!candidates.length" class="text-sm text-gray-500">Nhập từ khoá để tìm người dùng…</div>
+        <div *ngIf="!pickerUsers.length" class="text-sm text-gray-500">Không có kết quả</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: create user -->
+  <div *ngIf="showCreateUser" class="fixed inset-0 bg-black/40 grid place-items-center z-50">
+    <div class="bg-white rounded-2xl w-full max-w-2xl p-6 space-y-4">
+      <h3 class="font-semibold text-lg">Thêm tài khoản</h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input class="border rounded-xl px-3 py-2" placeholder="Tên hiển thị (tuỳ chọn)" [(ngModel)]="newUser.username">
+        <input class="border rounded-xl px-3 py-2" placeholder="Số điện thoại (tuỳ chọn)" [(ngModel)]="newUser.phone">
+        <input class="border rounded-xl px-3 py-2 md:col-span-2" placeholder="Email" [(ngModel)]="newUser.email">
+        <input type="password" class="border rounded-xl px-3 py-2" placeholder="Mật khẩu" [(ngModel)]="newUser.password">
+        <input type="password" class="border rounded-xl px-3 py-2" placeholder="Nhập lại mật khẩu" [(ngModel)]="newUser.password2">
+      </div>
+
+      <div>
+        <div class="text-sm font-medium mb-2">Gán nhóm ban đầu (tuỳ chọn)</div>
+        <div class="flex flex-wrap gap-2">
+          <label *ngFor="let r of roles" [class.opacity-50]="isSystemRole(r)"
+                 class="inline-flex items-center gap-2 border rounded-xl px-3 py-1.5 cursor-pointer hover:bg-gray-50">
+            <input type="checkbox" class="h-4 w-4"
+                   [disabled]="isSystemRole(r)"
+                   [checked]="draftUserRoleIds.has(r.id)"
+                   (change)="toggleDraftUserRole(r.id, $event)" />
+            <span>{{ r.name }}</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button (click)="showCreateUser=false" class="px-3 py-2 rounded-xl">Huỷ</button>
+        <button (click)="createUser()" class="px-4 py-2 rounded-xl bg-gray-900 text-white">Tạo tài khoản</button>
       </div>
     </div>
   </div>

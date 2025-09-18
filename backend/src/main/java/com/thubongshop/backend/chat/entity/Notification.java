@@ -2,44 +2,30 @@ package com.thubongshop.backend.chat.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.Instant;
+import java.sql.Timestamp;
 
-@Entity
-@Table(name = "notifications", indexes = {
-    @Index(name = "idx_n_user", columnList = "user_id"),
-    @Index(name = "idx_n_message", columnList = "message_id")
-})
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Entity @Table(name="notifications")
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Notification {
-
-  public enum Type { new_message, session_update }
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
 
-  @Column(name = "user_id", nullable = false)
+  @Column(name="user_id", nullable=false)
   private Integer userId;
 
-  @Column(name = "message_id", nullable = false)
-  private Integer messageId;
+  @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name="message_id", nullable=false)
+  private Message message;
 
-  @Builder.Default
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false, length = 30)
-  private Type type = Type.new_message;
+  @Column(nullable=false)
+  private Type type = Type.new_message; // new_message | session_update
 
-  @Builder.Default
-  @Column(name = "is_read", nullable = false)
-  private Boolean isRead = false;
+  @Column(name="is_read", nullable=false)
+  private boolean read = false;
 
-  @CreationTimestamp
-  @Column(name = "created_at", updatable = false, nullable = false)
-  private Instant createdAt;
+  @Column(name="created_at", insertable=false, updatable=false)
+  private Timestamp createdAt;
+
+  public enum Type { new_message, session_update }
 }
