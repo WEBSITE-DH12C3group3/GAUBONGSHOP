@@ -46,7 +46,9 @@ public class SecurityConfig {
           "/api/categories/**",
           "/api/brands/**",
           "/api/attributes/**",
-          "/api/reviews/products/**"
+          "/api/reviews/products/**",
+          "/api/imports/**",
+          "/api/import-details/**"
         ).permitAll()
 
         // Static & docs

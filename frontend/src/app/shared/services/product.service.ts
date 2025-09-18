@@ -10,28 +10,31 @@ import { Product, ProductResponse } from '../../models/product.model';
 export class ProductService {
   private readonly apiUrl = `${environment.apiUrl}/products`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * 🔹 Lấy danh sách sản phẩm (có phân trang, filter, search)
    */
-  getAllProducts(
-    page: number = 0,
-    size: number = 12,
-    keyword?: string,
-    categoryId?: number,
-    brandId?: number
-  ): Observable<ProductResponse> {
-    let params = new HttpParams()
-      .set('page', page)
-      .set('size', size);
+getAllProducts(
+  page: number = 0,
+  size: number = 12,
+  keyword?: string,
+  categoryId?: number,
+  brandId?: number,
+  supplierId?: number   // ✅ thêm tham số
+): Observable<ProductResponse> {
+  let params = new HttpParams()
+    .set('page', page)
+    .set('size', size);
 
-    if (keyword) params = params.set('keyword', keyword);
-    if (categoryId) params = params.set('categoryId', categoryId);
-    if (brandId) params = params.set('brandId', brandId);
+  if (keyword) params = params.set('keyword', keyword);
+  if (categoryId) params = params.set('categoryId', categoryId);
+  if (brandId) params = params.set('brandId', brandId);
+  if (supplierId) params = params.set('supplierId', supplierId); // ✅ gửi supplierId
 
-    return this.http.get<ProductResponse>(this.apiUrl, { params });
-  }
+  return this.http.get<ProductResponse>(this.apiUrl, { params });
+}
+
 
   /**
    * 🔹 Lấy sản phẩm theo category (có phân trang)

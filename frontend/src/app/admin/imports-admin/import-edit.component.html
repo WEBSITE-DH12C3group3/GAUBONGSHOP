@@ -1,0 +1,18 @@
+<div class="p-6 max-w-lg mx-auto bg-white rounded-lg shadow-md" *ngIf="importData">
+  <h2 class="text-xl font-bold mb-4">Sửa Phiếu nhập #{{ importData?.id }}</h2>
+
+  <label class="block mb-2">Ghi chú</label>
+  <textarea [(ngModel)]="importData.notes" class="w-full border rounded p-2 mb-4"></textarea>
+
+  <label class="block mb-2">Trạng thái</label>
+  <select [(ngModel)]="importData.status" class="w-full border rounded p-2 mb-4">
+    <option value="pending">Pending</option>
+    <option value="completed">Completed</option>
+    <option value="canceled">Canceled</option>
+  </select>
+
+  <button (click)="updateImport()"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+    Cập nhật
+  </button>
+</div>

@@ -1,0 +1,39 @@
+<div class="p-6">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-bold">Danh sách Phiếu nhập</h2>
+    <a routerLink="/admin/imports/add"
+       class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700">
+      + Thêm phiếu nhập
+    </a>
+  </div>
+
+  <div class="overflow-x-auto bg-white rounded-lg shadow-md">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-100 text-gray-600 uppercase">
+        <tr>
+          <th class="px-6 py-3">ID</th>
+          <th class="px-6 py-3">Ngày nhập</th>
+          <th class="px-6 py-3">Tổng tiền</th>
+          <th class="px-6 py-3">Trạng thái</th>
+          <th class="px-6 py-3">Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let imp of imports" class="border-b hover:bg-gray-50">
+          <td class="px-6 py-3">{{ imp.id }}</td>
+          <td class="px-6 py-3">{{ imp.importDate | date:'dd/MM/yyyy' }}</td>
+          <td class="px-6 py-3 text-pink-600 font-bold">{{ imp.totalCost | currency:'VND':'' }}</td>
+          <td class="px-6 py-3">{{ imp.status }}</td>
+          <td class="px-6 py-3 flex gap-2">
+            <a [routerLink]="['/admin/imports', imp.id, 'details']"
+               class="px-3 py-1 bg-blue-500 text-white rounded">Chi tiết</a>
+            <a [routerLink]="['/admin/imports', imp.id, 'edit']"
+               class="px-3 py-1 bg-yellow-500 text-white rounded">Sửa</a>
+            <button (click)="deleteImport(imp.id)"
+                    class="px-3 py-1 bg-red-500 text-white rounded">Xóa</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

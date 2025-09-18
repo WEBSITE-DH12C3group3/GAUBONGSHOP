@@ -60,4 +60,11 @@ export class SupplierAdminService {
   delete(id: number): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/${id}` /*, { withCredentials: true }*/);
   }
+
+  listAll(): Observable<Supplier[]> {
+  return this.list('', 0, 9999).pipe(
+    map((res: SupplierResponse) => res.items)
+  );
+}
+
 }

@@ -43,7 +43,9 @@ export class ProductAdminService {
       catchError(() => this.http.put<any>(`${this.apiUrl}/${id}`, body))
     );
   }
-
+ getAllProducts(page: number = 0, size: number = 10): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}?page=${page}&size=${size}`);
+  }
   // Gợi ý: trả any để dễ normalize nhiều kiểu payload
   getAttributes(): Observable<any> {
     return this.http.get<any>(`${environment.apiUrl}/attributes`);

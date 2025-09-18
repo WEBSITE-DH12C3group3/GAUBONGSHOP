@@ -20,6 +20,12 @@ import { CategoriesAdminEditComponent } from './admin/categories-admin/categorie
 import { ProductsAdminComponent } from './admin/products-admin/products-admin';
 import { ProductAdminFormComponent } from './admin/products-admin/product-admin-form';
 
+// Imports admin
+import { ImportListComponent } from './admin/imports-admin/import-list.component';
+import { ImportAddComponent } from './admin/imports-admin/import-add.component';
+import { ImportEditComponent } from './admin/imports-admin/import-edit.component';
+import { ImportDetailComponent } from './admin/imports-admin/import-detail.component';
+
 // Brands admin
 import { BrandAdminListComponent } from './admin/brands-admin/brand-admin-list';
 import { BrandAdminFormComponent } from './admin/brands-admin/brand-admin-form';
@@ -137,6 +143,16 @@ export const routes: Routes = [
           { path: ':id', component: ShipVoucherAdminFormComponent },
         ],
       },
+      {
+  path: 'imports',
+  children: [
+    { path: '', component: ImportListComponent },          // /admin/imports
+    { path: 'add', component: ImportAddComponent },        // /admin/imports/add
+    { path: 'edit/:id', component: ImportEditComponent },  // /admin/imports/edit/123
+    { path: 'detail/:id', component: ImportDetailComponent } // /admin/imports/detail/123
+  ]
+}
+
     ],
   },
 

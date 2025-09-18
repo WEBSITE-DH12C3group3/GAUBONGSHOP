@@ -1,0 +1,48 @@
+<div class="p-6 bg-white shadow rounded-lg">
+  <h2 class="text-xl font-bold mb-4">
+    Chi tiết phiếu nhập #{{ importData?.id }}
+  </h2>
+
+  <!-- Thông tin chung -->
+  <div class="mb-6">
+    <p><strong>Ngày nhập:</strong> {{ importData?.importDate | date:'dd/MM/yyyy HH:mm' }}</p>
+    <p><strong>Trạng thái:</strong>
+      <span [ngClass]="{
+        'text-green-600': importData?.status === 'completed',
+        'text-yellow-600': importData?.status === 'pending',
+        'text-red-600': importData?.status === 'canceled'
+      }">
+        {{ importData?.status }}
+      </span>
+    </p>
+    <p><strong>Tổng tiền:</strong> {{ getTotal() | currency:'VND':'' }}</p>
+    <p><strong>Ghi chú:</strong> {{ importData?.notes }}</p>
+  </div>
+
+  <!-- Bảng chi tiết sản phẩm -->
+  <h3 class="text-lg font-semibold mb-3">Danh sách sản phẩm</h3>
+  <table class="min-w-full border border-gray-200 rounded-lg">
+    <thead class="bg-gray-100 text-gray-700">
+      <tr>
+        <th class="px-4 py-2 border">ID</th>
+        <th class="px-4 py-2 border">Sản phẩm</th>
+        <th class="px-4 py-2 border">Số lượng</th>
+        <th class="px-4 py-2 border">Đơn giá</th>
+        <th class="px-4 py-2 border">Thành tiền</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let detail of importDetails">
+  <td class="px-4 py-2 border">{{ detail.id }}</td>
+  <td class="px-4 py-2 border">{{ detail.product?.name }}</td>
+  <td class="px-4 py-2 border">{{ detail.quantity }}</td>
+  <td class="px-4 py-2 border">{{ detail.unitPrice | currency:'VND':'' }}</td>
+  <td class="px-4 py-2 border">{{ detail.quantity * detail.unitPrice | currency:'VND':'' }}</td>
+</tr>
+<tr *ngIf="!importDetails || importDetails.length === 0">
+  <td colspan="5" class="text-center py-4">Chưa có sản phẩm nào</td>
+</tr>
+
+    </tbody>
+  </table>
+</div>

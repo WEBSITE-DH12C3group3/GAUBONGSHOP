@@ -14,35 +14,41 @@ public class ImportDetailController {
     private final ImportDetailService importDetailService;
 
     @GetMapping
-    public ResponseEntity<List<ImportDetail>> getAllDetails() {
-        return ResponseEntity.ok(importDetailService.getAllDetails());
+    public ResponseEntity<List<ImportDetail>> getAll() {
+        return ResponseEntity.ok(importDetailService.getAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ImportDetail> getDetailById(@PathVariable Long id) {
-        return importDetailService.getDetailById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ImportDetail> getById(@PathVariable Integer  id) {
+        return ResponseEntity.ok(importDetailService.getById(id));
     }
 
     @GetMapping("/import/{importId}")
-    public ResponseEntity<List<ImportDetail>> getDetailsByImportId(@PathVariable Long importId) {
-        return ResponseEntity.ok(importDetailService.getDetailsByImportId(importId));
+    public ResponseEntity<List<ImportDetail>> getByImportId(@PathVariable Integer  importId) {
+        return ResponseEntity.ok(importDetailService.getByImportId(importId));
     }
 
     @PostMapping
-    public ResponseEntity<ImportDetail> createDetail(@RequestBody ImportDetail detail) {
-        return ResponseEntity.ok(importDetailService.createDetail(detail));
+    public ResponseEntity<ImportDetail> create(
+            @RequestParam Integer  importId,
+            @RequestParam Integer  productId,
+            @RequestBody ImportDetail detail
+    ) {
+        return ResponseEntity.ok(importDetailService.create(importId, productId, detail));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ImportDetail> updateDetail(@PathVariable Long id, @RequestBody ImportDetail detail) {
-        return ResponseEntity.ok(importDetailService.updateDetail(id, detail));
+    public ResponseEntity<ImportDetail> update(
+            @PathVariable Integer  id,
+            @RequestParam(required = false) Integer  productId,
+            @RequestBody ImportDetail detail
+    ) {
+        return ResponseEntity.ok(importDetailService.update(id, detail, productId));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDetail(@PathVariable Long id) {
-        importDetailService.deleteDetail(id);
+    public ResponseEntity<Void> delete(@PathVariable Integer  id) {
+        importDetailService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

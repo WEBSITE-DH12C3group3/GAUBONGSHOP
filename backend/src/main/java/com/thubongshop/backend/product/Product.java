@@ -4,10 +4,12 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import com.thubongshop.backend.supplier.Supplier;
 
 @Entity
 @Table(name = "products")
-@Getter @Setter
+@Getter
+@Setter
 public class Product {
 
     @Id
@@ -27,4 +29,11 @@ public class Product {
 
     @Column(name = "created_at", updatable = false, insertable = false)
     private LocalDateTime createdAt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id", insertable = false, updatable = false)
+    private Supplier supplier;
+
+    @Column(name = "supplier_id")
+    private Long supplierId;
+
 }

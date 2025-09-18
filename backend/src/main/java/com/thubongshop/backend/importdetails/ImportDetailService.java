@@ -1,46 +1,61 @@
 package com.thubongshop.backend.importdetails;
 
+import com.thubongshop.backend.imports.Import;
+import com.thubongshop.backend.imports.ImportRepository;
+import com.thubongshop.backend.product.Product;
+import com.thubongshop.backend.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ImportDetailService {
 
     private final ImportDetailRepository importDetailRepository;
+    private final ImportRepository importRepository;
+    private final ProductRepository productRepository;
 
-    public List<ImportDetail> getAllDetails() {
+    public List<ImportDetail> getAll() {
         return importDetailRepository.findAll();
     }
 
-    public Optional<ImportDetail> getDetailById(Long id) {
-        return importDetailRepository.findById(id);
+    public List<ImportDetail> getByImportId(Integer  importId) {
+        return importDetailRepository.findByImportObj_Id(importId);
     }
 
-    public List<ImportDetail> getDetailsByImportId(Long importId) {
-        return importDetailRepository.findByImportId(importId);
-    }
-
-    public ImportDetail createDetail(ImportDetail detail) {
-        return importDetailRepository.save(detail);
-    }
-
-    public ImportDetail updateDetail(Long id, ImportDetail detail) {
+    public ImportDetail getById(Integer  id) {
         return importDetailRepository.findById(id)
-                .map(existing -> {
-                    existing.setImportId(detail.getImportId());
-                    existing.setProductId(detail.getProductId());
-                    existing.setQuantity(detail.getQuantity());
-                    existing.setUnitPrice(detail.getUnitPrice());
-                    return importDetailRepository.save(existing);
-                })
                 .orElseThrow(() -> new RuntimeException("ImportDetail not found with id " + id));
     }
 
-    public void deleteDetail(Long id) {
+    public ImportDetail create(Integer  importId, Integer  productId, ImportDetail detail) {
+        Import importObj = importRepository.findById(importId)
+                .orElseThrow(() -> new RuntimeException("Import not found"));
+        Product product = productRepository.findById(productId.intValue())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        detail.setImportObj(importObj);
+        detail.setProduct(product);
+
+        return importDetailRepository.save(detail);
+    }
+
+    public ImportDetail update(Integer  id, ImportDetail detail, Integer  productId) {
+        return importDetailRepository.findById(id).map(existing -> {
+            if (productId != null) {
+                Product product = productRepository.findById(productId.intValue())
+                        .orElseThrow(() -> new RuntimeException("Product not found"));
+                existing.setProduct(product);
+            }
+            existing.setQuantity(detail.getQuantity());
+            existing.setUnitPrice(detail.getUnitPrice());
+            return importDetailRepository.save(existing);
+        }).orElseThrow(() -> new RuntimeException("ImportDetail not found with id " + id));
+    }
+
+    public void delete(Integer  id) {
         importDetailRepository.deleteById(id);
     }
 }
