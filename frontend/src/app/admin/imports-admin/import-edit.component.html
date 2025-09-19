@@ -1,18 +1,96 @@
-<div class="p-6 max-w-lg mx-auto bg-white rounded-lg shadow-md" *ngIf="importData">
-  <h2 class="text-xl font-bold mb-4">Sửa Phiếu nhập #{{ importData?.id }}</h2>
+<form (ngSubmit)="saveImport()" *ngIf="importData" class="p-4 bg-white shadow rounded">
+  <!-- Nhà cung cấp -->
+  <div class="mb-4">
+    <label class="block mb-1 font-medium">Nhà cung cấp</label>
+    <select class="border rounded p-2 w-full"
+            name="supplierId"
+            [(ngModel)]="importData.supplierId"
+            required>
+      <option [ngValue]="0" disabled>-- Chọn nhà cung cấp --</option>
+      <option *ngFor="let s of suppliers" [ngValue]="s.id">{{ s.name }}</option>
+    </select>
+  </div>
 
-  <label class="block mb-2">Ghi chú</label>
-  <textarea [(ngModel)]="importData.notes" class="w-full border rounded p-2 mb-4"></textarea>
+  <!-- Trạng thái -->
+  <div class="mb-4">
+    <label class="block mb-1 font-medium">Trạng thái</label>
+    <select class="border rounded p-2 w-full"
+            name="status"
+            [(ngModel)]="importData.status"
+            required>
+      <option value="pending">Pending</option>
+      <option value="completed">Completed</option>
+      <option value="canceled">Canceled</option>
+    </select>
+  </div>
 
-  <label class="block mb-2">Trạng thái</label>
-  <select [(ngModel)]="importData.status" class="w-full border rounded p-2 mb-4">
-    <option value="pending">Pending</option>
-    <option value="completed">Completed</option>
-    <option value="canceled">Canceled</option>
-  </select>
+  <!-- Ghi chú -->
+  <div class="mb-4">
+    <label class="block mb-1 font-medium">Ghi chú</label>
+    <textarea [(ngModel)]="importData.notes"
+              name="notes"
+              class="border rounded p-2 w-full"
+              placeholder="Nhập ghi chú..."></textarea>
+  </div>
 
-  <button (click)="updateImport()"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-    Cập nhật
+  <!-- Thêm sản phẩm -->
+  <div class="mb-4 flex items-center gap-2">
+    <select class="border rounded p-2"
+            [(ngModel)]="selectedProductId"
+            name="selectedProductId">
+      <option [ngValue]="0" disabled>-- Chọn sản phẩm --</option>
+      <option *ngFor="let p of products" [ngValue]="p.id">{{ p.name }}</option>
+    </select>
+
+    <input type="number" [(ngModel)]="quantity" name="quantity" min="1"
+           class="border p-2 rounded w-20" placeholder="SL" />
+    <input type="number" [(ngModel)]="unitPrice" name="unitPrice"
+           class="border p-2 rounded w-28" placeholder="Đơn giá" />
+
+    <button type="button" (click)="addDetail()"
+            class="bg-blue-500 text-white px-4 py-2 rounded">+ Thêm</button>
+  </div>
+
+  <!-- Bảng chi tiết -->
+  <table class="min-w-full border border-gray-200 rounded-lg mb-4">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2 border">Sản phẩm</th>
+        <th class="px-4 py-2 border">Số lượng</th>
+        <th class="px-4 py-2 border">Đơn giá</th>
+        <th class="px-4 py-2 border">Thành tiền</th>
+        <th class="px-4 py-2 border">Hành động</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let d of importData.details; let i = index">
+        <td class="px-4 py-2 border">{{ getProductName(d.productId) }}</td>
+        <td class="px-4 py-2 border">
+          <input type="number" [(ngModel)]="d.quantity" name="qty{{i}}" min="1"
+                 class="border p-1 rounded w-20" (change)="updateTotal()" />
+        </td>
+        <td class="px-4 py-2 border">
+          <input type="number" [(ngModel)]="d.unitPrice" name="price{{i}}"
+                 class="border p-1 rounded w-28" (change)="updateTotal()" />
+        </td>
+        <td class="px-4 py-2 border">{{ d.quantity * d.unitPrice | currency:'VND':'' }}</td>
+        <td class="px-4 py-2 border">
+          <button type="button" (click)="removeDetail(i)" class="text-red-600">Xóa</button>
+        </td>
+      </tr>
+      <tr *ngIf="!importData.details || importData.details.length === 0">
+        <td colspan="5" class="text-center py-2">Chưa có sản phẩm nào</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Tổng cộng -->
+  <div class="mb-4 font-bold">
+    Tổng cộng: {{ getTotal() | currency:'VND':'' }}
+  </div>
+
+  <!-- Submit -->
+  <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">
+    Cập nhật phiếu nhập
   </button>
-</div>
+</form>

@@ -15,25 +15,23 @@ export class ProductService {
   /**
    * 🔹 Lấy danh sách sản phẩm (có phân trang, filter, search)
    */
-getAllProducts(
-  page: number = 0,
-  size: number = 12,
-  keyword?: string,
-  categoryId?: number,
-  brandId?: number,
-  supplierId?: number   // ✅ thêm tham số
-): Observable<ProductResponse> {
-  let params = new HttpParams()
-    .set('page', page)
-    .set('size', size);
+  getAllProducts(
+    page: number = 0,
+    size: number = 12,
+    keyword?: string,
+    categoryId?: number,
+    brandId?: number,
+  ): Observable<ProductResponse> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('size', size);
 
-  if (keyword) params = params.set('keyword', keyword);
-  if (categoryId) params = params.set('categoryId', categoryId);
-  if (brandId) params = params.set('brandId', brandId);
-  if (supplierId) params = params.set('supplierId', supplierId); // ✅ gửi supplierId
+    if (keyword) params = params.set('keyword', keyword);
+    if (categoryId) params = params.set('categoryId', categoryId);
+    if (brandId) params = params.set('brandId', brandId);
 
-  return this.http.get<ProductResponse>(this.apiUrl, { params });
-}
+    return this.http.get<ProductResponse>(this.apiUrl, { params });
+  }
 
 
   /**

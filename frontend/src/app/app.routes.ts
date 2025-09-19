@@ -143,15 +143,10 @@ export const routes: Routes = [
           { path: ':id', component: ShipVoucherAdminFormComponent },
         ],
       },
-      {
-  path: 'imports',
-  children: [
-    { path: '', component: ImportListComponent },          // /admin/imports
-    { path: 'add', component: ImportAddComponent },        // /admin/imports/add
-    { path: 'edit/:id', component: ImportEditComponent },  // /admin/imports/edit/123
-    { path: 'detail/:id', component: ImportDetailComponent } // /admin/imports/detail/123
-  ]
-}
+      { path: 'imports', component: ImportListComponent },
+{ path: 'imports/add', component: ImportAddComponent },
+{ path: 'imports/:id/edit', component: ImportEditComponent },
+{ path: 'imports/:id/details', component: ImportDetailComponent },
 
     ],
   },

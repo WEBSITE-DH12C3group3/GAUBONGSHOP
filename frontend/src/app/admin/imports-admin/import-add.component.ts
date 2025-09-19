@@ -101,29 +101,31 @@ addDetail() {
     return this.importData.details.reduce((sum, d) => sum + d.quantity * d.unitPrice, 0);
   }
 
-  saveImport() {
-    const payload = {
-      supplierId: this.importData.supplierId,
-      notes: this.importData.notes,
-      details: this.importData.details.map(d => ({
-        product: d.product,   // ✅ object { id }
-        quantity: d.quantity,
-        unitPrice: d.unitPrice
-      }))
-    };
+saveImport() {
+  const payload = {
+    supplierId: this.importData.supplierId,
+    notes: this.importData.notes,
+    status: this.importData.status,   // ✅ thêm status gửi về
+    details: this.importData.details.map(d => ({
+      product: d.product,
+      quantity: d.quantity,
+      unitPrice: d.unitPrice
+    }))
+  };
 
-    console.log("👉 Payload gửi đi:", payload);
+  console.log("👉 Payload gửi đi:", payload);
 
-    this.importService.create(payload).subscribe({
-      next: (res) => {
-        console.log("Phiếu nhập đã lưu:", res);
-        alert("Lưu phiếu nhập thành công!");
-        this.router.navigate(['/admin/imports']);
-      },
-      error: (err) => {
-        console.error("Lỗi khi lưu phiếu nhập:", err);
-        alert("Có lỗi xảy ra khi lưu phiếu nhập!");
-      }
-    });
-  }
+  this.importService.create(payload).subscribe({
+    next: (res) => {
+      console.log("Phiếu nhập đã lưu:", res);
+      alert("Lưu phiếu nhập thành công!");
+      this.router.navigate(['/admin/imports']);
+    },
+    error: (err) => {
+      console.error("Lỗi khi lưu phiếu nhập:", err);
+      alert("Có lỗi xảy ra khi lưu phiếu nhập!");
+    }
+  });
+}
+
 }

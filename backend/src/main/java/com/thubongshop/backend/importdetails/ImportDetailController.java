@@ -23,10 +23,11 @@ public class ImportDetailController {
         return ResponseEntity.ok(importDetailService.getById(id));
     }
 
-    @GetMapping("/import/{importId}")
-    public ResponseEntity<List<ImportDetail>> getByImportId(@PathVariable Integer  importId) {
-        return ResponseEntity.ok(importDetailService.getByImportId(importId));
-    }
+    @GetMapping("/imports/{importId}/details")
+public ResponseEntity<List<ImportDetail>> getByImportId(@PathVariable Integer importId) {
+    return ResponseEntity.ok(importDetailService.getByImportId(importId));
+}
+
 
     @PostMapping
     public ResponseEntity<ImportDetail> create(

@@ -1,10 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { ImportService } from '../../shared/services/import.service';
 import { ImportModel } from '../../models/import.model';
 import { ImportDetailModel } from '../../models/import-detail.model';
-import { ChangeDetectorRef } from '@angular/core';   // ✅ import thêm
 
 @Component({
   selector: 'app-import-detail',
@@ -25,26 +24,14 @@ export class ImportDetailComponent implements OnInit {
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
 
-    // ✅ Lấy thông tin phiếu nhập
     this.importService.getById(id).subscribe({
       next: (data) => {
         this.importData = data;
-        this.cdr.detectChanges();   // ✅ ép Angular cập nhật
+        this.importDetails = data.details || [];   // ✅ lấy luôn từ importData
+        this.cdr.detectChanges();                  // ✅ ép Angular cập nhật view
       },
       error: (err) => {
         console.error('Lỗi khi load phiếu nhập:', err);
-      }
-    });
-
-    // ✅ Lấy danh sách chi tiết phiếu nhập
-    this.importService.getImportDetails(id).subscribe({
-      next: (data) => {
-        console.log("Chi tiết phiếu nhập:", data);
-        this.importDetails = [...data];   // ⚡ clone mảng
-        this.cdr.detectChanges();         // ✅ ép Angular render lại
-      },
-      error: (err) => {
-        console.error('Lỗi khi load chi tiết phiếu nhập:', err);
       }
     });
   }

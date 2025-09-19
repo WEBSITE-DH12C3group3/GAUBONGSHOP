@@ -33,16 +33,16 @@
     </thead>
     <tbody>
       <tr *ngFor="let detail of importDetails">
-  <td class="px-4 py-2 border">{{ detail.id }}</td>
-  <td class="px-4 py-2 border">{{ detail.product?.name }}</td>
-  <td class="px-4 py-2 border">{{ detail.quantity }}</td>
-  <td class="px-4 py-2 border">{{ detail.unitPrice | currency:'VND':'' }}</td>
-  <td class="px-4 py-2 border">{{ detail.quantity * detail.unitPrice | currency:'VND':'' }}</td>
-</tr>
-<tr *ngIf="!importDetails || importDetails.length === 0">
-  <td colspan="5" class="text-center py-4">Chưa có sản phẩm nào</td>
-</tr>
-
+        <td class="px-4 py-2 border">{{ detail.id }}</td>
+        <td class="px-4 py-2 border">{{ detail.product?.name }}</td>
+        <td class="px-4 py-2 border">{{ detail.quantity }}</td>
+        <td class="px-4 py-2 border">{{ detail.unitPrice | currency:'VND':'' }}</td>
+        <td class="px-4 py-2 border">{{ detail.quantity * detail.unitPrice | currency:'VND':'' }}</td>
+      </tr>
+      <tr *ngIf="!importDetails || importDetails.length === 0">
+        <td colspan="5" class="text-center py-4">Chưa có sản phẩm nào</td>
+      </tr>
     </tbody>
+
   </table>
 </div>

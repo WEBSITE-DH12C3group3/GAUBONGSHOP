@@ -5,7 +5,7 @@ export interface ImportModel {
   importDate: string;        // ngày nhập (ISO string)
   totalCost: number;         // tổng tiền
   status: string;            // pending | completed | canceled
-  supplierId: number;        // id nhà cung cấp
+ supplierId?: number | null; 
   notes?: string;            // ghi chú
   createdAt?: string;        // ngày tạo (optional)
   updatedAt?: string;        // ngày cập nhật (optional)

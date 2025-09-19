@@ -36,8 +36,8 @@ public class Import {
 
     // Liên kết với Supplier
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "supplier_id")
-    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler", "products" })
+@JoinColumn(name = "supplier_id", nullable = true)  // ✅ cho phép null    
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler", "products" })
     private Supplier supplier;
 
     // Liên kết với ImportDetail
