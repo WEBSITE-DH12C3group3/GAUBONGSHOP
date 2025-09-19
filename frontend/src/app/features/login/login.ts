@@ -33,18 +33,19 @@ export class Login {
 
     this.auth.login({ email: this.email, password: this.password }).subscribe({
       next: (res: any) => {
-        // ✅ Lưu token & user
         if (res.token) this.auth.saveToken(res.token);
         if (res.user) this.auth.saveUser(res.user);
+        if (Array.isArray(res.permissions)) this.auth.savePermissions(res.permissions);
 
+        // ✅ Lấy role name đầu tiên
         const role = this.auth.getRole();
 
-        // ✅ Điều hướng sau khi lưu token xong
+        // ✅ Điều hướng
         setTimeout(() => {
-          if (role === 'Admin') {
-            this.router.navigate(['/admin/dashboard']);
+          if (role && role.toUpperCase() === 'CUSTOMER') {
+            this.router.navigate(['/home']);
           } else {
-            this.router.navigate(['/home']); // 👈 user thường → về trang chủ
+            this.router.navigate(['/admin/dashboard']);
           }
         }, 0);
 

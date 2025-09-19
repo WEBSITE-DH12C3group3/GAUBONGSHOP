@@ -10,33 +10,33 @@
        class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
       <i class="fa-solid fa-chart-line mr-3"></i> Dashboard
     </a>
-    <a routerLink="/admin/categories" routerLinkActive="active"
+    <a *appHasPermission="'manage_categories'" routerLink="/admin/categories" routerLinkActive="active"
        class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
       <i class="fa-solid fa-layer-group mr-3"></i> Danh mục
     </a>
-    <a routerLink="/admin/products" routerLinkActive="active"
+    <a *appHasPermission="'manage_products'" routerLink="/admin/products" routerLinkActive="active"
        class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
       <i class="fa-solid fa-box mr-3"></i> Sản phẩm
     </a>
-    <a routerLink="/admin/brands" routerLinkActive="active"
+    <a *appHasPermission="'manage_brands'" routerLink="/admin/brands" routerLinkActive="active"
        class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
       <i class="fa-solid fa-tags mr-3"></i> Thương hiệu
     </a>
-    <a routerLink="/admin/imports" routerLinkActive="active"
+    <a *appHasPermission="'manage_imports'" routerLink="/admin/imports" routerLinkActive="active"
        class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
       <i class="fa-solid fa-tags mr-3"></i> Phiếu nhập
     </a>
-    <a routerLink="/admin/suppliers" routerLinkActive="active"
+    <a *appHasPermission="'manage_suppliers'" routerLink="/admin/suppliers" routerLinkActive="active"
     class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
     <i class="fa-solid fa-truck-fast mr-3"></i> Nhà cung cấp
     </a>
 
-    <a routerLink="/admin/orders" routerLinkActive="active"
+    <a *appHasPermission="'manage_orders'" routerLink="/admin/orders" routerLinkActive="active"
        class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
       <i class="fa-solid fa-receipt mr-3"></i> Đơn hàng
     </a>
     
-    <a routerLink="/admin/live-chat" routerLinkActive="active"
+    <a *appHasPermission="'manage_livechat'" routerLink="/admin/live-chat" routerLinkActive="active"
       class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
       <i class="fa-solid fa-comments mr-3"></i>
       Live chat
@@ -47,15 +47,15 @@
       </span>
     </a>
 
-  <a routerLink="/admin/coupons" routerLinkActive="active"
+  <a *appHasPermission="'manage_coupons'" routerLink="/admin/coupons" routerLinkActive="active"
    class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
   <i class="fa-solid fa-ticket mr-3"></i> Phiếu giảm giá
   </a>
-  <a routerLink="/admin/shipping-vouchers" routerLinkActive="active"
+  <a *appHasPermission="'manage_shippingvoucher'" routerLink="/admin/shipping-vouchers" routerLinkActive="active"
    class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
   <i class="fa-solid fa-truck-fast mr-3"></i> Phiếu vận chuyển
     </a>
-    <a routerLink="/admin/users" routerLinkActive="active"
+    <a *appHasPermission="'manage_custommer'" routerLink="/admin/users" routerLinkActive="active"
        class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
       <i class="fa-solid fa-users mr-3"></i> Quản lý khách hàng
     </a>
@@ -68,12 +68,12 @@
       <i class="fa-solid fa-gear mr-3"></i> Cài đặt
     </a>
 
-    <a routerLink="/admin/roles" routerLinkActive="active"
+    <a *appHasPermission="'manage_users'" routerLink="/admin/roles" routerLinkActive="active"
       class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
       <i class="fa-solid fa-user-shield mr-3"></i> Quản lý nhóm người dùng
     </a>
 
-    <a routerLink="/admin/role-permissions" routerLinkActive="active"
+    <a *appHasPermission="'manage_permission'" routerLink="/admin/role-permissions" routerLinkActive="active"
       class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
       <i class="fa-solid fa-toggle-on mr-3"></i> Quản lý chức năng
     </a>

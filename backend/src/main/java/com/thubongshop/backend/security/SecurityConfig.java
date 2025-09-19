@@ -25,93 +25,89 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  private final JwtFilter jwtFilter;
+    private final JwtFilter jwtFilter;
 
-  @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-      .csrf(csrf -> csrf.disable())
-      .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-      .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-      .authorizeHttpRequests(auth -> auth
-        // Preflight
-        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                // Preflight
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-        // Auth public
-        .requestMatchers("/api/users/login", "/api/users/register", "/error").permitAll()
+                // Auth public
+                .requestMatchers("/api/users/login", "/api/users/register", "/error").permitAll()
 
-        // Catalog public GET
-        .requestMatchers(HttpMethod.GET,
-          "/api/products/**",
-          "/api/categories/**",
-          "/api/brands/**",
-          "/api/attributes/**",
-          "/api/reviews/products/**",
-          "/api/imports/**",
-          "/api/import-details/**"
-        ).permitAll()
+                // Catalog public GET
+                .requestMatchers(HttpMethod.GET,
+                    "/api/products/**",
+                    "/api/categories/**",
+                    "/api/brands/**",
+                    "/api/attributes/**",
+                    "/api/reviews/products/**"
+                ).permitAll()
 
-        // Static & docs
-        .requestMatchers(
-          "/uploads/**",
-          "/brandimg/**",
-          "/v3/api-docs/**",
-          "/swagger-ui/**",
-          "/swagger-ui.html"
-        ).permitAll()
+                // Static & docs
+                .requestMatchers(
+                    "/uploads/**",
+                    "/brandimg/**",
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
+                ).permitAll()
 
-        // Domain rules
-        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-        .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
+                // Quản lý user & nhóm: cần ADMIN role
+                .requestMatchers("/api/admin/users/**", "/api/admin/roles/**").hasRole("ADMIN")
 
-        // Chat: client + pusher auth đều cần đăng nhập
-        .requestMatchers("/api/client/**").authenticated()
-        .requestMatchers("/api/chat/**").authenticated()
+                // Theo permission cụ thể
+                .requestMatchers("/api/admin/products/**").hasAuthority("manage_products")
+                .requestMatchers("/api/admin/orders/**").hasAuthority("manage_orders")
+                .requestMatchers("/api/admin/imports/**").hasAuthority("manage_imports")
+                .requestMatchers("/api/admin/reports/**").hasAuthority("view_reports")
 
-        // Mặc định
-        .anyRequest().authenticated()
-      )
-      .exceptionHandling(ex -> ex
-        .authenticationEntryPoint((req, res, e) -> res.sendError(HttpServletResponse.SC_UNAUTHORIZED))
-        .accessDeniedHandler((req, res, e) -> res.sendError(HttpServletResponse.SC_FORBIDDEN))
-      )
-      .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                // Chat & client
+                .requestMatchers("/api/client/**").authenticated()
+                .requestMatchers("/api/chat/**").authenticated()
 
-    return http.build();
-  }
+                // Mặc định
+                .anyRequest().authenticated()
+            )
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((req, res, e) -> res.sendError(HttpServletResponse.SC_UNAUTHORIZED))
+                .accessDeniedHandler((req, res, e) -> res.sendError(HttpServletResponse.SC_FORBIDDEN))
+            )
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-  // 🌐 CORS
-  @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration cfg = new CorsConfiguration();
+        return http.build();
+    }
 
-    // Dùng patterns để linh hoạt cho dev ports (4200, 5173…)
-    cfg.setAllowedOriginPatterns(List.of(
-      "http://localhost:*",
-      "http://127.0.0.1:*"
-    ));
-    cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"));
-    cfg.setAllowedHeaders(List.of(
-      "Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"
-    ));
-    cfg.setExposedHeaders(List.of("Authorization", "Content-Type"));
-    cfg.setAllowCredentials(true);
-    cfg.setMaxAge(3600L); // cache preflight 1h
+    // 🌐 CORS
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration cfg = new CorsConfiguration();
+        cfg.setAllowedOriginPatterns(List.of("http://localhost:*", "http://127.0.0.1:*"));
+        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"));
+        cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+        cfg.setExposedHeaders(List.of("Authorization", "Content-Type"));
+        cfg.setAllowCredentials(true);
+        cfg.setMaxAge(3600L);
 
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", cfg);
-    return source;
-  }
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", cfg);
+        return source;
+    }
 
-  // ⚙️ AuthenticationManager
-  @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-    return configuration.getAuthenticationManager();
-  }
+    // ⚙️ AuthenticationManager
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
 
-  // 🔑 PasswordEncoder
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
+    // 🔑 PasswordEncoder
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

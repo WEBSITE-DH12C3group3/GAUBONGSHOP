@@ -1,14 +1,10 @@
 package com.thubongshop.backend.user.controller;
 
+import com.thubongshop.backend.rolepermission.RolePermissionRepository;
 import com.thubongshop.backend.security.JwtUtil;
-import com.thubongshop.backend.user.ChangePasswordRequest;
-import com.thubongshop.backend.user.LoginRequest;
-import com.thubongshop.backend.user.RegisterRequest;
-import com.thubongshop.backend.user.UpdateProfileRequest;
-import com.thubongshop.backend.user.User;
-import com.thubongshop.backend.user.UserDTO;
-import com.thubongshop.backend.user.UserService;
+import com.thubongshop.backend.user.*;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,26 +13,24 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import com.thubongshop.backend.role.Role;
+
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:4200") // FE Angular chạy ở 4200
+@CrossOrigin(origins = "http://localhost:4200")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
-
-    public UserController(UserService userService,
-                          AuthenticationManager authenticationManager,
-                          JwtUtil jwtUtil) {
-        this.userService = userService;
-        this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
-    }
+    private final UserRepository userRepo;
+    private final RolePermissionRepository rolePermRepo;
 
     // ----------------------------
     // Đăng ký
@@ -45,17 +39,16 @@ public class UserController {
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
             userService.registerUser(request);
-
-            // Nếu muốn trả token luôn sau khi đăng ký:
             var user = userService.findByEmail(request.getEmail())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy user sau khi đăng ký"));
+
             UserDetails userDetails = org.springframework.security.core.userdetails.User
                     .withUsername(user.getEmail())
                     .password(user.getPassword())
-                    .authorities("ROLE_USER") // hoặc map roles từ DB
+                    .authorities("ROLE_CUSTOMER") // mặc định khách hàng
                     .build();
 
-            String token = jwtUtil.generateToken(userDetails); // ✅ đúng
+            String token = jwtUtil.generateToken(userDetails);
 
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Đăng ký thành công");
@@ -75,12 +68,9 @@ public class UserController {
     // ----------------------------
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        System.out.println("Login attempt for email: " + request.getEmail());
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getEmail(), request.getPassword()
-                    )
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
 
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -89,23 +79,34 @@ public class UserController {
             User user = userService.findByEmail(userDetails.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
+            // 👉 Lấy roleId duy nhất (1 user – 1 role)
+            Long roleId = user.getRoles().stream()
+                    .findFirst()
+                    .map(Role::getId)
+                    .orElse(null);
+
+            // 👉 Lấy permissions từ role
+            List<String> permissions = (roleId == null)
+                    ? List.of()
+                    : rolePermRepo.findPermissionNamesOfRoles(List.of(roleId));
+
+            // 👉 Trả về đầy đủ
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
             response.put("user", new UserDTO(user));
+            response.put("permissions", permissions);
 
-            System.out.println("Login successful for email: " + request.getEmail());
             return ResponseEntity.ok(response);
+
         } catch (AuthenticationException e) {
-            System.out.println("Authentication failed for email: " + request.getEmail() + ", error: " + e.getMessage());
             return ResponseEntity.status(401).body(Map.of("error", "Sai email hoặc mật khẩu"));
         } catch (Exception e) {
-            System.out.println("Unexpected error for email: " + request.getEmail() + ", error: " + e.getMessage());
-            return ResponseEntity.status(500).body(Map.of("error", "Lỗi server khi tạo token"));
+            return ResponseEntity.status(500).body(Map.of("error", "Lỗi server khi tạo token: " + e.getMessage()));
         }
     }
 
     // ----------------------------
-    // Lấy user hiện tại (dựa vào token)
+    // Lấy user hiện tại
     // ----------------------------
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
@@ -122,7 +123,7 @@ public class UserController {
     // ----------------------------
     @PutMapping("/update")
     public ResponseEntity<?> updateProfile(@AuthenticationPrincipal UserDetails userDetails,
-                                        @RequestBody UpdateProfileRequest request) {
+                                           @RequestBody UpdateProfileRequest request) {
         if (userDetails == null) {
             return ResponseEntity.status(401).body(Map.of("error", "Chưa đăng nhập"));
         }
@@ -136,13 +137,12 @@ public class UserController {
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<?> changePassword(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<?> changePassword(@AuthenticationPrincipal UserDetails userDetails,
+                                            @RequestBody ChangePasswordRequest request) {
         try {
             userService.changePassword(userDetails.getUsername(),
-                                    request.getCurrentPassword(),
-                                    request.getNewPassword());
+                    request.getCurrentPassword(),
+                    request.getNewPassword());
             return ResponseEntity.ok(Map.of("message", "Đổi mật khẩu thành công"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -150,6 +150,4 @@ public class UserController {
             return ResponseEntity.status(500).body(Map.of("error", "Lỗi server: " + e.getMessage()));
         }
     }
-
-
 }

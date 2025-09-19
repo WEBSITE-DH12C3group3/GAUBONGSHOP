@@ -1,0 +1,2 @@
+/* Giữ style tối giản vì bạn dùng Tailwind; chỉ tweak nhỏ nếu cần */
+:host { display: block; height: 100%; }

@@ -80,16 +80,12 @@ export class ProfileComponent implements OnInit {
         };
         this.loading = false;
         this.pwd.current = '********';
-
-        // 👇 ép Angular render ngay vì zoneless
-        this.cdr.detectChanges();
+        this.cdr.detectChanges(); // ép Angular render ngay
       },
       error: (err) => {
         this.error = 'Không tải được hồ sơ. Vui lòng đăng nhập lại hoặc thử lại sau.';
         this.loading = false;
         console.error('Profile load error:', err);
-
-        // 👇 ép update UI khi có lỗi
         this.cdr.detectChanges();
       }
     });
@@ -106,29 +102,24 @@ export class ProfileComponent implements OnInit {
   }
 
   // Lưu hồ sơ
- onSaveProfile(form: NgForm) {
-  console.log('DEBUG submit form:', form.value);
-
-  if (form.invalid) {
-    console.warn('Form invalid!');
-    return;
-  }
-
-  this.auth.updateProfile(this.profile).subscribe({
-    next: (res: any) => {
-      this.profile = { ...res };  // nhận UserDTO trả về
-      this.editMode = false;
-      alert('✅ Hồ sơ đã được cập nhật!');
-    },
-    error: (err) => {
-      console.error('❌ Update profile error:', err);
-      alert('Có lỗi xảy ra khi cập nhật hồ sơ.');
+  onSaveProfile(form: NgForm) {
+    if (form.invalid) {
+      alert('Vui lòng điền đầy đủ thông tin hợp lệ.');
+      return;
     }
-  });
 
-}
-
-
+    this.auth.updateProfile(this.profile).subscribe({
+      next: (res: any) => {
+        this.profile = { ...res }; // nhận UserDTO trả về
+        this.editMode = false;
+        alert('✅ Hồ sơ đã được cập nhật!');
+      },
+      error: (err) => {
+        console.error('❌ Update profile error:', err);
+        alert('Có lỗi xảy ra khi cập nhật hồ sơ.');
+      }
+    });
+  }
 
   // Đổi mật khẩu
   onChangePassword() {
@@ -145,8 +136,8 @@ export class ProfileComponent implements OnInit {
       currentPassword: this.pwd.current,
       newPassword: this.pwd.next
     }).subscribe({
-      next: (res) => {
-        alert('✅ ' + res.message);
+      next: (res: any) => {
+        alert('✅ ' + (res.message || 'Đổi mật khẩu thành công'));
         this.pwd = { current: '********', next: '', confirm: '' }; // reset
       },
       error: (err) => {
@@ -154,7 +145,6 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
-
 
   // Xem chi tiết đơn hàng
   viewOrder(order: any) {

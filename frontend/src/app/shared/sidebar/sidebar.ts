@@ -14,10 +14,13 @@ import { Subscription, interval } from 'rxjs';
 import { ChatApiService } from '../services/chat-api.service';            // chỉnh path nếu khác
 import { environment } from '../../../environments/environment';          // chỉnh path nếu khác
 
+import { HasPermissionDirective } from '../directives/has-permission.directive';
+
+
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, HasPermissionDirective],
   templateUrl: './sidebar.html',
   styleUrls: ['./sidebar.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
