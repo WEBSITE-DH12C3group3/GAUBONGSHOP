@@ -3,11 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 18, 2025 at 04:27 AM
+-- Generation Time: Sep 19, 2025 at 08:12 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
-CREATE DATABASE IF NOT EXISTS thu_bong_shop;
-USE thu_bong_shop;
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -131,8 +129,10 @@ CREATE TABLE `chat_sessions` (
 --
 
 INSERT INTO `chat_sessions` (`id`, `participant1_id`, `participant2_id`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 3, 'open', '2025-09-16 06:50:18', '2025-09-16 06:50:18'),
-(2, 1, 36, 'open', '2025-09-16 16:10:19', '2025-09-16 16:10:19');
+(1, 1, 3, 'open', '2025-09-16 06:50:18', '2025-09-19 01:09:31'),
+(2, 1, 36, 'closed', '2025-09-16 16:10:19', '2025-09-19 01:09:14'),
+(3, 30, 1, 'open', '2025-09-18 10:02:04', '2025-09-19 01:08:24'),
+(4, 37, 1, 'closed', '2025-09-18 16:55:08', '2025-09-19 01:08:10');
 
 -- --------------------------------------------------------
 
@@ -312,9 +312,41 @@ CREATE TABLE `messages` (
 --
 
 INSERT INTO `messages` (`id`, `chat_session_id`, `sender_id`, `content`, `is_read`, `created_at`) VALUES
-(1, 1, 1, 'Xin chào admin!', 0, '2025-09-16 06:50:18'),
-(6, 2, 36, 'Hello shop!', 0, '2025-09-16 16:36:49'),
-(9, 2, 36, 'Hello nha cả yêu!', 0, '2025-09-16 09:53:30');
+(1, 1, 1, 'Xin chào admin!', 1, '2025-09-16 06:50:18'),
+(6, 2, 36, 'Hello shop!', 1, '2025-09-16 16:36:49'),
+(9, 2, 36, 'Hello nha cả yêu!', 1, '2025-09-16 09:53:30'),
+(11, 3, 30, 'Xin chào shop!', 1, '2025-09-18 10:23:12'),
+(12, 3, 37, 'Shop xin chào bạn ạ!', 0, '2025-09-18 10:41:05'),
+(13, 3, 30, 'hello', 1, '2025-09-18 13:55:12'),
+(14, 3, 30, 'shop owi', 1, '2025-09-18 13:56:21'),
+(15, 2, 36, 'ê bà', 1, '2025-09-18 16:51:17'),
+(16, 4, 37, 'chào', 0, '2025-09-18 16:55:26'),
+(17, 4, 37, 'chào', 0, '2025-09-18 16:55:29'),
+(18, 4, 37, 'ê m', 0, '2025-09-18 16:55:37'),
+(19, 2, 37, 'tôi đây', 1, '2025-09-19 03:41:45'),
+(20, 2, 36, 'khỏe không', 1, '2025-09-19 03:42:32'),
+(21, 4, 37, 'tao đây', 0, '2025-09-19 03:43:55'),
+(22, 2, 36, 'ê', 1, '2025-09-19 03:56:41'),
+(23, 2, 36, 'ê', 1, '2025-09-19 03:57:02'),
+(24, 2, 30, 'ê', 0, '2025-09-19 03:59:03'),
+(25, 2, 30, 'ê', 0, '2025-09-19 03:59:31'),
+(26, 3, 37, 'đây nha\\', 0, '2025-09-19 04:00:28'),
+(27, 3, 37, 'hh', 0, '2025-09-19 04:05:15'),
+(28, 2, 30, 'dfgh', 0, '2025-09-19 04:05:45'),
+(29, 3, 37, 'chào nhá', 0, '2025-09-19 04:12:43'),
+(30, 2, 30, 'hú', 0, '2025-09-19 04:14:17'),
+(31, 2, 30, 'hú', 0, '2025-09-19 04:14:22'),
+(32, 2, 30, 'ê ê', 0, '2025-09-19 04:18:23'),
+(33, 2, 30, 'ê', 0, '2025-09-19 04:18:26'),
+(34, 2, 30, 'hello', 0, '2025-09-19 07:36:54'),
+(35, 2, 30, 'chào nhé', 0, '2025-09-19 07:37:01'),
+(36, 3, 37, 'cin chao', 0, '2025-09-19 07:37:49'),
+(37, 3, 37, 'hi', 0, '2025-09-19 07:40:05'),
+(38, 2, 36, 'hello', 1, '2025-09-19 07:42:43'),
+(39, 3, 37, 'ê', 0, '2025-09-19 08:08:24'),
+(40, 2, 30, 'chài]', 0, '2025-09-19 08:09:12'),
+(41, 2, 30, 'adfhiusafguia', 0, '2025-09-19 08:09:14'),
+(42, 1, 37, 'ddda', 0, '2025-09-19 08:09:30');
 
 -- --------------------------------------------------------
 
@@ -337,7 +369,39 @@ CREATE TABLE `notifications` (
 
 INSERT INTO `notifications` (`id`, `user_id`, `message_id`, `type`, `is_read`, `created_at`) VALUES
 (5, 1, 6, 'new_message', 0, '2025-09-16 16:36:49'),
-(8, 1, 9, 'new_message', 0, '2025-09-16 09:53:30');
+(8, 1, 9, 'new_message', 0, '2025-09-16 09:53:30'),
+(10, 1, 11, 'new_message', 0, '2025-09-18 10:23:12'),
+(11, 30, 12, 'new_message', 1, '2025-09-18 10:41:05'),
+(12, 1, 13, 'new_message', 0, '2025-09-18 13:55:12'),
+(13, 1, 14, 'new_message', 0, '2025-09-18 13:56:21'),
+(14, 1, 15, 'new_message', 0, '2025-09-18 16:51:17'),
+(15, 1, 16, 'new_message', 0, '2025-09-18 16:55:26'),
+(16, 1, 17, 'new_message', 0, '2025-09-18 16:55:29'),
+(17, 1, 18, 'new_message', 0, '2025-09-18 16:55:37'),
+(18, 1, 19, 'new_message', 0, '2025-09-19 03:41:45'),
+(19, 1, 20, 'new_message', 0, '2025-09-19 03:42:32'),
+(20, 1, 21, 'new_message', 0, '2025-09-19 03:43:55'),
+(21, 1, 22, 'new_message', 0, '2025-09-19 03:56:41'),
+(22, 1, 23, 'new_message', 0, '2025-09-19 03:57:02'),
+(23, 36, 24, 'new_message', 0, '2025-09-19 03:59:03'),
+(24, 36, 25, 'new_message', 0, '2025-09-19 03:59:31'),
+(25, 30, 26, 'new_message', 1, '2025-09-19 04:00:28'),
+(26, 30, 27, 'new_message', 1, '2025-09-19 04:05:15'),
+(27, 36, 28, 'new_message', 0, '2025-09-19 04:05:45'),
+(28, 30, 29, 'new_message', 1, '2025-09-19 04:12:43'),
+(29, 36, 30, 'new_message', 0, '2025-09-19 04:14:17'),
+(30, 36, 31, 'new_message', 0, '2025-09-19 04:14:22'),
+(31, 36, 32, 'new_message', 0, '2025-09-19 04:18:23'),
+(32, 36, 33, 'new_message', 0, '2025-09-19 04:18:26'),
+(33, 36, 34, 'new_message', 0, '2025-09-19 07:36:54'),
+(34, 36, 35, 'new_message', 0, '2025-09-19 07:37:01'),
+(35, 30, 36, 'new_message', 1, '2025-09-19 07:37:49'),
+(36, 30, 37, 'new_message', 1, '2025-09-19 07:40:05'),
+(37, 1, 38, 'new_message', 0, '2025-09-19 07:42:43'),
+(38, 30, 39, 'new_message', 1, '2025-09-19 08:08:24'),
+(39, 36, 40, 'new_message', 0, '2025-09-19 08:09:12'),
+(40, 36, 41, 'new_message', 0, '2025-09-19 08:09:14'),
+(41, 1, 42, 'new_message', 0, '2025-09-19 08:09:30');
 
 -- --------------------------------------------------------
 
@@ -449,17 +513,19 @@ CREATE TABLE `permissions` (
 --
 
 INSERT INTO `permissions` (`id`, `name`, `description`) VALUES
-(1, 'view_products', 'Xem danh sách sản phẩm'),
-(2, 'add_to_cart', 'Thêm vào giỏ hàng'),
-(3, 'add_to_favorites', 'Thêm vào yêu thích'),
-(4, 'place_order', 'Đặt hàng'),
-(5, 'view_orders', 'Xem đơn hàng của mình'),
-(6, 'manage_products', 'Quản lý sản phẩm (thêm/sửa/xóa)'),
-(7, 'manage_orders', 'Quản lý đơn hàng (xử lý, hủy)'),
-(8, 'manage_users', 'Quản lý người dùng'),
-(9, 'view_reports', 'Xem báo cáo doanh thu'),
-(10, 'manage_imports', 'Quản lý phiếu nhập (tạo, sửa, xóa)'),
-(11, 'view_imports', 'Xem danh sách phiếu nhập');
+(12, 'manage_categories', 'Quản lý danh mục sản phẩm'),
+(13, 'manage_products', 'Quản lý sản phẩm (thêm/sửa/xoá)'),
+(14, 'manage_brands', 'Quản lý thương hiệu'),
+(15, 'manage_imports', 'Quản lý phiếu nhập'),
+(16, 'manage_suppliers', 'Quản lý nhà cung cấp'),
+(17, 'manage_orders', 'Quản lý đơn hàng'),
+(18, 'manage_livechat', 'Quản lý và trả lời live chat'),
+(19, 'manage_coupons', 'Quản lý phiếu giảm giá'),
+(20, 'manage_shippingvoucher', 'Quản lý phiếu vận chuyển'),
+(21, 'manage_custommer', 'Quản lý khách hàng'),
+(22, 'view_reports', 'Xem báo cáo'),
+(23, 'manage_users', 'Quản lý nhóm người dùng'),
+(24, 'manage_permission', 'Quản lý phân quyền chức năng');
 
 -- --------------------------------------------------------
 
@@ -493,8 +559,7 @@ INSERT INTO `products` (`id`, `name`, `description`, `price`, `image_url`, `cate
 (11, 'GẤU TRÚC HAM ĂN', 'HHH', 130000.00, '/uploads/1756280679637-881067446-OIP9.jpg', 1, 3, 11, '2025-08-27 07:44:39'),
 (12, 'GẤU DÂU ĐÁNG YÊU', 'KKKK', 210000.00, '/uploads/1756280739648-379525019-OIP (5).webp', 1, 1, 22, '2025-08-27 07:45:39'),
 (13, 'THỎ ĐÀO NGỌT NGÀO', 'HHH', 210000.00, '/uploads/1756280802618-785400663-OIP (7).webp', 1, 3, 22, '2025-08-27 07:46:42'),
-(14, 'TIỂU ĐÀO ĐÀO', 'HHH', 120000.00, '/uploads/1756280863080-210403397-OIP (6).webp', 2, 3, 22, '2025-08-27 07:47:43'),
-(19, 'Gấu mèo', 'sự dễ thương nhất', 120000.00, '', 5, 4, 20, '2025-09-16 02:52:29');
+(14, 'TIỂU ĐÀO ĐÀO', 'HHH', 120000.00, '/uploads/1756280863080-210403397-OIP (6).webp', 2, 3, 22, '2025-08-27 07:47:43');
 
 -- --------------------------------------------------------
 
@@ -572,8 +637,7 @@ INSERT INTO `product_attributes` (`product_id`, `attribute_id`, `value`) VALUES
 (14, 3, 'Vải nhung'),
 (14, 4, 'Thỏ'),
 (14, 5, 'Dễ thương'),
-(14, 6, 'Tặng quà'),
-(19, 1, 'đỏ');
+(14, 6, 'Tặng quà');
 
 -- --------------------------------------------------------
 
@@ -618,11 +682,11 @@ CREATE TABLE `roles` (
 --
 
 INSERT INTO `roles` (`id`, `name`, `description`) VALUES
-(1, 'Customer', 'Khách hàng thông thường'),
-(2, 'mèo méo meo', 'Nhà bán hàng quản lý sản phẩm'),
-(3, 'Admin', 'Quản trị viên toàn quyền'),
-(4, 'MANAGER', NULL),
-(5, 'đẹp trai', NULL);
+(1, 'CUSTOMER', 'Khách hàng thông thường'),
+(2, 'MEOMEO', 'Nhà bán hàng quản lý sản phẩm'),
+(3, 'ADMIN', 'Quản trị viên toàn quyền'),
+(4, 'MANAGER', 'Quản lý'),
+(5, 'DEPTRAI', 'đẹp trai');
 
 -- --------------------------------------------------------
 
@@ -641,23 +705,20 @@ CREATE TABLE `role_permissions` (
 --
 
 INSERT INTO `role_permissions` (`role_id`, `permission_id`, `id`) VALUES
-(1, 1, 1),
-(1, 2, 2),
-(1, 3, 3),
-(1, 4, 4),
-(1, 5, 5),
-(2, 3, 34),
-(2, 6, 35),
-(2, 7, 36),
-(2, 10, 37),
-(2, 11, 38),
-(3, 1, 11),
-(3, 2, 12),
-(4, 1, 13),
-(4, 2, 14),
-(4, 4, 15),
-(4, 5, 16),
-(5, 1, 39);
+(2, 12, 75),
+(3, 12, 41),
+(3, 13, 48),
+(3, 14, 40),
+(3, 15, 44),
+(3, 16, 50),
+(3, 17, 46),
+(3, 18, 45),
+(3, 19, 42),
+(3, 20, 49),
+(3, 21, 43),
+(3, 22, 52),
+(3, 23, 51),
+(3, 24, 47);
 
 -- --------------------------------------------------------
 
@@ -790,7 +851,7 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `address`, `phone`, 
 (27, 'admin', '1', 'admin@test', 'hanoi', '03', '2025-08-26 14:20:23'),
 (28, 'lua', '123', 'lua@gmail.com', NULL, NULL, '2025-09-10 11:49:44'),
 (29, 'trang', '123', 'trang@gmail.com', NULL, NULL, '2025-09-10 12:34:00'),
-(30, 'Nguyen Van A', '$2a$10$jg4lUFNGWYbrqETGuMhBuusX.KdbfQIbmcgNjoI8vT/EYXHxBvh/.', 'abc@gmail.com', NULL, NULL, '2025-09-10 14:24:35'),
+(30, 'Nguyen Van A', '$2a$10$jg4lUFNGWYbrqETGuMhBuusX.KdbfQIbmcgNjoI8vT/EYXHxBvh/.', 'abc@gmail.com', 'nam dinh', '0349459165', '2025-09-10 14:24:35'),
 (31, 'tien dat', '$2a$10$Jbw9XjQiRYzNa7TVbdihyuO59SBI56UgGTNbYJinZ37g.93UXIT.i', 'a@gmail.com', NULL, NULL, '2025-09-10 14:58:31'),
 (32, 'Nguyen Van A', '$2a$10$grUUt5EDoYTpU0AZ4i6GjO9tn8vbxI3oBBauviwknkouOWt24uyvG', 'aaa@gmail.com', NULL, NULL, '2025-09-10 15:16:34'),
 (33, 'khachhang_test', '$2a$10$gy1jz2u5ZuXWC14tB4B1i.8kvTEt.LMKV8LjQTMgMZjGS7IXXsR32', 'khachhang_test@example.com', '123 Hà Nội', '0909999999', '2025-09-11 01:47:29'),
@@ -816,8 +877,6 @@ CREATE TABLE `user_roles` (
 --
 
 INSERT INTO `user_roles` (`id`, `user_id`, `role_id`) VALUES
-(5, 30, 1),
-(6, 30, 2),
 (4, 30, 3),
 (1, 36, 2),
 (2, 37, 3);
@@ -1065,6 +1124,7 @@ ALTER TABLE `users`
 ALTER TABLE `user_roles`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uq_user_roles_user_role` (`user_id`,`role_id`),
+  ADD UNIQUE KEY `uq_user_roles_user` (`user_id`),
   ADD KEY `role_id` (`role_id`);
 
 --
@@ -1099,7 +1159,7 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `chat_sessions`
 --
 ALTER TABLE `chat_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `coupons`
@@ -1129,13 +1189,13 @@ ALTER TABLE `import_details`
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `orders`
@@ -1159,7 +1219,7 @@ ALTER TABLE `payments`
 -- AUTO_INCREMENT for table `permissions`
 --
 ALTER TABLE `permissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `products`
@@ -1183,7 +1243,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT for table `role_permissions`
 --
 ALTER TABLE `role_permissions`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
 
 --
 -- AUTO_INCREMENT for table `shipping`
@@ -1213,7 +1273,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `user_roles`
 --
 ALTER TABLE `user_roles`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables
