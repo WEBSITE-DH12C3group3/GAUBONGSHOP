@@ -1,0 +1,139 @@
+<div class="p-4 grid grid-cols-12 gap-4">
+  <!-- LEFT: danh sách hội thoại -->
+  <div class="col-span-4 bg-white rounded-2xl border shadow-sm overflow-hidden">
+    <div class="px-4 py-3 border-b flex items-center gap-2">
+      <div class="font-semibold">Khách hàng</div>
+      <div class="ml-auto relative">
+        <input
+          type="text"
+          placeholder="Tìm kiếm..."
+          class="rounded-lg border px-3 py-1.5 text-sm"
+          (input)="q.set(($any($event.target).value || '').trim())" />
+        <i
+          class="fa-solid fa-magnifying-glass text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 text-xs"></i>
+      </div>
+    </div>
+
+    <!-- loading -->
+    <div *ngIf="loadingSessions()" class="p-6 text-sm text-gray-500">
+      Đang tải danh sách…
+    </div>
+
+    <div *ngIf="!loadingSessions() && filtered().length === 0" class="p-6 text-sm text-gray-500">
+      Không có cuộc trò chuyện nào.
+    </div>
+
+    <div class="divide-y max-h-[72vh] overflow-y-auto" *ngIf="!loadingSessions() && filtered().length">
+      <button
+        *ngFor="let s of filtered()"
+        (click)="select(s)"
+        class="w-full text-left px-4 py-3 hover:bg-pink-50 flex items-center gap-3"
+        [class.bg-pink-50]="selected()?.id === s.id">
+        <div class="relative">
+          <img
+            class="w-10 h-10 rounded-full border object-cover"
+            src="https://placehold.co/40x40?text=U"
+            alt="user" />
+          <span
+            *ngIf="s.unreadForViewer > 0"
+            class="absolute -top-1 -right-1 bg-rose-600 text-white text-[10px] rounded-full px-1.5">
+            {{ s.unreadForViewer }}
+          </span>
+        </div>
+
+        <div class="min-w-0">
+          <div class="font-medium truncate">User #{{ s.participant1Id }}</div>
+          <div class="text-xs text-gray-500 truncate">
+            {{ s.lastMessageSnippet || '—' }}
+          </div>
+        </div>
+
+        <div class="ml-auto text-xs text-gray-400">
+          {{ (s.updatedAt || s.createdAt) | date: 'short' }}
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- RIGHT: khung chat -->
+  <div class="col-span-8 bg-white rounded-2xl border shadow-sm flex flex-col min-h-[72vh]">
+    <!-- khi chưa chọn -->
+    <div *ngIf="!selected()" class="flex-1 grid place-items-center p-8 text-gray-500">
+      Hãy chọn một cuộc trò chuyện ở bên trái.
+    </div>
+
+    <!-- khi đã chọn -->
+    <ng-container *ngIf="selected() as sel">
+      <div class="px-4 py-3 border-b flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <img
+            class="w-9 h-9 rounded-full border object-cover"
+            src="https://placehold.co/36x36?text=U"
+            alt="user" />
+          <div>
+            <div class="font-semibold">User #{{ sel.participant1Id }}</div>
+            <div class="text-xs text-gray-500">Phiên #{{ sel.id }}</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            (click)="closeSession()"
+            class="px-3 py-1.5 rounded-lg border hover:bg-gray-50 text-sm">
+            Đóng phiên
+          </button>
+        </div>
+      </div>
+
+      <div id="admin-chat-scroll" class="flex-1 overflow-y-auto p-4 space-y-2 bg-[rgb(249,250,251)]">
+        <div *ngIf="loadingMessages()" class="text-center py-6 text-gray-500">
+          Đang tải tin nhắn…
+        </div>
+
+        <ng-container *ngFor="let m of messages(); trackBy: trackByMessageId">
+          <div [ngClass]="m.senderId === sel.participant1Id ? 'flex justify-start' : 'flex justify-end'">
+            <div class="flex max-w-[72%] items-end gap-2">
+              <img
+                *ngIf="m.senderId === sel.participant1Id"
+                class="w-8 h-8 rounded-full border"
+                src="https://placehold.co/32x32?text=U"
+                alt="user" />
+
+              <div
+                [ngClass]="
+                  m.senderId === sel.participant1Id
+                    ? 'bg-white text-gray-800 border'
+                    : 'bg-rose-600 text-white'
+                "
+                class="rounded-2xl px-3 py-2 shadow-sm">
+                <div class="whitespace-pre-wrap leading-relaxed">
+                  {{ m.content }}
+                </div>
+                <div class="text-[11px] opacity-70 mt-1 text-right">
+                  {{ m.createdAt | date: 'shortTime' }}
+                </div>
+              </div>
+
+              <img
+                *ngIf="m.senderId !== sel.participant1Id"
+                class="w-8 h-8 rounded-full border"
+                src="https://placehold.co/32x32?text=A"
+                alt="admin" />
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="p-3 border-t flex items-center gap-2">
+        <input
+          [(ngModel)]="reply"
+          (keyup.enter)="send()"
+          type="text"
+          placeholder="Nhập trả lời…"
+          class="flex-1 rounded-full border px-3 py-2 outline-none focus:ring-2 focus:ring-rose-300" />
+        <button (click)="send()" class="rounded-full bg-rose-600 text-white px-4 py-2">
+          Gửi
+        </button>
+      </div>
+    </ng-container>
+  </div>
+</div>

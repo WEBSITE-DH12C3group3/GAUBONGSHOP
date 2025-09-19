@@ -1,0 +1,46 @@
+<div cdkDrag class="w-[380px] max-h-[72vh] rounded-2xl shadow-2xl bg-white border border-gray-200 overflow-hidden animate-slide-in">
+  <!-- Header -->
+  <div class="px-4 py-3 bg-gradient-to-r from-rose-600 to-pink-500 text-white flex items-center justify-between cursor-move">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full bg-white/20 grid place-items-center font-bold">🧸</div>
+      <div class="leading-tight">
+        <div class="font-semibold">Gấu Bông Shop</div>
+        <div class="text-xs opacity-90">Trực tuyến • Hỗ trợ từ 8:00–22:00</div>
+      </div>
+    </div>
+    <button class="opacity-90 hover:opacity-100 transition" (click)="input=''; messages = []; $event.stopPropagation()"
+            title="Xóa khung chat">
+      <i class="fa-regular fa-trash-can"></i>
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div id="chat-scroll" class="px-3 py-3 space-y-2 overflow-y-auto bg-[rgb(249,250,251)]" style="max-height: 54vh">
+    <div *ngIf="loading" class="text-center py-8 text-gray-500">Đang tải...</div>
+
+    <ng-container *ngFor="let m of messages; trackBy: trackById">
+      <div [ngClass]="m.senderId===meId ? 'flex justify-end' : 'flex justify-start'">
+        <div class="flex max-w-[82%] items-end gap-2">
+          <img *ngIf="m.senderId!==meId" class="w-7 h-7 rounded-full object-cover border"
+               src="https://placehold.co/28x28?text=S" alt="shop">
+          <div [ngClass]="m.senderId===meId ? 'bg-rose-600 text-white' : 'bg-white text-gray-800 border'"
+               class="rounded-2xl px-3 py-2 shadow-sm">
+            <div class="whitespace-pre-wrap leading-relaxed">{{ m.content }}</div>
+            <div class="text-[11px] opacity-70 mt-1 text-right">{{ m.createdAt | date:'shortTime' }}</div>
+          </div>
+          <img *ngIf="m.senderId===meId" class="w-7 h-7 rounded-full object-cover border"
+               src="https://placehold.co/28x28?text=ME" alt="me">
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Composer -->
+  <div class="p-3 border-t bg-white flex items-center gap-2">
+    <input [(ngModel)]="input" (keyup.enter)="send()" type="text" placeholder="Nhập tin nhắn…"
+           class="flex-1 rounded-full border px-4 py-2 outline-none focus:ring-2 focus:ring-rose-300">
+    <button (click)="send()" class="rounded-full bg-rose-600 text-white px-4 py-2 hover:scale-[1.02] transition">
+      Gửi
+    </button>
+  </div>
+</div>

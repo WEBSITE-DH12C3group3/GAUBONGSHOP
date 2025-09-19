@@ -43,7 +43,7 @@ import { ShipVoucherAdminListComponent } from './admin/shipping-vouchers-admin/s
 import { ShipVoucherAdminFormComponent } from './admin/shipping-vouchers-admin/ship-voucher-admin-form';
 
 // Live chat
-import { LiveChatAdminComponent } from './admin/live-chat/live-chat-admin';
+import { LiveChatPage } from './admin/live-chat/live-chat';
 
 export const routes: Routes = [
   // ===== Customer layout =====
@@ -121,12 +121,12 @@ export const routes: Routes = [
         ],
       },
 
-      // Live chat
-      { path: 'live-chat', component: LiveChatAdminComponent },
-
+      // ✅ Live chat (đúng path)
+      { path: 'live-chat', component: LiveChatPage },
+      
       // Coupons
       {
-        path: 'coupons',
+        path: 'coupons', 
         children: [
           { path: '', component: CouponAdminListComponent },
           { path: 'new', component: CouponAdminFormComponent },
