@@ -33,16 +33,15 @@
     </a>
     
     <a routerLink="/admin/live-chat" routerLinkActive="active"
-      class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
-      <i class="fa-solid fa-comments mr-2"></i> <!-- dùng FA cho đồng bộ -->
+      class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
+      <i class="fa-solid fa-comments mr-3"></i>
       Live chat
       <span *ngIf="unreadTotal > 0"
             class="ml-auto inline-flex items-center justify-center text-xs px-2 py-0.5
-                  rounded-full bg-pink-600 text-white">{{ unreadTotal }}</span>
+                  rounded-full bg-pink-600 text-white">
+        {{ unreadTotal }}
+      </span>
     </a>
-
-
-
 
   <a routerLink="/admin/coupons" routerLinkActive="active"
    class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">

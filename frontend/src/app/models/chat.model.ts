@@ -1,21 +1,21 @@
-export type SenderType = 'USER' | 'ADMIN' | 'SYSTEM';
+export interface PageResponse<T> { content: T[]; number: number; size: number; totalElements: number; totalPages: number; }
 
-export interface ChatMessage {
+export interface ChatSessionDTO {
   id: number;
-  conversationId: number;
-  senderType: SenderType;
-  text: string;
-  sentAt: string;         // ISO string
-  isMine?: boolean;       // FE helper
+  participant1Id: number;
+  participant2Id: number;
+  status: 'open'|'closed'|'pending';
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  unreadForViewer: number;
+  lastMessageSnippet?: string | null;
 }
 
-export interface Conversation {
+export interface MessageDTO {
   id: number;
-  userId?: number;
-  userName?: string;
-  lastMessage?: string;
-  lastTime?: string;      // ISO
-  unreadCount?: number;
-  assignedTo?: string;    // agent name/email (optional)
-  status?: 'OPEN' | 'RESOLVED';
+  sessionId: number;
+  senderId: number;
+  content: string;
+  read: boolean;
+  createdAt?: string | null;
 }

@@ -1,9 +1,12 @@
+// ChatSession.java
 package com.thubongshop.backend.chat.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import java.sql.Timestamp;
+import java.time.Instant;
 
 @Entity @Table(name="chat_sessions")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -19,13 +22,15 @@ public class ChatSession {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable=false)
-  private Status status = Status.pending; // open/closed/pending
+  private Status status = Status.pending;
 
-  @Column(name="created_at", insertable=false, updatable=false)
-  private Timestamp createdAt;
+  @CreationTimestamp
+  @Column(name="created_at", nullable=false, updatable=false)
+  private Instant createdAt;
 
-  @Column(name="updated_at", insertable=false, updatable=false)
-  private Timestamp updatedAt;
+  @UpdateTimestamp
+  @Column(name="updated_at", nullable=false)
+  private Instant updatedAt;
 
   public enum Status { open, closed, pending }
 }

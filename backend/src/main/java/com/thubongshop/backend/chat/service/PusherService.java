@@ -21,6 +21,6 @@ public class PusherService {
   }
 
   public static String channelOf(Integer sessionId) {
-    return "private-chat-" + sessionId;
+    return "private-chat." + sessionId;
   }
 }
