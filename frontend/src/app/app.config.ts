@@ -5,8 +5,7 @@ import {
   inject,
   PLATFORM_ID
 } from '@angular/core';
-import {withRouterConfig } from '@angular/router';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withRouterConfig } from '@angular/router';
 import {
   provideClientHydration,
   withEventReplay
@@ -21,90 +20,124 @@ import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
+import { Router } from '@angular/router';
 
 import { routes } from './app.routes';
+import { environment } from '../environments/environment';
 
-//
-// 🔑 Interceptor gắn token cho API private
-//
+// ---------- Auth Interceptor ----------
 export const authInterceptorFn: HttpInterceptorFn = (req, next) => {
   const platformId = inject(PLATFORM_ID);
 
-  // ✅ API public (không cần token)
-  const isPublicApi =
-    req.url.includes('/api/products') ||
-    req.url.includes('/api/categories/featured') || // chỉ featured là public
-    req.url.includes('/api/brands') ||
-    req.url.includes('/api/attributes') ||
-    req.url.includes('/api/reviews/products') ||
-    req.url.includes('/uploads');
+  // Bỏ qua preflight
+  const method = (req.method || 'GET').toUpperCase();
+  if (method === 'OPTIONS') return next(req);
 
-  if (isPublicApi) {
-    return next(req);
+  // Nhận diện API absolute/relative
+  const apiBase = (environment.apiUrl || '').replace(/\/+$/, ''); // trim trailing slash
+  const url = req.url || '';
+
+  const isAbsoluteApi = apiBase && url.startsWith(apiBase + '/');
+  const isRelativeApi = url.startsWith('/api/');
+  if (!isAbsoluteApi && !isRelativeApi) return next(req);
+
+  // Lấy path tương đối để soi rule
+  const path = isAbsoluteApi ? url.substring(apiBase.length) : url; // vd: /api/...
+
+  // PUBLIC cụ thể (login/register/guest, file tĩnh…)
+  const isExplicitPublic =
+    (method === 'POST' && (
+      path.startsWith('/api/users/login') ||
+      path.startsWith('/api/users/register') ||
+      path.startsWith('/api/auth/guest')
+    )) ||
+    (method === 'GET' && (
+      path.startsWith('/uploads/') ||
+      path.startsWith('/brandimg/')
+    ));
+
+  // PUBLIC GET (catalog)
+  const isPublicGet =
+    method === 'GET' && (
+      path.startsWith('/api/products')   ||
+      path.startsWith('/api/categories') ||
+      path.startsWith('/api/brands')     ||
+      path.startsWith('/api/attributes') ||
+      path.startsWith('/api/reviews/products')
+    );
+
+  if (isExplicitPublic || isPublicGet) {
+    // thêm header nhẹ để backend phân biệt XHR (tuỳ bạn)
+    return next(req.clone({ setHeaders: { 'X-Requested-With': 'XMLHttpRequest' }}));
   }
 
-  // 👉 Các API private thì gắn token
+  // PRIVATE: gắn token (chỉ trên browser)
   let token: string | null = null;
   if (isPlatformBrowser(platformId)) {
-    token = localStorage.getItem('token');
+    token =
+      localStorage.getItem('token') ||
+      localStorage.getItem('access_token') ||
+      localStorage.getItem('jwt') ||
+      sessionStorage.getItem('token') ||
+      sessionStorage.getItem('access_token') ||
+      null;
   }
+  if (token && !/^Bearer\s/i.test(token)) token = `Bearer ${token}`;
 
-  if (token) {
-    req = req.clone({
-      setHeaders: { Authorization: `Bearer ${token}` }
-    });
-  }
+  const headers: Record<string,string> = {
+    'X-Requested-With': 'XMLHttpRequest',
+    ...(token ? { Authorization: token } : {})
+  };
 
-  return next(req);
+  // Nếu backend dùng cookie/session: bật withCredentials
+  // const useCookie = !!(environment as any).authWithCredentials;
+
+  return next(req.clone({
+    setHeaders: headers,
+    // withCredentials: useCookie === true
+  }));
 };
 
-//
-// ⚠️ Interceptor xử lý lỗi (401, 403)
-//
+// ---------- Error Interceptor ----------
 export const errorInterceptorFn: HttpInterceptorFn = (req, next) => {
   const platformId = inject(PLATFORM_ID);
+  const router = inject(Router);
 
   return next(req).pipe(
     catchError((err: HttpErrorResponse) => {
-      // Nếu đang ở browser
       if (isPlatformBrowser(platformId)) {
         if (err.status === 401) {
-          // ❌ Token hết hạn -> bắt buộc đăng nhập lại
-          console.warn('401 Unauthorized, redirect login...');
+          // Token hết hạn / chưa đăng nhập
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          window.location.href = '/login';
+          // Điều hướng SPA (mượt hơn window.location.href)
+          router.navigateByUrl('/login');
         } else if (err.status === 403) {
-          // ⚠️ 403: chỉ redirect khi gọi API admin
+          // Chỉ redirect khi đụng API admin
           if (req.url.includes('/api/admin/')) {
-            console.warn('403 Forbidden on admin API, redirect login...');
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = '/login';
+            router.navigateByUrl('/login');
           } else {
-            // Public API bị 403 thì chỉ log, không redirect
-            console.warn('403 Forbidden on public API, để component tự xử lý.');
+            // Public 403: để component tự xử lý
+            console.warn('[403] Forbidden on public API:', req.url);
           }
         }
-
-        // ⚠️ 400, 409: để component xử lý (không redirect)
+        // Các lỗi khác (400, 409, 500...) để component tự xử lý UI/Toast
       }
       return throwError(() => err);
     })
   );
 };
 
-
-//
-// ✅ Cấu hình toàn bộ app
-//
+// ---------- App Config ----------
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(
       routes,
-      withRouterConfig({ onSameUrlNavigation: 'reload' }) // ✅ Thêm tùy chọn này
+      withRouterConfig({ onSameUrlNavigation: 'reload' })
     ),
     provideClientHydration(withEventReplay()),
     provideHttpClient(

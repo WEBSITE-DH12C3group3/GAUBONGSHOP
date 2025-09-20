@@ -1,4 +1,4 @@
-// auth.interceptor.ts
+// src/app/shared/interceptors/auth.interceptor.ts
 import { inject, PLATFORM_ID } from '@angular/core';
 import { HttpInterceptorFn } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
@@ -7,23 +7,29 @@ import { environment } from '../../../environments/environment';
 export const authInterceptorFn: HttpInterceptorFn = (req, next) => {
   const platformId = inject(PLATFORM_ID);
 
-  // Bỏ qua preflight
-  if ((req.method || '').toUpperCase() === 'OPTIONS') {
-    return next(req);
-  }
-
-  // Xác định có phải call API không (hỗ trợ cả absolute & relative)
-  const apiBase = environment.apiUrl.replace(/\/+$/, '');               // trim trailing slash
-  const isAbsoluteApi = req.url.startsWith(apiBase + '/');
-  const isRelativeApi = req.url.startsWith('/api/');
-  const isApiCall = isAbsoluteApi || isRelativeApi;
-  if (!isApiCall) return next(req);
-
-  // Lấy path tương đối để so khớp rule
-  const path = isAbsoluteApi ? req.url.substring(apiBase.length) : req.url; // vd: /api/...
+  // 1) Bỏ qua preflight
   const method = (req.method || 'GET').toUpperCase();
+  if (method === 'OPTIONS') return next(req);
 
-  // --- PUBLIC EXPLICIT (không gắn token) ---
+  // 2) Nhận diện request có phải gọi API của mình hay không
+  const apiBase = (environment.apiUrl || '').replace(/\/+$/, ''); // trim trailing slash
+  const url = req.url || '';
+
+  // Absolute API: http(s)://host:port/... khớp apiBase
+  const isAbsoluteApi = apiBase && url.startsWith(apiBase + '/');
+
+  // Relative API: /api/...
+  const isRelativeApi = url.startsWith('/api/');
+
+  // Nếu không phải call API -> bỏ qua
+  if (!isAbsoluteApi && !isRelativeApi) return next(req);
+
+  // 3) Suy ra "path" tương đối để soi rule
+  const path = isAbsoluteApi ? url.substring(apiBase.length) : url; // ví dụ: /api/xxx
+
+  // 4) Allow-list: các endpoint PUBLIC
+  //    - Các endpoint auth/guest
+  //    - Các GET public (catalog)
   const isExplicitPublic =
     (method === 'POST' && (
       path.startsWith('/api/users/login') ||
@@ -35,7 +41,6 @@ export const authInterceptorFn: HttpInterceptorFn = (req, next) => {
       path.startsWith('/brandimg/')
     ));
 
-  // --- PUBLIC GET (catalog) ---
   const isPublicGet =
     method === 'GET' && (
       path.startsWith('/api/products')   ||
@@ -46,10 +51,14 @@ export const authInterceptorFn: HttpInterceptorFn = (req, next) => {
     );
 
   if (isExplicitPublic || isPublicGet) {
-    return next(req);
+    // Có thể thêm X-Requested-With để backend phân biệt XHR
+    const publicReq = req.clone({
+      setHeaders: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    return next(publicReq);
   }
 
-  // --- PRIVATE: gắn token ---
+  // 5) PRIVATE: gắn token (chỉ đọc storage khi chạy browser)
   let token: string | null = null;
   if (isPlatformBrowser(platformId)) {
     token =
@@ -65,6 +74,18 @@ export const authInterceptorFn: HttpInterceptorFn = (req, next) => {
     token = `Bearer ${token}`;
   }
 
-  const authReq = token ? req.clone({ setHeaders: { Authorization: token } }) : req;
+  // (Tuỳ chọn) Nếu backend dùng cookie session thay vì Bearer:
+  // const useCookie = !!(environment as any).authWithCredentials;
+
+  const headers: Record<string, string> = {
+    'X-Requested-With': 'XMLHttpRequest',
+    ...(token ? { Authorization: token } : {})
+  };
+
+  const authReq = req.clone({
+    setHeaders: headers,
+    // withCredentials: useCookie === true
+  });
+
   return next(authReq);
 };
