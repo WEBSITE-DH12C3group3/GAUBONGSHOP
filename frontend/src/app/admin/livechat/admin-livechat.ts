@@ -1,13 +1,12 @@
-import { CommonModule, formatDate } from '@angular/common';
 import {
   Component,
   OnInit,
   ChangeDetectorRef,
   ViewChild,
   ElementRef,
-  Inject,
-  LOCALE_ID,
+  Inject,LOCALE_ID
 } from '@angular/core';
+import { CommonModule, formatDate } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { LivechatAdminService } from '../../shared/services/livechat-admin.service';
@@ -30,7 +29,7 @@ export class AdminLivechatPage implements OnInit {
   @ViewChild('scrollHost', { static: false })
   private scrollHost?: ElementRef<HTMLDivElement>;
 
-  // Timezone cố định cho mọi phép tính ngày/giờ
+  // Cố định timezone để tính ngày theo VN (tránh lệch do SSR/khác múi giờ)
   private readonly TZ = 'Asia/Ho_Chi_Minh';
 
   constructor(

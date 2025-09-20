@@ -1,11 +1,12 @@
-// src/app/features/chat/client-chat.page.ts
-import { Component, OnDestroy, OnInit, ChangeDetectorRef, Inject, LOCALE_ID } from '@angular/core';
-import { CommonModule, formatDate } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 
+
+// src/app/features/chat/client-chat.page.ts  (đường dẫn bạn đang dùng)
+import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ChatClientService } from '../../shared/services/chat-client.service';
 import { ChatSocketService } from '../../shared/services/chat-socket.service';
 import { ChatSessionResponse, MessageDTO } from '../../models/chat.model';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   standalone: true,
@@ -15,37 +16,37 @@ import { ChatSessionResponse, MessageDTO } from '../../models/chat.model';
   styleUrls: ['./client-chat.css']
 })
 export class ClientChatPage implements OnInit, OnDestroy {
-  meId?: number; // nếu decode JWT có thể lấy id
+  meId?: number; // nếu bạn decode token có thể lấy ra, còn không cứ render "senderId === meId"
   session?: ChatSessionResponse;
   messages: MessageDTO[] = [];
   input = '';
   loading = true;
 
-  private readonly TZ = 'Asia/Ho_Chi_Minh';
-
   constructor(
     private api: ChatClientService,
     private socket: ChatSocketService,
-    private cdr: ChangeDetectorRef,
-    @Inject(LOCALE_ID) private locale: string
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.api.openWithAdmin().subscribe(s => {
       this.session = s;
-      this.cdr.detectChanges();
+      this.cdr.detectChanges(); // ✅ cập nhật ngay khi có session
       this.loadMessages();
 
       // subscribe realtime
       const ch = this.socket.sub(`private-chat.${s.id}`);
       ch.bind('message:new', (payload: any) => {
         this.messages.push(payload.message);
-        this.cdr.detectChanges();
+        this.cdr.detectChanges(); // ✅ re-render khi có tin mới
         this.scrollBottom();
       });
 
       // vào trang là mark read
-      this.api.markRead(s.id).subscribe();
+      this.api.markRead(s.id).subscribe(() => {
+        // nếu bạn muốn chắc chắn badge ngoài header cũng về 0 tức thì:
+        // window.dispatchEvent(new CustomEvent('chat:refresh-unread'));
+      });
     });
   }
 
@@ -54,7 +55,7 @@ export class ClientChatPage implements OnInit, OnDestroy {
     this.api.messages(this.session.id, 0, 50).subscribe(res => {
       this.messages = res.content ?? res.items ?? [];
       this.loading = false;
-      this.cdr.detectChanges();
+      this.cdr.detectChanges(); // ✅ sau khi load xong
       setTimeout(() => this.scrollBottom(), 0);
     });
   }
@@ -63,11 +64,12 @@ export class ClientChatPage implements OnInit, OnDestroy {
     if (!this.session || !this.input.trim()) return;
     const content = this.input.trim();
     this.input = '';
-    this.cdr.detectChanges();
+    this.cdr.detectChanges(); // ✅ cập nhật input ngay
 
     this.api.send(this.session.id, content).subscribe(m => {
+      // push optimistic
       this.messages.push(m);
-      this.cdr.detectChanges();
+      this.cdr.detectChanges(); // ✅ re-render sau khi push
       this.scrollBottom();
     });
   }
@@ -79,31 +81,5 @@ export class ClientChatPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.session) this.socket.unsub(`private-chat.${this.session.id}`);
-  }
-
-  // ===== Divider ngày theo múi giờ VN (giống admin) =====
-  private sameDayTZ(a: string | Date, b: string | Date): boolean {
-    const fa = formatDate(a, 'yyyy-MM-dd', this.locale, this.TZ);
-    const fb = formatDate(b, 'yyyy-MM-dd', this.locale, this.TZ);
-    return fa === fb;
-  }
-
-  showDayDivider(i: number): boolean {
-    if (i === 0) return true;
-    const prev = this.messages[i - 1]?.createdAt as any;
-    const curr = this.messages[i]?.createdAt as any;
-    if (!prev || !curr) return false;
-    return !this.sameDayTZ(prev, curr);
-  }
-
-  dayLabel(i: number): string {
-    const d = this.messages[i]?.createdAt as any;
-    const now = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(now.getDate() - 1);
-
-    if (this.sameDayTZ(d, now)) return 'Hôm nay';
-    if (this.sameDayTZ(d, yesterday)) return 'Hôm qua';
-    return formatDate(d, 'dd/MM/yyyy', this.locale, this.TZ);
   }
 }

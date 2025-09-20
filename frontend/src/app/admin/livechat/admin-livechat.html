@@ -31,9 +31,7 @@
               >{{ s.unreadForViewer }}</span>
             </div>
             <div class="text-xs text-gray-500 truncate">{{ s.lastMessageSnippet }}</div>
-            <div class="text-[10px] text-gray-400">
-              {{ s.updatedAt | date:'short':'':'Asia/Ho_Chi_Minh' }}
-            </div>
+            <div class="text-[10px] text-gray-400">{{ s.updatedAt | date:'short' }}</div>
           </div>
         </button>
       </ng-container>
@@ -61,7 +59,7 @@
       <ng-container *ngIf="selected as sel; else pickTpl">
         <div *ngIf="!loading; else loadingTpl">
           <ng-container *ngFor="let m of messages; let i = index; trackBy: trackMessage">
-            <!-- Divider theo ngày -->
+            <!-- Divider theo ngày (tùy chọn) -->
             <div *ngIf="showDayDivider(i)" class="flex justify-center my-2">
               <span class="text-[11px] text-gray-500 bg-gray-200/60 px-2 py-0.5 rounded-full shadow-sm">
                 {{ dayLabel(i) }}
@@ -76,9 +74,7 @@
                 [ngClass]="bubbleClass(m, sel)"
               >
                 <div class="text-sm">{{ m.content }}</div>
-                <div class="text-[10px] opacity-70 mt-1">
-                  {{ m.createdAt | date:'short':'':'Asia/Ho_Chi_Minh' }}
-                </div>
+                <div class="text-[10px] opacity-70 mt-1">{{ m.createdAt | date:'short' }}</div>
               </div>
             </div>
           </ng-container>
