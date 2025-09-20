@@ -54,7 +54,6 @@ public class AdminUserController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
         Page<User> p = userRepo.searchUsers(q, roleId, pageable);
 
-        // Loại trừ theo tên role (client yêu cầu)
         Set<String> excludes = Arrays.stream(excludeRoles.split(","))
                 .map(String::trim).filter(s -> !s.isEmpty())
                 .map(String::toUpperCase).collect(Collectors.toSet());
@@ -68,7 +67,6 @@ public class AdminUserController {
                         .noneMatch(excludes::contains))
                 .toList();
 
-        // Giữ totalElements gốc để phân trang ổn định
         return new PageImpl<>(filtered, pageable, p.getTotalElements());
     }
 
@@ -79,34 +77,41 @@ public class AdminUserController {
     @PostMapping
     @Transactional
     public ResponseEntity<User> create(@RequestBody CreateUserReq body) {
-      if (userRepo.existsByEmailIgnoreCase(body.getEmail())) {
-        throw new ResponseStatusException(HttpStatus.CONFLICT, "Email đã tồn tại");
-      }
+        if (userRepo.existsByEmailIgnoreCase(body.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email đã tồn tại");
+        }
 
-      User u = new User();
-      u.setUsername(body.getUsername());
-      u.setPhone(body.getPhone());
-      u.setEmail(body.getEmail());
-      u.setPassword(passwordEncoder.encode(body.getPassword()));
-      u = userRepo.save(u);
+        User u = new User();
+        u.setUsername(body.getUsername());
+        u.setPhone(body.getPhone());
+        u.setEmail(body.getEmail());
+        u.setPassword(passwordEncoder.encode(body.getPassword()));
+        u = userRepo.save(u);
 
-      // Nếu FE vẫn gửi mảng roleIds, lấy phần tử đầu (nếu có)
-      Long roleId = null;
-      if (body.getRoleId() != null) {
-        roleId = body.getRoleId();
-      } else if (body.getRoleIds() != null && !body.getRoleIds().isEmpty()) {
-        roleId = body.getRoleIds().get(0);
-      }
+        Long roleId = null;
+        if (body.getRoleId() != null) {
+            roleId = body.getRoleId();
+        } else if (body.getRoleIds() != null && !body.getRoleIds().isEmpty()) {
+            roleId = body.getRoleIds().get(0);
+        }
 
-      if (roleId != null) {
-        doAssign(u.getId(), roleId);
-      }
+        if (roleId != null) {
+            doAssign(u.getId(), roleId);
+        }
 
-      URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
-          .path("/{id}").buildAndExpand(u.getId()).toUri();
-      return ResponseEntity.created(uri).body(u);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}").buildAndExpand(u.getId()).toUri();
+        return ResponseEntity.created(uri).body(u);
     }
 
+    /* =========================
+     * ⭐ NEW: GET /api/admin/users/without-role
+     * -> trả danh sách user chưa có role nào (để FE hiển thị trong modal "thêm từ user có sẵn")
+     * ========================= */
+    @GetMapping("/without-role")
+    public List<User> usersWithoutRole() {
+        return userRepo.findUsersWithoutRole();
+    }
 
     /* =========================
      * PUT /api/admin/users/{userId}/roles/{roleId}
@@ -120,13 +125,30 @@ public class AdminUserController {
         return ResponseEntity.ok().build();
     }
 
-    
     @PostMapping(path = "/assign", params = {"userId","roleId"})
     public ResponseEntity<Void> addToRole(@RequestParam Long userId, @RequestParam Long roleId) {
-      doAssign(userId, roleId);  // move luôn
-      return ResponseEntity.ok().build();
+        doAssign(userId, roleId);
+        return ResponseEntity.ok().build();
     }
 
+    /* =========================
+     * ⭐ NEW: POST /api/admin/users/{userId}/assign-role
+     * -> FE gửi body { "roleId": 2 }
+     * (để thay cho call /assign-role đang 500 do chưa có mapping)
+     * ========================= */
+    @PostMapping("/{userId}/assign-role")
+    @Transactional
+    public ResponseEntity<?> assignByBody(
+            @PathVariable Long userId,
+            @RequestBody Map<String, Long> body
+    ) {
+        Long roleId = body.get("roleId");
+        if (roleId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "roleId is required");
+        }
+        doAssign(userId, roleId);
+        return ResponseEntity.ok(Map.of("message", "Assigned", "userId", userId, "roleId", roleId));
+    }
 
     /* =========================
      * DELETE /api/admin/users/{userId}/roles/{roleId}
@@ -134,52 +156,52 @@ public class AdminUserController {
      * ========================= */
     @DeleteMapping(path = "/assign", params = {"userId","roleId"})
     public ResponseEntity<Void> removeFromRole(@RequestParam Long userId, @RequestParam Long roleId) {
-      userRoleRepo.deleteByUser_IdAndRole_Id(userId, roleId);
-      return ResponseEntity.noContent().build();
+        userRoleRepo.deleteByUser_IdAndRole_Id(userId, roleId);
+        return ResponseEntity.noContent().build();
     }
 
-
-    // @DeleteMapping(path = "/assign", params = {"userId","roleId"})
-    // @Transactional
-    // public ResponseEntity<Void> removeFromRoleQuery(
-    //         @RequestParam Long userId, @RequestParam Long roleId) {
-    //     userRoleRepo.deleteByUser_IdAndRole_Id(userId, roleId);
-    //     return ResponseEntity.noContent().build();
-    // }
+    /* =========================
+     * ⭐ NEW: DELETE /api/admin/users/{userId}/role
+     * -> "Gỡ khỏi nhóm": xoá toàn bộ role (role = null)
+     * ========================= */
+    @DeleteMapping("/{userId}/role")
+    @Transactional
+    public ResponseEntity<?> unassignAll(@PathVariable Long userId) {
+        if (!userRepo.existsById(userId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User không tồn tại");
+        }
+        userRoleRepo.deleteByUser_Id(userId);
+        return ResponseEntity.ok(Map.of("message", "Unassigned", "userId", userId));
+    }
 
     /* ===== Helper ===== */
     @Transactional
     private void doAssign(Long userId, Long roleId) {
-      // Nếu đã cùng role thì bỏ qua
-      if (userRoleRepo.existsByUser_IdAndRole_Id(userId, roleId)) return;
+        if (userRoleRepo.existsByUser_IdAndRole_Id(userId, roleId)) return;
 
-      // Xoá mọi role cũ của user để đảm bảo chỉ còn 1
-      userRoleRepo.deleteByUser_Id(userId);
+        userRoleRepo.deleteByUser_Id(userId);
 
-      User u = userRepo.findById(userId)
-          .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User không tồn tại"));
-      Role r = roleRepo.findById(roleId)
-          .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role không tồn tại"));
-      UserRole ur = UserRole.builder()
-          .user(u)
-          .role(r)
-          .build();
-      userRoleRepo.save(ur);
+        User u = userRepo.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User không tồn tại"));
+        Role r = roleRepo.findById(roleId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role không tồn tại"));
 
+        UserRole ur = UserRole.builder()
+                .user(u)
+                .role(r)
+                .build();
+        userRoleRepo.save(ur);
     }
-
-
 
     /* ===== DTO ===== */
     @Data
     public static class CreateUserReq {
-      private String username;
-      private String phone;
-      @NotBlank @Email private String email;
-      @NotBlank @Size(min = 6) private String password;
+        private String username;
+        private String phone;
+        @NotBlank @Email private String email;
+        @NotBlank @Size(min = 6) private String password;
 
-      private Long roleId;            // MỚI: 1 role duy nhất
-      private List<Long> roleIds;     // CŨ: vẫn cho phép, nhưng chỉ lấy phần tử đầu nếu có
+        private Long roleId;            // MỚI: 1 role duy nhất
+        private List<Long> roleIds;     // CŨ: vẫn cho phép, nhưng chỉ lấy phần tử đầu nếu có
     }
-
 }

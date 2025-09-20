@@ -1,202 +1,264 @@
-<div class="h-full flex">
+<div class="h-full flex bg-slate-50">
   <!-- LEFT: Roles list -->
-  <aside class="w-72 border-r bg-white p-4 space-y-3">
+  <aside class="w-80 border-r bg-white p-4 space-y-3">
     <div class="flex items-center justify-between">
-      <h2 class="font-semibold">Nhóm người dùng</h2>
-      <button class="px-2 py-1 text-sm rounded bg-pink-600 text-white"
-              (click)="openCreateRole()">+ Thêm</button>
+      <h2 class="font-semibold text-gray-800">Nhóm người dùng</h2>
     </div>
 
-    <ng-container *ngIf="!loading(); else loadingRoles">
-      <div *ngFor="let r of roles()"
-           class="px-3 py-2 rounded cursor-pointer hover:bg-pink-50"
-           [class.bg-pink-100]="selectedRoleId() === r.id"
-           (click)="selectedRoleId.set(r.id)">
+    <!-- search roles -->
+    <div class="relative">
+      <input
+        type="text"
+        class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+        placeholder="Tìm nhóm…"
+        #roleSearch
+        (input)="roleSearch.value = roleSearch.value.trimStart()"
+      />
+      <i class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-gray-400 text-sm"></i>
+    </div>
+
+    <ng-container *ngIf="!loading; else loadingRoles">
+      <div
+        *ngFor="let r of roles | slice : 0 : 999; trackBy: trackById"
+        (click)="onSelectRole(r)"
+        class="px-3 py-2 rounded-lg cursor-pointer hover:bg-pink-50 border"
+        [class.bg-pink-100]="selectedRole?.id === r.id"
+        [class.border-pink-300]="selectedRole?.id === r.id"
+        [hidden]="
+          !!roleSearch?.value &&
+          !( (r.name || '').toLowerCase().includes( (roleSearch?.value || '').toLowerCase() ) )
+        "
+      >
         <div class="flex items-center justify-between">
-          <span class="font-medium">{{ r.name }}</span>
-          <span class="text-xs text-gray-500">{{ countUsersByRole(r.id) }}
-</span>
+          <div class="min-w-0">
+            <div class="font-medium text-gray-800 truncate">{{ r.name }}</div>
+            <div class="text-[11px] text-gray-500 font-mono truncate" *ngIf="r.code">code: {{ r.code }}</div>
+          </div>
+          <span
+            class="ml-3 inline-flex items-center justify-center min-w-[1.5rem] h-6 rounded-full text-xs px-2 bg-slate-100 text-gray-700"
+            >{{ countUsersByRole(r.id) }}</span
+          >
         </div>
-        <div class="text-xs text-gray-500 font-mono" *ngIf="r.code">{{ r.code }}</div>
       </div>
     </ng-container>
+
     <ng-template #loadingRoles>
-      <div class="text-sm text-gray-500">Đang tải nhóm...</div>
+      <div class="space-y-2">
+        <div class="h-8 rounded bg-slate-100 animate-pulse"></div>
+        <div class="h-8 rounded bg-slate-100 animate-pulse"></div>
+        <div class="h-8 rounded bg-slate-100 animate-pulse"></div>
+      </div>
     </ng-template>
   </aside>
 
   <!-- RIGHT: Role detail -->
-  <section class="flex-1 p-6 overflow-y-auto">
-    <ng-container *ngIf="selectedRole(); else emptyState">
-      <div class="flex items-center justify-between mb-4">
+  <section class="flex-1 p-6 overflow-y-auto" *ngIf="selectedRole; else emptyState">
+    <!-- Header -->
+    <div class="mb-5">
+      <div class="flex items-center justify-between">
         <div>
-          <h3 class="text-lg font-semibold">{{ selectedRole()?.name }}</h3>
-          <div class="text-xs text-gray-500 font-mono" *ngIf="selectedRole()?.code">code: {{ selectedRole()?.code }}</div>
-        </div>
-        <div class="space-x-2">
-          <button class="px-3 py-1 rounded bg-blue-600 text-white" (click)="openEditRole(selectedRole()!)">Sửa</button>
-          <button class="px-3 py-1 rounded bg-red-600 text-white" (click)="deleteRole(selectedRole()!)">Xoá</button>
-        </div>
-      </div>
-
-      <!-- Permissions -->
-      <div class="bg-white rounded-xl border p-4 mb-6">
-        <div class="flex items-center justify-between mb-3">
-          <h4 class="font-medium">Quyền của nhóm</h4>
-          <small class="text-gray-500">Tick để cấp quyền cho nhóm (sửa trong modal)</small>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-          <label *ngFor="let p of permissions()" class="flex items-center space-x-2">
-            <input type="checkbox" [checked]="hasPermission(selectedRole(), p.name)" disabled />
-
-            <span>{{ p.description || p.name }}</span>
-          </label>
-        </div>
-        <div class="text-xs text-gray-500 mt-2">Nhấn “Sửa” để cập nhật quyền.</div>
-      </div>
-
-      <!-- Members -->
-      <div class="bg-white rounded-xl border">
-        <div class="p-4 border-b flex items-center justify-between">
-          <div class="font-medium">Thành viên trong nhóm</div>
-          <div class="flex items-center space-x-2">
-            <input class="border rounded px-2 py-1 text-sm"
-       placeholder="Tìm theo tên / email / sđt"
-       [ngModel]="searchMember()"
-       (ngModelChange)="searchMember.set($event)" />
-
-            <button class="px-3 py-1 rounded bg-pink-600 text-white"
-                    (click)="openAddMember(selectedRole()!)">+ Add member</button>
+          <h3 class="text-xl font-semibold text-gray-900">{{ selectedRole?.name }}</h3>
+          <div class="text-xs text-gray-500 font-mono mt-0.5" *ngIf="selectedRole?.code">
+            code: {{ selectedRole?.code }}
           </div>
         </div>
+      </div>
+    </div>
 
-        <div class="p-4 overflow-x-auto">
-          <table class="min-w-full">
-            <thead>
-              <tr class="text-left text-sm text-gray-500">
-                <th class="py-2">User</th>
-                <th class="py-2">Email</th>
-                <th class="py-2">Phone</th>
-                <th class="py-2">Nhóm hiện tại</th>
-                <th class="py-2">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let u of membersOfSelectedRole()" class="border-t">
-                <td class="py-2">{{ u.username || '—' }}</td>
-                <td class="py-2">{{ u.email }}</td>
-                <td class="py-2">{{ u.phone || '—' }}</td>
-                <td class="py-2">
-                  <select class="border rounded px-2 py-1"
-                          [ngModel]="u.roles?.[0]?.id"
-                          (ngModelChange)="reassignMember(u, $event)">
-                    <option *ngFor="let r of roles()" [ngValue]="r.id">{{ r.name }}</option>
-                  </select>
-                </td>
-                <td class="py-2">
-                  <button class="px-2 py-1 rounded border text-sm" (click)="reassignMember(u, selectedRoleId()!)">
-                    Chuyển về nhóm này
-                  </button>
-                </td>
-              </tr>
-              <tr *ngIf="membersOfSelectedRole().length === 0">
-                <td colspan="5" class="py-6 text-center text-gray-500">Chưa có thành viên trong nhóm này.</td>
-              </tr>
-            </tbody>
-          </table>
+    <!-- Permissions (read-only – chỉ quyền nhóm đang sở hữu) -->
+    <div class="bg-white rounded-2xl border p-4 mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="font-medium text-gray-900">Quyền của nhóm</h4>
+        <small class="text-gray-500">Chỉ hiển thị quyền nhóm hiện có (chỉnh ở trang Phân quyền)</small>
+      </div>
+
+      <ng-container *ngIf="selectedPermissions.length; else noPerms">
+        <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <div
+            *ngFor="let p of selectedPermissions; trackBy: trackById"
+            class="flex items-center gap-2 px-3 py-2 border rounded-lg bg-slate-50 text-sm"
+            title="{{ p.name }}"
+          >
+            <i class="fa-solid fa-check text-pink-600"></i>
+            <span class="truncate">{{ p.description || p.name }}</span>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #noPerms>
+        <div class="text-sm text-gray-500">Nhóm này chưa được gán quyền nào.</div>
+      </ng-template>
+    </div>
+
+    <!-- Members -->
+    <div class="bg-white rounded-2xl border">
+      <div class="p-4 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="font-medium text-gray-900">Thành viên trong nhóm</div>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <div class="relative flex-1 sm:flex-none">
+            <input
+              class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+              placeholder="Tìm theo tên / email / sđt"
+              [(ngModel)]="searchTerm"
+            />
+            <i class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-gray-400 text-sm"></i>
+          </div>
+          <button class="px-3 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700"
+                  (click)="openAddMember()">
+            <i class="fa-solid fa-user-plus mr-1"></i> Thêm người dùng
+          </button>
         </div>
       </div>
-    </ng-container>
 
-    <ng-template #emptyState>
-      <div class="text-gray-500">Hãy chọn một nhóm ở panel trái để xem chi tiết.</div>
-    </ng-template>
+      <div class="p-4 overflow-x-auto">
+        <table class="min-w-full">
+          <thead>
+            <tr class="text-left text-sm text-gray-500">
+              <th class="py-2 font-medium">User</th>
+              <th class="py-2 font-medium">Email</th>
+              <th class="py-2 font-medium">Phone</th>
+              <th class="py-2 font-medium">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of membersOfSelected(); trackBy: trackById" class="border-t">
+              <td class="py-2">
+                <div class="font-medium text-gray-800">{{ u.username || '—' }}</div>
+                <div class="text-xs text-gray-500" *ngIf="!u.username">#{{ u.id }}</div>
+              </td>
+              <td class="py-2">{{ u.email }}</td>
+              <td class="py-2">{{ u.phone || '—' }}</td>
+              <td class="py-2">
+                <button class="px-2.5 py-1.5 rounded-lg border text-sm hover:bg-slate-50"
+                        (click)="removeMemberFromRole(u)">
+                  <i class="fa-solid fa-user-minus mr-1"></i> Gỡ khỏi nhóm
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="membersOfSelected().length === 0">
+              <td colspan="4" class="py-8 text-center text-gray-500">
+                <div class="flex flex-col items-center gap-2">
+                  <i class="fa-regular fa-circle-user text-2xl"></i>
+                  <div>Chưa có thành viên trong nhóm này.</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </section>
+
+  <ng-template #emptyState>
+    <div class="p-6 text-gray-500">Hãy chọn một nhóm ở panel trái để xem chi tiết.</div>
+  </ng-template>
 </div>
 
-<!-- MODAL: create/update role -->
-<div *ngIf="showRoleModal()" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-  <div class="bg-white w-[720px] rounded-2xl shadow-xl p-6">
-    <h3 class="text-lg font-semibold mb-4">{{ editMode() ? 'Chỉnh sửa nhóm' : 'Tạo nhóm mới' }}</h3>
+<!-- MODAL: Add member (2 tab: Tạo mới / Chọn từ user chưa có nhóm) -->
+<div *ngIf="showMemberModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-white w-[760px] max-w-full rounded-2xl shadow-2xl p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold">Thêm người dùng vào nhóm “{{ selectedRole?.name }}”</h3>
+      <button class="p-2 text-gray-500 hover:text-gray-700" (click)="showMemberModal=false">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
 
-    <form #rf="ngForm" (ngSubmit)="saveRole(rf)">
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium">Code (kỹ thuật)</label>
-          <input name="code" [(ngModel)]="roleForm().code" class="w-full border rounded px-3 py-2" placeholder="MANAGER / SELLER" />
-          <div class="text-xs text-gray-500 mt-1">Dùng tiếng Anh, viết hoa/không dấu. Dùng để map phân quyền.</div>
-        </div>
-        <div>
-          <label class="block text-sm font-medium">Tên hiển thị</label>
-          <input required name="name" [(ngModel)]="roleForm().name" class="w-full border rounded px-3 py-2" placeholder="Người quản lý" />
-        </div>
-      </div>
+    <!-- Tabs -->
+    <div class="flex mb-4 border-b">
+      <button class="px-4 py-2 -mb-px"
+              [class.border-b-2]="addMode==='new'"
+              [class.border-pink-600]="addMode==='new'"
+              (click)="addMode='new'">
+        Tạo mới
+      </button>
+      <button class="px-4 py-2 -mb-px"
+              [class.border-b-2]="addMode==='from-existing'"
+              [class.border-pink-600]="addMode==='from-existing'"
+              (click)="addMode='from-existing'">
+        Chọn từ user chưa có nhóm
+      </button>
+    </div>
 
-      <div class="mt-4">
-        <label class="block text-sm font-medium">Mô tả</label>
-        <textarea name="description" [(ngModel)]="roleForm().description" class="w-full border rounded px-3 py-2" rows="2"></textarea>
-      </div>
-
-      <div class="mt-4">
-        <label class="block text-sm font-medium mb-1">Quyền</label>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-56 overflow-y-auto border rounded p-3">
-          <label *ngFor="let p of permissions()" class="flex items-center space-x-2">
-              <input type="checkbox" [checked]="hasPermission(selectedRole(), p.name)" disabled />
-
-            <span>{{ p.description || p.name }}</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="mt-6 flex justify-end space-x-2">
-        <button type="button" class="px-4 py-2 rounded border" (click)="showRoleModal.set(false)">Huỷ</button>
-        <button type="submit" class="px-4 py-2 rounded bg-pink-600 text-white">Lưu</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- MODAL: add member -->
-<div *ngIf="showMemberModal()" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-  <div class="bg-white w-[720px] rounded-2xl shadow-xl p-6">
-    <h3 class="text-lg font-semibold mb-4">Thêm thành viên mới</h3>
-
-    <form #mf="ngForm" (ngSubmit)="createMember(mf)">
+    <!-- Tab: TẠO MỚI -->
+    <form *ngIf="addMode==='new'" #mf="ngForm" (ngSubmit)="createMember(mf)">
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label class="block text-sm font-medium">Email</label>
-          <input name="email" required type="email" [(ngModel)]="memberForm().email"
-                 class="w-full border rounded px-3 py-2" placeholder="user@example.com" />
+          <input name="email" required type="email" [(ngModel)]="memberForm.email"
+                 class="w-full border rounded-lg px-3 py-2" placeholder="user@example.com" />
         </div>
         <div>
           <label class="block text-sm font-medium">Mật khẩu</label>
-          <input name="password" required type="password" [(ngModel)]="memberForm().password"
-                 class="w-full border rounded px-3 py-2" placeholder="••••••••" />
+          <input name="password" required type="password" [(ngModel)]="memberForm.password"
+                 class="w-full border rounded-lg px-3 py-2" placeholder="••••••••" />
         </div>
         <div>
           <label class="block text-sm font-medium">Họ tên</label>
-          <input name="username" [(ngModel)]="memberForm().username" class="w-full border rounded px-3 py-2" />
+          <input name="username" [(ngModel)]="memberForm.username" class="w-full border rounded-lg px-3 py-2" />
         </div>
         <div>
           <label class="block text-sm font-medium">Số điện thoại</label>
-          <input name="phone" [(ngModel)]="memberForm().phone" class="w-full border rounded px-3 py-2" />
+          <input name="phone" [(ngModel)]="memberForm.phone" class="w-full border rounded-lg px-3 py-2" />
         </div>
         <div class="col-span-2">
           <label class="block text-sm font-medium">Địa chỉ</label>
-          <input name="address" [(ngModel)]="memberForm().address" class="w-full border rounded px-3 py-2" />
+          <input name="address" [(ngModel)]="memberForm.address" class="w-full border rounded-lg px-3 py-2" />
         </div>
         <div class="col-span-2">
           <label class="block text-sm font-medium">Nhóm (role)</label>
-          <select name="roleId" required [(ngModel)]="memberForm().roleId" class="w-full border rounded px-3 py-2">
-            <option *ngFor="let r of roles()" [ngValue]="r.id">{{ r.name }}</option>
+          <select name="roleId" required [(ngModel)]="memberForm.roleId" class="w-full border rounded-lg px-3 py-2">
+            <option *ngFor="let r of roles; trackBy: trackById" [ngValue]="r.id">{{ r.name }}</option>
           </select>
         </div>
       </div>
 
-      <div class="mt-6 flex justify-end space-x-2">
-        <button type="button" class="px-4 py-2 rounded border" (click)="showMemberModal.set(false)">Huỷ</button>
-        <button type="submit" class="px-4 py-2 rounded bg-pink-600 text-white">Tạo & gán nhóm</button>
+      <div class="mt-6 flex justify-end gap-2">
+        <button type="button" class="px-4 py-2 rounded-lg border"
+                (click)="closeMemberModalSafely()">Huỷ</button>
+        <button type="submit"
+                class="px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700 disabled:opacity-50"
+                [disabled]="mf.invalid || saving">
+          <i *ngIf="saving" class="fa-solid fa-spinner fa-spin mr-2"></i>
+          Tạo & gán nhóm
+        </button>
       </div>
+
     </form>
+
+    <!-- Tab: CHỌN TỪ USER CHƯA CÓ NHÓM -->
+    <div *ngIf="addMode==='from-existing'">
+      <div class="mb-3">
+        <button class="px-4 py-2 -mb-px"
+                [class.border-b-2]="addMode==='from-existing'"
+                [class.border-pink-600]="addMode==='from-existing'"
+                (click)="openPickExisting()">Chọn từ user chưa có nhóm</button>
+        <select class="w-full border rounded-lg px-3 py-2"
+                [(ngModel)]="selectedCandidateId"
+                name="candidate">
+          <option [ngValue]="null" disabled>-- Chọn user --</option>
+          <option *ngFor="let u of candidates; trackBy: trackById" [ngValue]="u.id">
+            {{ u.username || u.email }} — {{ u.email }}
+          </option>
+        </select>
+        <div class="text-xs text-gray-500 mt-1" *ngIf="loadingCandidates">Đang tải danh sách…</div>
+        <div class="text-xs text-gray-500 mt-1" *ngIf="!loadingCandidates && candidates.length===0">
+          Không có người dùng nào chưa có nhóm.
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end gap-2">
+        <button type="button" class="px-4 py-2 rounded-lg border" (click)="showMemberModal = false">Huỷ</button>
+        <button type="button"
+                class="px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700 disabled:opacity-50"
+                (click)="addExistingToRole()"
+                [disabled]="!selectedCandidateId || saving">
+          <i *ngIf="saving" class="fa-solid fa-spinner fa-spin mr-2"></i>
+          Gán vào nhóm
+        </button>
+
+      </div>
+    </div>
   </div>
 </div>

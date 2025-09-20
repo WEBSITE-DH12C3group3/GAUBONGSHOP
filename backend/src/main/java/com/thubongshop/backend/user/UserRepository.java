@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -54,4 +55,21 @@ public interface UserRepository extends JpaRepository<User, Long> {
                or lower(u.phone)    like lower(concat('%', :q, '%')))
         """)
     Page<User> searchKeywordOnly(@Param("q") String q, Pageable pageable);
+
+    /* ===== ⭐ BỔ SUNG CHO MÀN QUẢN LÝ NHÓM ===== */
+
+    // Lấy toàn bộ user kèm roles (dùng cho admin list nhanh, tránh N+1)
+    @Query("""
+      select distinct u from User u
+      left join fetch u.roles r
+    """)
+    List<User> findAllWithRoles();
+
+    // Lấy các user chưa có role nào (phục vụ "chọn từ user chưa có nhóm")
+    @Query("""
+      select u from User u
+      left join u.roles r
+      where r is null
+    """)
+    List<User> findUsersWithoutRole();
 }

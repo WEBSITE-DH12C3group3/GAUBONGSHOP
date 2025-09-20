@@ -1,12 +1,11 @@
 package com.thubongshop.backend.rolepermission;
 
 import com.thubongshop.backend.permission.Permission;
-import lombok.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
+
 import java.util.List;
 
 @RestController
@@ -17,16 +16,20 @@ public class RolePermissionController {
 
   private final RolePermissionService service;
 
+  // ✅ Chỉ còn MỘT GET duy nhất cho permissions của role
   @GetMapping("/{roleId}/permissions")
   public List<Permission> list(@PathVariable Long roleId) {
-    return service.listOfRole(roleId);
+    // Chọn 1 trong 2 service call dưới đây tuỳ bạn muốn dùng hàm nào.
+    // return service.listOfRole(roleId);
+    return service.getPermissionsOfRole(roleId);
   }
 
   @PutMapping("/{roleId}/permissions")
   public ResponseEntity<List<Permission>> setAll(@PathVariable Long roleId,
                                                  @RequestBody(required = false) List<Long> ids) {
-    service.setForRole(roleId, ids == null ? List.of() : ids);
-    return ResponseEntity.ok(service.listOfRole(roleId));
+    service.setForRole(roleId, (ids == null) ? List.of() : ids);
+    // Trả lại danh sách hiện tại sau khi set (giữ nguyên hành vi cũ)
+    return ResponseEntity.ok(service.getPermissionsOfRole(roleId));
   }
 
   @PostMapping("/{roleId}/permissions/{permId}")
@@ -41,5 +44,3 @@ public class RolePermissionController {
     return ResponseEntity.noContent().build();
   }
 }
-
-

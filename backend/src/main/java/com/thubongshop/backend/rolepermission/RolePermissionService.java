@@ -23,6 +23,10 @@ public class RolePermissionService {
     return rpRepo.findPermissionsOfRole(roleId);
   }
 
+    @Transactional(readOnly = true)
+    public List<Permission> getPermissionsOfRole(Long roleId) {
+      return rpRepo.findPermissionsOfRole(roleId);
+    }
   @Transactional
   public void setForRole(Long roleId, List<Long> permissionIds) {
     Role role = roleRepo.findById(roleId).orElseThrow();

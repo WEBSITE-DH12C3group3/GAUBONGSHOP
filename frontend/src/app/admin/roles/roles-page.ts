@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import {
@@ -8,7 +8,6 @@ import {
   AdminUserDto
 } from '../../shared/services/admin-users.service';
 
-
 @Component({
   selector: 'app-roles-page',
   standalone: true,
@@ -17,216 +16,287 @@ import {
   styleUrls: ['./roles-page.css']
 })
 export class RolesPageComponent implements OnInit {
-  // data
-  roles = signal<RoleDto[]>([]);
-  permissions = signal<PermissionDto[]>([]);
-  users = signal<AdminUserDto[]>([]);
+  // ===== data =====
+  allRoles: RoleDto[] = [];          // gồm cả CUSTOMER
+  roles: RoleDto[] = [];             // đã lọc (ẩn CUSTOMER)
+  customerRole: RoleDto | null = null;
 
-  // UI states
-  loading = signal(true);
-  error = signal<string | null>(null);
+  permissions: PermissionDto[] = []; // toàn bộ permission (nếu cần dùng nơi khác)
+  users: AdminUserDto[] = [];        // mọi user (đã loại Customer khi render)
 
-  searchMember = signal('');                      // ô tìm kiếm member trong nhóm
-  selectedRoleId = signal<number | null>(null);   // role đang chọn (panel phải)
+  // Quyền của nhóm đang chọn (chỉ quyền nhóm này có)
+  selectedPermissions: PermissionDto[] = [];
 
-  // modal: thêm/sửa role
-  showRoleModal = signal(false);
-  editMode = signal(false);
-  roleForm = signal<{ id?: number; code?: string; name: string; description?: string; permissions: string[] }>({
-    name: '',
-    permissions: []
-  });
+  // ===== UI state =====
+  loading = true;
+  error: string | null = null;
+  selectedRole: RoleDto | null = null;
 
-  // modal: thêm member
-  showMemberModal = signal(false);
-  memberForm = signal<{ email: string; password: string; username?: string; phone?: string; address?: string; roleId: number | null }>({
+  // tìm theo tên/email/sđt trong bảng thành viên
+  searchTerm = '';
+
+  // ===== Modal: Thêm thành viên =====
+  showMemberModal = false;
+  saving = false;
+  addMode: 'new' | 'from-existing' = 'new';
+
+  // form tạo mới user
+  memberForm = {
     email: '',
     password: '',
     username: '',
     phone: '',
     address: '',
-    roleId: null
-  });
+    roleId: 0 as number
+  };
 
-  constructor(private admin: AdminUsersService) {}
+  // ứng viên chưa có role
+  candidates: AdminUserDto[] = [];
+  loadingCandidates = false;
+  selectedCandidateId: number | null = null;
+
+  constructor(
+    private admin: AdminUsersService,
+    private zone: NgZone,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadAll();
+    this.cdr.detectChanges(); // đảm bảo vòng change detection đầu tiên ổn định
   }
 
-  loadAll() {
-    this.loading.set(true);
-    this.error.set(null);
+  /** Tải roles + permissions + users */
+  private loadAll() {
+    this.loading = true; this.error = null;
+    this.cdr.detectChanges();
 
-    // tải roles + perms + users song song
     Promise.all([
       this.admin.getRoles().toPromise(),
       this.admin.getPermissions().toPromise(),
       this.admin.getUsers().toPromise()
-    ]).then(([roles, perms, users]) => {
-      // Ẩn nhóm Customer khỏi UI
-      const filteredRoles = (roles || []).filter(r =>
-        (r.code ? r.code.toUpperCase() !== 'CUSTOMER' : (r.name?.toUpperCase() !== 'CUSTOMER'))
+    ])
+    .then(([roles, perms, users]) => {
+      this.allRoles = roles ?? [];
+
+      // tìm CUSTOMER (theo code hoặc name)
+      this.customerRole =
+        this.allRoles.find(r => r.code?.toUpperCase() === 'CUSTOMER')
+        ?? this.allRoles.find(r => r.name?.toUpperCase() === 'CUSTOMER')
+        ?? null;
+
+      // ẩn CUSTOMER ở panel trái
+      this.roles = this.allRoles.filter(r =>
+        (r.code ? r.code.toUpperCase() !== 'CUSTOMER' : (r.name || '').toUpperCase() !== 'CUSTOMER')
       );
 
-      this.roles.set(filteredRoles);
-      this.permissions.set(perms || []);
-      // chỉ hiển thị users KHÔNG phải Customer
-      const usersExcludingCustomer = (users || []).filter(u => {
-        const rn = u.roles?.[0]?.name?.toUpperCase() || u.roles?.[0]?.code?.toUpperCase();
+      this.permissions = perms ?? [];
+
+      // users cho bảng: không show Customer
+      this.users = (users ?? []).filter(u => {
+        const rn = u.roles?.[0]?.code?.toUpperCase() || u.roles?.[0]?.name?.toUpperCase();
         return rn !== 'CUSTOMER';
       });
-      this.users.set(usersExcludingCustomer);
 
-      // chọn role đầu tiên nếu chưa có
-      if (!this.selectedRoleId()) {
-        this.selectedRoleId.set(this.roles()[0]?.id ?? null);
+      // chọn role đầu tiên nếu chưa chọn
+      if (!this.selectedRole && this.roles.length > 0) {
+        this.onSelectRole(this.roles[0]); // gọi luôn để fetch quyền nhóm
       }
 
-      this.loading.set(false);
-    }).catch(err => {
+      this.loading = false;
+      this.cdr.detectChanges();
+    })
+    .catch(err => {
       console.error(err);
-      this.error.set('Không tải được dữ liệu. Vui lòng thử lại.');
-      this.loading.set(false);
+      this.error = 'Không tải được dữ liệu. Vui lòng thử lại.';
+      this.loading = false;
+      this.cdr.detectChanges();
     });
   }
 
-  // ====== computed cho panel phải ======
-  selectedRole = computed<RoleDto | undefined>(() =>
-    this.roles().find(r => r.id === this.selectedRoleId())
-  );
+  // ===== Helpers UI =====
+  onSelectRole(r: RoleDto) {
+    this.selectedRole = r;
+    this.memberForm.roleId = r.id;
+    this.searchTerm = '';
+    this.cdr.detectChanges();
 
-  membersOfSelectedRole = computed<AdminUserDto[]>(() => {
-    const roleId = this.selectedRoleId();
-    const q = this.searchMember().trim().toLowerCase();
-    let list = this.users().filter(u => u.roles?.[0]?.id === roleId);
-    if (q) {
-      list = list.filter(u =>
-        (u.username || '').toLowerCase().includes(q) ||
-        (u.email || '').toLowerCase().includes(q) ||
-        (u.phone || '').toLowerCase().includes(q)
-      );
-    }
-    return list;
-  });
-
-  // ====== actions: ROLE ======
-  openCreateRole() {
-    this.editMode.set(false);
-    this.roleForm.set({ name: '', description: '', code: '', permissions: [] });
-    this.showRoleModal.set(true);
-  }
-
-  openEditRole(role: RoleDto) {
-    this.editMode.set(true);
-    this.roleForm.set({
-      id: role.id,
-      code: role.code,
-      name: role.name,
-      description: role.description,
-      permissions: (role.permissions || []).map(p => p.name)
-    });
-    this.showRoleModal.set(true);
-  }
-
-  togglePermInForm(perm: string, checked: boolean) {
-    const form = { ...this.roleForm() };
-    form.permissions = form.permissions || [];
-    if (checked && !form.permissions.includes(perm)) form.permissions.push(perm);
-    if (!checked) form.permissions = form.permissions.filter(p => p !== perm);
-    this.roleForm.set(form);
-  }
-
-  saveRole(formRef: NgForm) {
-    if (formRef.invalid) return;
-    const data = this.roleForm();
-
-    const payload = {
-      code: data.code ? data.code.trim() : undefined,
-      name: data.name ? data.name.trim() : '',
-      description: data.description ? data.description.trim() : undefined,
-      permissions: data.permissions || []
-    };
-
-    let req$;
-    if (this.editMode() && data.id) {
-      req$ = this.admin.updateRole(data.id, payload);
-    } else {
-      req$ = this.admin.createRole(payload);
-    }
-
-    req$.subscribe({
-      next: () => { this.showRoleModal.set(false); this.loadAll(); },
-      error: () => alert('❌ Không thể lưu nhóm. Vui lòng thử lại.')
-    });
-  }
-
-
-  deleteRole(role: RoleDto) {
-    // an toàn: cảnh báo khi nhóm còn thành viên
-    const memberCount = this.users().filter(u => u.roles?.[0]?.id === role.id).length;
-    if (memberCount > 0) {
-      alert('Nhóm vẫn còn thành viên. Hãy chuyển các thành viên sang nhóm khác trước khi xoá.');
-      return;
-    }
-    if (!confirm(`Xoá nhóm "${role.name}"?`)) return;
-
-    this.admin.deleteRole(role.id).subscribe({
-      next: () => {
-        if (this.selectedRoleId() === role.id) this.selectedRoleId.set(null);
-        this.loadAll();
+    // lấy đúng các quyền nhóm đang có để hiển thị
+    this.admin.getRolePermissions(r.id).subscribe({
+      next: perms => {
+        this.selectedPermissions = perms || [];
+        this.cdr.detectChanges();
       },
-      error: () => alert('❌ Xoá nhóm thất bại.')
+      error: () => {
+        this.selectedPermissions = [];
+        this.cdr.detectChanges();
+      }
     });
   }
 
-  // ====== actions: MEMBER ======
-  openAddMember(role: RoleDto) {
-    this.memberForm.set({
+  countUsersByRole(roleId: number): number {
+    return this.users.filter(u => u.roles && u.roles[0]?.id === roleId).length;
+  }
+
+  membersOfSelected(): AdminUserDto[] {
+    if (!this.selectedRole) return [];
+    const list = this.users.filter(u => u.roles && u.roles[0]?.id === this.selectedRole!.id);
+    const q = this.searchTerm.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(u =>
+      (u.username || '').toLowerCase().includes(q) ||
+      (u.email || '').toLowerCase().includes(q) ||
+      (u.phone || '').toLowerCase().includes(q)
+    );
+  }
+
+  trackById(_: number, item: { id: number }) { return item.id; }
+
+  // ===== Actions: Member =====
+
+  /** Mở modal: reset form & tải danh sách user chưa có nhóm */
+  openAddMember() {
+    if (!this.selectedRole) return;
+
+    this.addMode = 'new';
+    this.selectedCandidateId = null;
+
+    this.memberForm = {
       email: '',
       password: '',
       username: '',
       phone: '',
       address: '',
-      roleId: role.id
-    });
-    this.showMemberModal.set(true);
+      roleId: this.selectedRole.id
+    };
+
+    this.saving = false;
+    this.showMemberModal = true;
+    this.cdr.detectChanges();
+
+    this.loadCandidates();
   }
 
-  createMember(memberRef: NgForm) {
-    if (memberRef.invalid || !this.memberForm().roleId) return;
-    const f = this.memberForm();
+  /** Tải danh sách ứng viên chưa có role */
+  private loadCandidates() {
+    this.loadingCandidates = true;
+    this.cdr.detectChanges();
+
+    this.admin.getUsersWithoutRole().subscribe({
+      next: res => {
+        this.candidates = res || [];
+        this.loadingCandidates = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.candidates = [];
+        this.loadingCandidates = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // ĐÓNG modal an toàn (ép detect + reset)
+  closeMemberModalSafely() {
+    this.zone.run(() => {
+      this.showMemberModal = false;
+      this.saving = false;
+      // reset form
+      this.memberForm = {
+        email: '', password: '', username: '', phone: '', address: '', roleId: 0
+      };
+      this.selectedCandidateId = null;
+      this.cdr.detectChanges();
+    });
+  }
+
+  /** Tạo mới user + gán vào nhóm hiện tại */
+  createMember(mf: NgForm) {
+    if (mf.invalid || !this.memberForm.roleId || this.saving) return;
+    this.saving = true;
+    this.cdr.detectChanges();
 
     this.admin.createUserAndAssignRole({
-      email: f.email.trim(),
-      password: f.password.trim(),
-      username: f.username?.trim(),
-      phone: f.phone?.trim(),
-      address: f.address?.trim()
-    }, f.roleId!).subscribe({
-      next: () => { this.showMemberModal.set(false); this.loadAll(); },
-      error: () => alert('❌ Tạo thành viên thất bại.')
+      email: (this.memberForm.email || '').trim().toLowerCase(),
+      password: (this.memberForm.password || '').trim(),
+      username: this.memberForm.username?.trim(),
+      phone: this.memberForm.phone?.trim(),
+      address: this.memberForm.address?.trim()
+    }, this.memberForm.roleId).subscribe({
+      next: () => {
+        // Đóng modal NGAY, rồi load lại danh sách
+        this.closeMemberModalSafely();
+        // loadAll có lỗi cũng không làm modal “hiện lại”
+        this.loadAll();
+      },
+      error: (err) => {
+        this.saving = false;
+        if (err?.status === 409) {
+          alert('Email đã tồn tại.');
+        } else {
+          alert('❌ Tạo thành viên thất bại.');
+        }
+        this.cdr.detectChanges();
+      }
     });
   }
 
-  hasPermission(role: RoleDto | undefined, permName: string): boolean {
-    if (!role || !role.permissions) return false;
-    return role.permissions.some(p => p.name === permName);
+  /** Gán nhóm cho user đã tồn tại (user chưa có role) */
+  addExistingToRole() {
+    if (!this.selectedRole || !this.selectedCandidateId || this.saving) return;
+    this.saving = true;
+    this.cdr.detectChanges();
+
+    this.admin.assignRole(this.selectedCandidateId, this.selectedRole.id).subscribe({
+      next: () => {
+        this.closeMemberModalSafely();
+        this.loadAll();
+      },
+      error: () => {
+        this.saving = false;
+        alert('❌ Gán nhóm thất bại.');
+        this.cdr.detectChanges();
+      }
+    });
   }
 
-  countUsersByRole(roleId: number): number {
-    return this.users()
-      .filter(u => (u.roles && u.roles[0]?.id === roleId))
-      .length;
+  /** Gỡ thành viên khỏi nhóm: set role = null (roles = []) */
+  removeMemberFromRole(u: AdminUserDto) {
+    if (!confirm(`Gỡ ${u.email} khỏi nhóm "${this.selectedRole?.name}"?`)) return;
+
+    this.admin.unassignRole(u.id).subscribe({
+      next: () => {
+        this.loadAll();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        alert('❌ Gỡ thành viên thất bại.');
+        this.cdr.detectChanges();
+      }
+    });
   }
 
+  /** Mở tab chọn từ user chưa có nhóm */
+  openPickExisting() {
+    if (!this.selectedRole) return;
+    this.addMode = 'from-existing';
+    this.saving = false;
+    this.selectedCandidateId = null;
+    this.loadingCandidates = true;
+    this.showMemberModal = true;
+    this.cdr.detectChanges();
 
-
-  reassignMember(u: AdminUserDto, newRoleId: number) {
-    if (!newRoleId || u.roles?.[0]?.id === newRoleId) return;
-    this.admin.assignRole(u.id, newRoleId).subscribe({
-      next: () => this.loadAll(),
-      error: () => alert('❌ Chuyển nhóm thất bại.')
+    this.admin.getUsersWithoutRole().subscribe({
+      next: (list) => {
+        this.candidates = list || [];
+        this.loadingCandidates = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.candidates = [];
+        this.loadingCandidates = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 }
