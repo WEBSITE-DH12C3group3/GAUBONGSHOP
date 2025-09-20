@@ -1,0 +1,119 @@
+<div class="h-[calc(100vh-120px)] bg-white rounded-xl shadow grid grid-cols-12 overflow-hidden">
+  <!-- LEFT: danh sách phiên -->
+  <aside class="col-span-4 border-r flex flex-col min-h-0 bg-white">
+    <!-- Header trái -->
+    <div class="p-3 border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+      <input
+        placeholder="Tìm theo khách hàng..."
+        class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-300"
+      />
+    </div>
+
+    <!-- List có cuộn riêng -->
+    <div class="flex-1 min-h-0 overflow-y-auto">
+      <ng-container *ngIf="sessions?.length; else emptyLeft">
+        <button
+          *ngFor="let s of sessions; trackBy: trackSession"
+          (click)="select(s)"
+          class="w-full text-left px-3 py-3 hover:bg-pink-50 flex items-start gap-3 transition border-b last:border-b-0"
+          [ngClass]="{'bg-pink-50': selected?.id === s.id}"
+        >
+          <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-user text-gray-500"></i>
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <div class="font-medium truncate">Khách #{{ s.participant1Id }}</div>
+              <span
+                *ngIf="(s.unreadForViewer||0) > 0"
+                class="ml-auto text-xs bg-pink-600 text-white rounded-full px-2 py-0.5"
+              >{{ s.unreadForViewer }}</span>
+            </div>
+            <div class="text-xs text-gray-500 truncate">{{ s.lastMessageSnippet }}</div>
+            <div class="text-[10px] text-gray-400">
+              {{ s.updatedAt | date:'short':'':'Asia/Ho_Chi_Minh' }}
+            </div>
+          </div>
+        </button>
+      </ng-container>
+
+      <ng-template #emptyLeft>
+        <div class="p-6 text-center text-gray-400">Chưa có cuộc hội thoại</div>
+      </ng-template>
+    </div>
+  </aside>
+
+  <!-- RIGHT: cửa sổ chat -->
+  <section class="col-span-8 flex flex-col min-h-0 bg-white">
+    <!-- Header phải -->
+    <header class="px-4 py-3 border-b flex items-center gap-3 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+      <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center">
+        <i class="fa-solid fa-headset text-pink-600"></i>
+      </div>
+      <div class="font-semibold">Hỗ trợ khách hàng</div>
+      <div class="text-xs text-gray-500">Admin</div>
+      <div class="ml-auto text-xs text-gray-400" *ngIf="selected">#{{ selected.participant1Id }}</div>
+    </header>
+
+    <!-- Messages có cuộn riêng -->
+    <main #scrollHost id="admin-chat-scroll" class="flex-1 min-h-0 overflow-y-auto p-4 space-y-2 bg-gray-50">
+      <ng-container *ngIf="selected as sel; else pickTpl">
+        <div *ngIf="!loading; else loadingTpl">
+          <ng-container *ngFor="let m of messages; let i = index; trackBy: trackMessage">
+            <!-- Divider theo ngày -->
+            <div *ngIf="showDayDivider(i)" class="flex justify-center my-2">
+              <span class="text-[11px] text-gray-500 bg-gray-200/60 px-2 py-0.5 rounded-full shadow-sm">
+                {{ dayLabel(i) }}
+              </span>
+            </div>
+
+            <!-- Hàng bong bóng: KHÁCH trái (trắng), ADMIN phải (hồng) -->
+            <div [ngClass]="rowClass(m, sel)">
+              <div
+                class="max-w-[75%] px-3 py-2 rounded-2xl shadow whitespace-pre-wrap break-words break-all
+                       bubble-scroll max-h-56 overflow-y-auto"
+                [ngClass]="bubbleClass(m, sel)"
+              >
+                <div class="text-sm">{{ m.content }}</div>
+                <div class="text-[10px] opacity-70 mt-1">
+                  {{ m.createdAt | date:'short':'':'Asia/Ho_Chi_Minh' }}
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </ng-container>
+
+      <ng-template #pickTpl>
+        <div class="h-full flex items-center justify-center text-gray-400">
+          Chọn một cuộc hội thoại để bắt đầu
+        </div>
+      </ng-template>
+
+      <ng-template #loadingTpl>
+        <div class="text-center text-gray-400 mt-8">Đang tải...</div>
+      </ng-template>
+    </main>
+
+    <!-- Input -->
+    <footer class="p-3 border-t bg-white">
+      <div class="flex gap-2">
+        <input
+          [(ngModel)]="input"
+          (keyup.enter)="send()"
+          [disabled]="!selected"
+          class="flex-1 border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-300 disabled:bg-gray-100"
+          placeholder="Nhập trả lời..."
+        />
+        <button
+          (click)="send()"
+          [disabled]="!selected"
+          class="px-4 py-2 rounded-xl bg-pink-600 text-white hover:bg-pink-700 disabled:opacity-50"
+        >
+          Gửi
+        </button>
+      </div>
+    </footer>
+  </section>
+</div>

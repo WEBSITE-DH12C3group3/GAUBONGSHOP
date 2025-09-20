@@ -7,14 +7,13 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface ChatSessionRepo extends JpaRepository<ChatSession, Integer> {
+public interface ChatSessionRepo extends JpaRepository<ChatSession, Integer>, JpaSpecificationExecutor<ChatSession> {
 
   @Query("""
     SELECT s FROM ChatSession s
-    WHERE (s.participant1Id=:u1 AND s.participant2Id=:u2)
-       OR (s.participant1Id=:u2 AND s.participant2Id=:u1)
+    WHERE s.participant1Id = :u AND s.participant2Id = :a
   """)
-  Optional<ChatSession> findBetween(@Param("u1") Integer u1, @Param("u2") Integer u2);
+  Optional<ChatSession> findBetween(@Param("u") Integer userId, @Param("a") Integer adminId);
 
   @Query("""
     SELECT s FROM ChatSession s

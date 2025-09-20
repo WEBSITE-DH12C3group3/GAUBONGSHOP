@@ -2,13 +2,17 @@ package com.thubongshop.backend.chat.repo;
 
 import com.thubongshop.backend.chat.entity.Notification;
 import org.springframework.data.jpa.repository.*;
-
-import java.util.List;
+import org.springframework.data.repository.query.Param;
 
 public interface NotificationRepo extends JpaRepository<Notification, Integer> {
-  List<Notification> findByUserIdAndReadFalse(Integer userId);
 
   @Modifying
-  @Query("UPDATE Notification n SET n.read=true WHERE n.userId=:userId AND n.read=false")
-  int markAllRead(Integer userId);
+  @Query("""
+    UPDATE Notification n
+    SET n.read = true
+    WHERE n.userId = :uid
+      AND n.read = false
+      AND n.message.session.id = :sid
+  """)
+  int markReadBySession(@Param("uid") Integer userId, @Param("sid") Integer sessionId);
 }

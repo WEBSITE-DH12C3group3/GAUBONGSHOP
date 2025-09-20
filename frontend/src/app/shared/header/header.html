@@ -44,6 +44,16 @@
         </span>
       </a>
 
+      <!-- nút Messenger trong header -->
+      <button *ngIf="showChat" (click)="openChat()"
+        class="relative inline-flex items-center justify-center w-10 h-10 rounded-full hover:bg-pink-50">
+        <i class="fa-brands fa-facebook-messenger text-pink-600 text-xl"></i>
+        <span *ngIf="unreadTotal > 0"
+              class="absolute -top-1 -right-1 bg-pink-600 text-white text-[10px] leading-none px-1.5 py-0.5 rounded-full">
+          {{ unreadTotal }}
+        </span>
+      </button>
+
       <!-- Tài khoản -->
       <div class="relative">
         <button (click)="toggleDropdown()" class="text-gray-600 hover:text-pink-600 transition">

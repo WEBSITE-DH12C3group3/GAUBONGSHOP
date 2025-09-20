@@ -17,5 +17,16 @@ export interface MessageDTO {
   senderId: number;
   content: string;
   read: boolean;
-  createdAt?: string | null;
+  createdAt: string; // Timestamp ISO from backend
+}
+
+export interface ChatSessionResponse {
+  id: number;
+  participant1Id: number;
+  participant2Id: number;
+  status: 'open' | 'closed' | 'pending';
+  createdAt: string;
+  updatedAt: string;
+  lastMessageSnippet: string;
+  unreadForViewer: number;
 }

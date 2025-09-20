@@ -13,6 +13,7 @@ import { RegisterComponent } from './features/register/register';
 import { ProfileComponent } from './features/profile/profile';
 import { ProductsComponent } from './features/products/products';
 import { ProductDetailComponent } from './features/product_detail/product_detail';
+import { ClientChatPage } from './features/chat/client-chat';
 
 // Admin
 import { Dashboard } from './admin/dashboard/dashboard';
@@ -49,7 +50,7 @@ import { ShipVoucherAdminListComponent } from './admin/shipping-vouchers-admin/s
 import { ShipVoucherAdminFormComponent } from './admin/shipping-vouchers-admin/ship-voucher-admin-form';
 
 // Live chat
-import { LiveChatPage } from './admin/live-chat/live-chat';
+import { AdminLivechatPage } from './admin/livechat/admin-livechat';
 
 export const routes: Routes = [
   // ===== Customer layout =====
@@ -64,6 +65,7 @@ export const routes: Routes = [
       { path: 'profile', component: ProfileComponent },
       { path: 'products', component: ProductsComponent },
       { path: 'product/:id', component: ProductDetailComponent },
+      { path: 'chat', component: ClientChatPage },
     ],
   },
 
@@ -149,7 +151,7 @@ export const routes: Routes = [
       // Live chat
       {
         path: 'live-chat',
-        component: LiveChatPage,
+        component: AdminLivechatPage,
         canActivate: [permissionGuard],
         data: { permissions: ['manage_livechat'] },
       },

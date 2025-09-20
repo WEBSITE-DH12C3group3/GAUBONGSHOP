@@ -1,11 +1,10 @@
-// PusherAuthController.java
 package com.thubongshop.backend.chat.controller;
 
-import com.pusher.rest.Pusher;
+import com.thubongshop.backend.chat.service.ChatService;
+import com.thubongshop.backend.chat.service.PusherService;
 import com.thubongshop.backend.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -16,42 +15,35 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PusherAuthController {
 
-  private final Pusher pusher;
+  private final PusherService pusher;
+  private final ChatService chatService;
 
-  // Form-URL-Encoded (Pusher mặc định)
-  @PostMapping(
-      value = "/api/pusher/auth",
-      consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE
-  )
+  @PostMapping(value = "/api/chat/pusher/auth", consumes = "application/json", produces = "application/json")
   @PreAuthorize("isAuthenticated()")
-  public ResponseEntity<String> authForm(
-      @AuthenticationPrincipal UserPrincipal me,
-      @RequestParam("socket_id") String socketId,
-      @RequestParam("channel_name") String channelName
-  ) {
-    String authJson = pusher.authenticate(socketId, channelName); // ✅ đúng thứ tự, KHÔNG .toJson()
-    return ResponseEntity.ok()
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(authJson);
-  }
-
-  // JSON (nếu FE gửi JSON)
-  @PostMapping(
-      value = "/api/pusher/auth",
-      consumes = MediaType.APPLICATION_JSON_VALUE,
-      produces = MediaType.APPLICATION_JSON_VALUE
-  )
-  @PreAuthorize("isAuthenticated()")
-  public ResponseEntity<String> authJson(
-      @AuthenticationPrincipal UserPrincipal me,
-      @RequestBody Map<String, String> body
-  ) {
+  public ResponseEntity<String> auth(@AuthenticationPrincipal UserPrincipal me,
+                                     @RequestBody Map<String, String> body) {
     String socketId = body.get("socket_id");
-    String channelName = body.get("channel_name");
-    String authJson = pusher.authenticate(channelName, socketId);
-    return ResponseEntity.ok()
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(authJson);
+    String channel = body.get("channel_name");
+    if (socketId == null || channel == null) return ResponseEntity.badRequest().build();
+
+    // admin hub
+    if ("private-admin.livechat".equals(channel)) {
+      boolean ok = me.getAuthorities().stream().anyMatch(a -> "manage_livechat".equals(a.getAuthority()));
+      if (!ok) return ResponseEntity.status(403).build();
+      String json = pusher.authenticate(channel, socketId);
+      return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(json);
+    }
+
+    // kênh đoạn chat riêng
+    if (channel.startsWith("private-chat.")) {
+      Integer sid = Integer.valueOf(channel.substring("private-chat.".length()));
+      if (!chatService.canView(me.getId(), sid)) {
+        return ResponseEntity.status(403).build();
+      }
+      String json = pusher.authenticate(channel, socketId);
+      return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(json);
+    }
+
+    return ResponseEntity.status(403).build();
   }
 }

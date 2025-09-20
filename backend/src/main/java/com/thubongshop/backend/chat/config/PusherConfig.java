@@ -7,18 +7,22 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class PusherConfig {
-  @Value("${pusher.app-id:}") private String appId;
-  @Value("${pusher.key:}")    private String key;
-  @Value("${pusher.secret:}") private String secret;
-  @Value("${pusher.cluster:}") private String cluster;
-  @Value("${pusher.use-tls:true}") private boolean useTls;
+
+  @Value("${pusher.app-id:}")
+  private String appId;
+  @Value("${pusher.key:}")
+  private String key;
+  @Value("${pusher.secret:}")
+  private String secret;
+  @Value("${pusher.cluster:ap1}")
+  private String cluster;
 
   @Bean
   public Pusher pusher() {
-    if (key == null || key.isBlank()) return null; // allow running without pusher
+    if (key == null || key.isBlank()) return null; // cho phép chạy local không realtime
     Pusher p = new Pusher(appId, key, secret);
     p.setCluster(cluster);
-    p.setEncrypted(useTls);
+    p.setEncrypted(true);
     return p;
   }
 }

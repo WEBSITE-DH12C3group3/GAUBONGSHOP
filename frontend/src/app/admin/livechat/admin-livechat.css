@@ -1,0 +1,38 @@
+:host { display: block; padding: 16px; }
+
+/* thanh cuộn mảnh cho KHUNG CHAT (phải) */
+#admin-chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(203,213,225,.9) transparent;
+}
+#admin-chat-scroll::-webkit-scrollbar { width: 8px; }
+#admin-chat-scroll::-webkit-scrollbar-thumb {
+  background: rgba(203,213,225,.9);
+  border-radius: 9999px;
+}
+#admin-chat-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* thanh cuộn mảnh cho BONG BÓNG DÀI (cả hai phía) */
+.bubble-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(203,213,225,.9) transparent;
+}
+.bubble-scroll::-webkit-scrollbar { width: 6px; }
+.bubble-scroll::-webkit-scrollbar-thumb {
+  background: rgba(203,213,225,.9);
+  border-radius: 9999px;
+}
+.bubble-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* thanh cuộn mảnh cho DANH SÁCH PHIÊN (trái)
+   -> container list đã có overflow-y-auto, nên style chung luôn */
+aside .overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(203,213,225,.9) transparent;
+}
+aside .overflow-y-auto::-webkit-scrollbar { width: 8px; }
+aside .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(203,213,225,.9);
+  border-radius: 9999px;
+}
+aside .overflow-y-auto::-webkit-scrollbar-track { background: transparent; }

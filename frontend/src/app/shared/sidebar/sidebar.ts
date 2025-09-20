@@ -7,15 +7,15 @@ import {
   inject,
   PLATFORM_ID,
 } from '@angular/core';
-import { isPlatformBrowser, CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
 
-import { ChatApiService } from '../services/chat-api.service';            // chỉnh path nếu khác
-import { environment } from '../../../environments/environment';          // chỉnh path nếu khác
-
 import { HasPermissionDirective } from '../directives/has-permission.directive';
 
+// ✅ Service livechat phía admin (đã cung cấp trước đó)
+import { LivechatAdminService } from '../../shared/services/livechat-admin.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-sidebar',
@@ -32,61 +32,49 @@ export class SidebarComponent implements OnInit, OnDestroy {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
 
-  private listSub?: Subscription;
+  private unreadSub?: Subscription;
   private pollSub?: Subscription;
 
-  // handler để có thể removeEventListener khi destroy
-  private unreadRefreshHandler = () => this.refreshUnread();
+  // Handler để removeEventListener khi destroy
+  private refreshHandler = () => this.forceReload();
 
-  constructor(private chat: ChatApiService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private chat: LivechatAdminService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
-    if (!this.isBrowser) return;                 // ⛔️ SSR: bỏ qua
+    if (!this.isBrowser) return;
 
-    // Gọi ngay khi load
-    this.refreshUnread();
+    this.chat.initSocket(() => ({
+      Authorization: `Bearer ${localStorage.getItem('token') || ''}` // ✅
+    }));
+    this.chat.reload();
 
-    // Polling định kỳ
-    const ms = Number((environment as any)?.pollingMs ?? 15000);
-    this.pollSub = interval(ms).subscribe(() => this.refreshUnread());
+    this.unreadSub = this.chat.unreadTotal$.subscribe(n => {
+      this.unreadTotal = n; this.cdr.markForCheck();
+    });
 
-    // Lắng nghe event để cập nhật tức thì từ nơi khác:
-    // window.dispatchEvent(new CustomEvent('chat:unreadRefresh'));
-    window.addEventListener(
-      'chat:unreadRefresh',
-      this.unreadRefreshHandler as EventListener
-    );
+    const ms = typeof (environment as any).chatPollMs === 'number' ? (environment as any).chatPollMs : 15000;
+    this.pollSub = interval(ms).subscribe(() => this.chat.reload());
+
+    window.addEventListener('chat:refresh-unread', this.refreshHandler as EventListener);
   }
 
   ngOnDestroy(): void {
-    this.listSub?.unsubscribe();
+    this.unreadSub?.unsubscribe();
     this.pollSub?.unsubscribe();
     if (this.isBrowser) {
       window.removeEventListener(
-        'chat:unreadRefresh',
-        this.unreadRefreshHandler as EventListener
+        'chat:refresh-unread',
+        this.refreshHandler as EventListener
       );
     }
   }
 
-  /** Gọi API lấy danh sách phiên open của admin và cộng dồn unread */
-  private refreshUnread(): void {
+  /** Ép reload danh sách phiên để cập nhật badge ngay lập tức */
+  private forceReload(): void {
     if (!this.isBrowser) return;
-
-    this.listSub?.unsubscribe();
-    this.listSub = this.chat.adminSessions('open', 0, 50).subscribe({
-      next: (page: any) => {
-        const sessions = page?.content ?? [];
-        this.unreadTotal = sessions.reduce(
-          (sum: number, s: any) => sum + (s.unreadForViewer || 0),
-          0
-        );
-        // Tránh NG0100 khi hydrate
-        queueMicrotask(() => this.cdr.markForCheck());
-      },
-      error: () => {
-        // im lặng; không chặn render sidebar
-      },
-    });
+    this.chat.reload();
   }
 }

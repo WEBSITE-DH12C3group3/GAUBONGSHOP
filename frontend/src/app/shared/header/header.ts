@@ -1,56 +1,158 @@
-import { Component, HostListener } from '@angular/core';
+// src/app/shared/header/header.ts
+import {
+  Component,
+  HostListener,
+  OnInit,
+  OnDestroy,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  inject,
+  PLATFORM_ID,
+} from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { CommonModule, NgIf, NgFor } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
+
 import { AuthService } from '../../shared/services/auth.service';
+import { ChatClientService } from '../../shared/services/chat-client.service';
+import { ChatSocketService } from '../../shared/services/chat-socket.service';
 
 @Component({
   selector: 'app-user-header',
   standalone: true,
   templateUrl: './header.html',
   styleUrls: ['./header.css'],
-  imports: [
-    CommonModule,
-    RouterModule,
-    ReactiveFormsModule, // cho [formControl]
-    NgIf,
-    NgFor
-  ]
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule, RouterModule, ReactiveFormsModule],
 })
-export class HeaderComponent {
-  searchTerm = new FormControl('');
-  cartCount: number = 0;
+export class HeaderComponent implements OnInit, OnDestroy {
+  // UI
+  searchTerm = new FormControl<string>('');
+  cartCount = 0;
   dropdownOpen = false;
 
-  constructor(public auth: AuthService, private router: Router) {}
+  // Chat badge
+  showChat = false;   // chỉ hiện khi đăng nhập (browser)
+  unreadTotal = 0;
+  private sessionId?: number;
 
-  toggleDropdown() {
-    this.dropdownOpen = !this.dropdownOpen;
-  }
+  // SSR guard
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
-  // ✅ Bắt sự kiện click toàn document mà không cần document.addEventListener
-  @HostListener('document:click', ['$event'])
-  onClickOutside(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    // Nếu click ra ngoài vùng dropdown (class="relative"), thì đóng dropdown
-    if (!target.closest('.relative')) {
-      this.dropdownOpen = false;
+  constructor(
+    public auth: AuthService,
+    private router: Router,
+    private chatApi: ChatClientService,
+    private socket: ChatSocketService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    if (!this.isBrowser) return; // ⛔️ Bỏ qua toàn bộ logic browser khi SSR
+
+    this.showChat = this.isLoggedIn();
+    if (this.showChat) {
+      const token = this.getToken();
+      this.socket.init(() => ({ Authorization: token })); // luôn trả string
+
+      this.chatApi.openWithAdmin().subscribe((s) => {
+        this.sessionId = s.id;
+        this.unreadTotal = s.unreadForViewer ?? 0;
+        this.cdr.markForCheck();
+
+        const ch = this.socket.sub(`private-chat.${s.id}`);
+        ch.bind('message:new', () => {
+          if (this.router.url !== '/chat') {
+            this.unreadTotal++;
+            this.cdr.markForCheck();
+          }
+        });
+      });
     }
+
+    // nghe thay đổi token ở TAB khác
+    window.addEventListener('storage', this.onStorage);
   }
+
+  ngOnDestroy(): void {
+    if (!this.isBrowser) return;
+    window.removeEventListener('storage', this.onStorage);
+  }
+
+  // ===== Dropdown =====
+  @HostListener('document:click', ['$event'])
+  onClickOutside(ev: MouseEvent) {
+    if (!this.isBrowser) return;
+    const target = ev.target as HTMLElement;
+    if (!target.closest('.relative')) this.dropdownOpen = false;
+  }
+  toggleDropdown() { this.dropdownOpen = !this.dropdownOpen; }
+
   removeReadonly(event: FocusEvent) {
+    if (!this.isBrowser) return;
     (event.target as HTMLInputElement).removeAttribute('readonly');
   }
 
-
+  // ===== Auth =====
   onLogout() {
-    this.auth.logout();
+    if (!this.isBrowser) return;
+    this.auth.logout?.();
+    this.unreadTotal = 0;
     this.router.navigate(['/']);
   }
 
+  // ===== Search =====
   onSearch() {
-    if (this.searchTerm.value?.trim()) {
-      console.log('Tìm kiếm:', this.searchTerm.value);
-      // TODO: gọi service tìm kiếm sản phẩm
+    const q = (this.searchTerm.value || '').trim();
+    if (q) this.router.navigate(['/search'], { queryParams: { q } });
+  }
+
+  // ===== Chat =====
+  openChat() {
+    if (!this.isBrowser || !this.sessionId) return;
+    this.unreadTotal = 0; // UX: clear ngay, BE markRead trong trang /chat
+    this.cdr.markForCheck();
+    this.router.navigate(['/chat']);
+  }
+
+  // ===== Helpers =====
+  private isLoggedIn(): boolean {
+    if (!this.isBrowser) return false;
+    try {
+      const anyAuth = this.auth as any;
+      if (typeof anyAuth.isAuthenticated === 'function') return !!anyAuth.isAuthenticated();
+      if (typeof anyAuth.isLoggedIn === 'function') return !!anyAuth.isLoggedIn();
+    } catch {}
+    return !!this.rawToken();
+  }
+
+  private rawToken(): string {
+    try {
+      return (
+        localStorage.getItem('token') ||
+        localStorage.getItem('access_token') ||
+        localStorage.getItem('jwt') ||
+        ''
+      );
+    } catch {
+      return '';
     }
   }
+
+  private getToken(): string {
+    const raw = this.rawToken();
+    return /^Bearer\s/i.test(raw) ? raw : raw ? `Bearer ${raw}` : '';
+    // luôn trả string để hợp chữ ký init()
+  }
+
+  private onStorage = (e: StorageEvent) => {
+    if (e.key === 'token' || e.key === 'access_token' || e.key === 'jwt') {
+      const now = this.isLoggedIn();
+      if (now !== this.showChat) {
+        this.showChat = now;
+        this.cdr.markForCheck();
+      }
+    }
+  };
 }

@@ -6,15 +6,18 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
-public interface MessageRepo extends JpaRepository<Message, Integer> {
+public interface MessageRepo extends JpaRepository<Message, Integer>, JpaSpecificationExecutor<Message> {
 
   @Query("SELECT m FROM Message m WHERE m.session=:session ORDER BY m.id ASC")
   Page<Message> findBySession(@Param("session") ChatSession session, Pageable pageable);
 
   @Modifying
   @Query("""
-    UPDATE Message m SET m.read=true
-    WHERE m.session=:session AND m.senderId<>:viewerId AND m.read=false
+    UPDATE Message m
+    SET m.read = true
+    WHERE m.session = :session
+      AND m.senderId <> :viewerId
+      AND m.read = false
   """)
   int markReadAll(@Param("session") ChatSession session, @Param("viewerId") Integer viewerId);
 
