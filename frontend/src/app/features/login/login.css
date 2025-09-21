@@ -93,3 +93,10 @@ button:hover {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+.forgot-wrap{display:flex;justify-content:flex-end;margin:6px 0 12px}
+.forgot-link{
+  font-size:.9rem;color:#f5156f;text-decoration:none;display:inline-flex;gap:.4rem;align-items:center
+}
+.forgot-link:hover{text-decoration:underline}
+.forgot-link:focus{outline:2px solid #93c5fd;outline-offset:2px;border-radius:.25rem}
+

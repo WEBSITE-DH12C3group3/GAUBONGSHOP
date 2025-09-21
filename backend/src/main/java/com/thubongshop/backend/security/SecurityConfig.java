@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 // Auth public
-                .requestMatchers("/api/users/login", "/api/users/register", "/error").permitAll()
+                .requestMatchers("/api/users/login", "/api/users/register","/api/users/forgot-password/**", "/error").permitAll()
 
                 // Catalog public GET
                 .requestMatchers(HttpMethod.GET,

@@ -14,6 +14,8 @@ import { ProfileComponent } from './features/profile/profile';
 import { ProductsComponent } from './features/products/products';
 import { ProductDetailComponent } from './features/product_detail/product_detail';
 import { ClientChatPage } from './features/chat/client-chat';
+import { ForgotPasswordComponent } from './features/forgot-password/forgot-password';
+
 
 // Admin
 import { Dashboard } from './admin/dashboard/dashboard';
@@ -66,6 +68,7 @@ export const routes: Routes = [
       { path: 'products', component: ProductsComponent },
       { path: 'product/:id', component: ProductDetailComponent },
       { path: 'chat', component: ClientChatPage },
+      { path: 'forgot-password', component: ForgotPasswordComponent },
     ],
   },
 
