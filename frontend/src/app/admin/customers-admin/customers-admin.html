@@ -1,0 +1,149 @@
+<div class="p-6 bg-gray-50 min-h-screen">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-3xl font-extrabold text-pink-600 flex items-center gap-3">
+      👥 Quản lý Khách hàng
+      <span class="text-sm text-gray-500 font-normal hidden md:inline">CRUD • Tìm kiếm • Lọc • Phân trang • Trạng thái • Hạng</span>
+    </h2>
+    <button (click)="openCreate()" class="btn-primary">
+      ➕ Thêm khách hàng
+    </button>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="grid grid-cols-1 md:grid-cols-6 gap-3 mb-4">
+    <input [(ngModel)]="q" placeholder="Tìm theo tên / email / điện thoại" class="input md:col-span-2" />
+    <select [(ngModel)]="status" class="input">
+      <option value="">Trạng thái</option>
+      <option *ngFor="let s of statuses" [value]="s">{{s}}</option>
+    </select>
+    <select [(ngModel)]="tier" class="input">
+      <option value="">Hạng</option>
+      <option *ngFor="let t of tiers" [value]="t">{{t}}</option>
+    </select>
+    <input [(ngModel)]="createdFrom" type="date" class="input" />
+    <input [(ngModel)]="createdTo" type="date" class="input" />
+  </div>
+
+  <div class="flex items-center gap-2 mb-6">
+    <button (click)="page=0; load()" class="btn">Lọc</button>
+    <div class="text-sm text-gray-500">Sắp xếp: <code>{{sort}}</code></div>
+  </div>
+
+  <!-- Loading & Error -->
+  <div *ngIf="loading" class="flex justify-center items-center py-10">
+    <div class="animate-pulse text-gray-500">Đang tải dữ liệu…</div>
+  </div>
+  <div *ngIf="errorMsg" class="p-3 bg-red-50 text-red-700 rounded mb-4">{{errorMsg}}</div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto bg-white rounded-xl shadow-sm ring-1 ring-gray-200">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="th">ID</th>
+          <th class="th">Username</th>
+          <th class="th">Email</th>
+          <th class="th">Phone</th>
+          <th class="th">Trạng thái</th>
+          <th class="th">Hạng</th>
+          <th class="th">Điểm</th>
+          <th class="th">Ngày tạo</th>
+          <th class="th w-44">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let x of data?.content" class="hover:bg-pink-50/40">
+          <td class="td">{{x.id}}</td>
+          <td class="td font-medium">{{x.username}}</td>
+          <td class="td">{{x.email}}</td>
+          <td class="td">{{x.phone}}</td>
+
+          <td class="td">
+            <span class="badge" [ngClass]="{
+              'badge-green': x.status==='ACTIVE',
+              'badge-yellow': x.status==='INACTIVE',
+              'badge-red': x.status==='BANNED'
+            }">{{x.status}}</span>
+            <div class="mt-2 flex flex-wrap gap-1">
+              <button class="tag" (click)="setStatus(x,'ACTIVE')">Kích hoạt</button>
+              <button class="tag" (click)="setStatus(x,'INACTIVE')">Khóa tạm</button>
+              <button class="tag" (click)="setStatus(x,'BANNED')">Cấm</button>
+            </div>
+          </td>
+
+          <td class="td">
+            <span class="badge" [ngClass]="{
+              'badge-bronze': x.tier==='DONG',
+              'badge-silver': x.tier==='BAC',
+              'badge-gold': x.tier==='VANG',
+              'badge-platinum': x.tier==='BACHKIM',
+              'badge-diamond': x.tier==='KIMCUONG'
+            }">{{x.tier}}</span>
+            <div class="mt-2 flex flex-wrap gap-1">
+              <button class="tag" (click)="setTier(x,'DONG')">Đồng</button>
+              <button class="tag" (click)="setTier(x,'BAC')">Bạc</button>
+              <button class="tag" (click)="setTier(x,'VANG')">Vàng</button>
+              <button class="tag" (click)="setTier(x,'BACHKIM')">B.Kim</button>
+              <button class="tag" (click)="setTier(x,'KIMCUONG')">K.Cương</button>
+            </div>
+          </td>
+
+          <td class="td">{{x.points}}</td>
+          <td class="td">{{ x.createdAt | date:'short' }}</td>
+
+          <td class="td flex gap-2">
+            <button class="btn-sm" (click)="openEdit(x)">Sửa</button>
+            <button class="btn-sm-danger" (click)="remove(x.id)">Xóa</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!loading && (data?.content?.length ?? 0)===0">
+          <td class="td text-center text-gray-500" colspan="9">Không có dữ liệu.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="flex items-center justify-between mt-4">
+    <div class="text-sm text-gray-500" *ngIf="data">
+      Tổng: <b>{{data.totalElements}}</b> — Trang <b>{{data.number+1}}</b>/<b>{{data.totalPages}}</b>
+    </div>
+    <div class="flex items-center gap-2" *ngIf="data">
+      <button class="btn" (click)="go(0)" [disabled]="data.number===0">«</button>
+      <button class="btn" (click)="go(data.number-1)" [disabled]="data.number===0">‹</button>
+      <button class="btn" (click)="go(data.number+1)" [disabled]="data.number+1>=data.totalPages">›</button>
+      <button class="btn" (click)="go(data.totalPages-1)" [disabled]="data.number+1>=data.totalPages">»</button>
+    </div>
+  </div>
+
+  <!-- Modal Create/Edit -->
+  <div *ngIf="showModal" class="fixed inset-0 bg-black/40 z-50 grid place-items-center p-4">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl ring-1 ring-gray-200">
+      <div class="px-6 py-4 border-b">
+        <h3 class="text-lg font-semibold">{{isEdit ? 'Cập nhật' : 'Thêm mới'}} khách hàng</h3>
+      </div>
+
+      <div class="p-6 grid md:grid-cols-2 gap-3">
+        <input class="input" [(ngModel)]="form.username" placeholder="Username" />
+        <input class="input" [(ngModel)]="form.password" [type]="isEdit?'text':'password'" placeholder="Mật khẩu" />
+        <input class="input" [(ngModel)]="form.email" placeholder="Email" />
+        <input class="input" [(ngModel)]="form.phone" placeholder="Điện thoại" />
+        <input class="input md:col-span-2" [(ngModel)]="form.address" placeholder="Địa chỉ" />
+
+        <select class="input" [(ngModel)]="form.status">
+          <option *ngFor="let s of statuses" [value]="s">{{s}}</option>
+        </select>
+        <select class="input" [(ngModel)]="form.tier">
+          <option *ngFor="let t of tiers" [value]="t">{{t}}</option>
+        </select>
+      </div>
+
+      <div class="px-6 py-4 border-t flex justify-end gap-2">
+        <button class="btn" (click)="showModal=false">Hủy</button>
+        <button class="btn-primary" (click)="save()">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>

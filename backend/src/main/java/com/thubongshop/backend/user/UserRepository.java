@@ -7,6 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.thubongshop.backend.customer.CustomerStatus;
+import com.thubongshop.backend.customer.CustomerTier;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -72,4 +76,24 @@ public interface UserRepository extends JpaRepository<User, Long> {
       where r is null
     """)
     List<User> findUsersWithoutRole();
+
+    User findFirstByEmail(String email);
+    @Query("""
+      SELECT u FROM User u
+      WHERE (:q IS NULL OR lower(u.username) LIKE lower(CONCAT('%',:q,'%'))
+      OR lower(u.email) LIKE lower(CONCAT('%',:q,'%'))
+      OR lower(u.phone) LIKE lower(CONCAT('%',:q,'%')))
+      AND (:status IS NULL OR u.status = :status)
+      AND (:tier IS NULL OR u.tier = :tier)
+      AND (:fromAt IS NULL OR u.createdAt >= :fromAt)
+      AND (:toAt IS NULL OR u.createdAt < :toAt)
+      """)
+      Page<User> search(
+      @Param("q") String q,
+      @Param("status") CustomerStatus status,
+      @Param("tier") CustomerTier tier,
+      @Param("fromAt") LocalDateTime fromAt,
+      @Param("toAt") LocalDateTime toAt,
+      Pageable pageable
+    );
 }

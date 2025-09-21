@@ -1,5 +1,7 @@
 package com.thubongshop.backend.user;
 
+import com.thubongshop.backend.customer.CustomerStatus;
+import com.thubongshop.backend.customer.CustomerTier;
 import com.thubongshop.backend.role.Role;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -19,6 +21,19 @@ public class User {
     private String email;
     private String phone;
     private String address;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CustomerStatus status = CustomerStatus.ACTIVE;
+
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CustomerTier tier = CustomerTier.DONG;
+
+
+@Column(nullable = false)
+private Integer points = 0; // dùng để nâng hạng tự động nếu cần
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -47,8 +62,21 @@ public class User {
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
 
+    public CustomerStatus getStatus() { return status; }
+    public void setStatus(CustomerStatus status) { this.status = status; }
+
+
+    public CustomerTier getTier() { return tier; }
+    public void setTier(CustomerTier tier) { this.tier = tier; }
+
+
+    public Integer getPoints() { return points; }
+    public void setPoints(Integer points) { this.points = points; }
+
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+
+    
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

@@ -1,0 +1,20 @@
+.input{ @apply border rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-pink-500/40; }
+.btn{ @apply border rounded-lg px-3 py-1.5 bg-white hover:bg-gray-50; }
+.btn-primary{ @apply bg-pink-600 text-white rounded-lg px-3 py-1.5 hover:bg-pink-700; }
+.btn-sm{ @apply border rounded px-2 py-1 hover:bg-gray-50; }
+.btn-sm-danger{ @apply bg-red-600 text-white rounded px-2 py-1 hover:bg-red-700; }
+.th{ @apply text-left p-3 text-gray-600 font-semibold; }
+.td{ @apply p-3 align-top text-gray-800; }
+
+.badge{ @apply inline-flex px-2 py-0.5 rounded-full text-xs font-medium border; }
+.badge-green{ @apply bg-green-50 text-green-700 border-green-200; }
+.badge-yellow{ @apply bg-yellow-50 text-yellow-700 border-yellow-200; }
+.badge-red{ @apply bg-red-50 text-red-700 border-red-200; }
+
+.badge-bronze{ @apply bg-amber-50 text-amber-800 border-amber-200; }
+.badge-silver{ @apply bg-gray-100 text-gray-700 border-gray-200; }
+.badge-gold{ @apply bg-yellow-50 text-yellow-800 border-yellow-200; }
+.badge-platinum{ @apply bg-slate-50 text-slate-700 border-slate-200; }
+.badge-diamond{ @apply bg-cyan-50 text-cyan-700 border-cyan-200; }
+
+.tag{ @apply text-xs border rounded px-2 py-0.5 hover:bg-gray-50; }

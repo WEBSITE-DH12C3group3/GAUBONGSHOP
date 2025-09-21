@@ -55,6 +55,9 @@ import { ShipVoucherAdminFormComponent } from './admin/shipping-vouchers-admin/s
 import { AdminLivechatPage } from './admin/livechat/admin-livechat';
 // import { LiveChatAdminComponent } from './admin/live-chat/live-chat-admin';
 import { WishlistComponent } from './features/wishlist/wishlist.component';
+// mânger cusyomer
+import { CustomersAdminComponent } from './admin/customers-admin/customers-admin';
+
 
 export const routes: Routes = [
   // ===== Customer layout =====
@@ -187,14 +190,14 @@ export const routes: Routes = [
         ],
       },
 
-      // Quản lý khách hàng
-      // {
-      //   path: 'users',
-      //   canActivate: [permissionGuard],
-      //   data: { permissions: ['manage_custommer'] },
-      //   loadComponent: () =>
-      //     import('./admin/users-admin/users-admin').then(m => m.UsersAdminComponent),
-      // },
+      {
+        path: 'users',
+        canActivate: [permissionGuard],
+        data: { permissions: ['manage_customer'] }, // giữ nguyên key đang dùng ở sidebar
+        children: [
+          { path: '', component: CustomersAdminComponent }
+        ]
+      },
 
       // Báo cáo
       // {

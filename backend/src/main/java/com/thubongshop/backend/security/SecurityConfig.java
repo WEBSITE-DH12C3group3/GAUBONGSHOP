@@ -40,18 +40,19 @@ public class SecurityConfig {
                 // Auth public
                 .requestMatchers("/api/users/login", "/api/users/register","/api/users/forgot-password/**", "/error").permitAll()
 
-        // Catalog public GET
-        .requestMatchers(HttpMethod.GET,
-          "/api/products/**",
-          "/api/categories/**",
-          "/api/brands/**",
-          "/api/attributes/**",
-          "/api/reviews/products/**",
-          "/api/imports/**",
-          "/api/import-details/**",
-          "/api/favorites/**"
-        ).permitAll()
-            .requestMatchers("/{path:^(?!api).*}/**").permitAll()
+
+                // Catalog public GET
+                .requestMatchers(HttpMethod.GET,
+                "/api/products/**",
+                "/api/categories/**",
+                "/api/brands/**",
+                "/api/attributes/**",
+                "/api/reviews/products/**",
+                "/api/imports/**",
+                "/api/import-details/**",
+                "/api/favorites/**"
+                ).permitAll()
+                .requestMatchers("/{path:^(?!api).*}/**").permitAll()
 
                 // Static & docs
                 .requestMatchers(
@@ -70,6 +71,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/orders/**").hasAuthority("manage_orders")
                 .requestMatchers("/api/admin/imports/**").hasAuthority("manage_imports")
                 .requestMatchers("/api/admin/reports/**").hasAuthority("view_reports")
+                .requestMatchers("/api/admin/customers/**")
+                    .hasAnyAuthority("manage_customers", "manage_customer", "ROLE_ADMIN", "ADMIN")
 
                 // Chat & client
                 .requestMatchers("/api/client/**").authenticated()
