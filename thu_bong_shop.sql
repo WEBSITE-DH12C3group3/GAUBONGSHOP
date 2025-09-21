@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 21, 2025 at 03:44 PM
+-- Generation Time: Sep 21, 2025 at 10:22 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -66,10 +66,14 @@ CREATE TABLE `brands` (
 --
 
 INSERT INTO `brands` (`id`, `name`, `description`, `logo_url`, `website_url`, `created_at`) VALUES
-(1, 'Teddy', 'Thương hiệu gấu bông cao cấp', '/Brandimg/1756284670991-82964158-OIP.webp', 'https://www.teddy.it/en/home/', '2025-08-25 14:50:57'),
-(2, 'Kuromi', 'Thương hiệu thú bông nhân vật hoạt hình', '/Brandimg/1756284599669-261707982-download (1).webp', 'https://kuromi.co.uk/what-animal-is-kuromi/', '2025-08-25 14:50:57'),
-(3, 'OEM', 'Thương hiệu sản xuất chung', '/Brandimg/1756284502761-606171162-download.webp', 'https://thunhoibongthanhdat.com/', '2025-08-25 14:50:57'),
-(4, 'Steiff', 'Hãng gấu bông cao cấp đến từ Đức', '/Brandimg/1756284427104-458305385-OIF.webp', 'https://www.steiff.com/en', '2025-08-27 08:47:07');
+(1, 'Teddy', 'Thương hiệu gấu bông cao cấp', '/brandimg/1758470140264-6474298538122326766-download-3-.jpg', 'https://www.teddy.it/en/home/', '2025-08-25 14:50:57'),
+(2, 'Kuromi', 'Thương hiệu thú bông nhân vật hoạt hình', '/brandimg/1758470089967-7502343142001979517-download-2-.jpg', 'https://kuromi.co.uk/what-animal-is-kuromi/', '2025-08-25 14:50:57'),
+(3, 'OEM', 'Thương hiệu sản xuất chung', '/brandimg/1758470050822-5581011938948658606-download-1-.jpg', 'https://thunhoibongthanhdat.com/', '2025-08-25 14:50:57'),
+(4, 'Steiff', 'Hãng gấu bông cao cấp đến từ Đức', '/brandimg/1758470000060-7755539213327187156-OIP.jpg', 'https://www.steiff.com/en', '2025-08-27 08:47:07'),
+(5, 'Kẹo ngọt', 'Gấu xinh mềm mại', '/brandimg/1758465449927-9019866415158050303-brandstuffed.jpg', 'https://www.buildabear.com/', '2025-09-21 07:37:37'),
+(6, 'Jellycat', 'Thương hiệu gấu bông siêu mềm mại', '/brandimg/1758465607659-437977114948579399-download.jpg', 'https://www.jellycat.com/', '2025-09-21 07:40:19'),
+(7, 'Charlie Bears', 'Thương hiệu chuyên về gấu bông sưu tầm với thiết kế tỉ mỉ, có hồn và giới hạn số lượng', '/brandimg/1758465768750-7353927941000966383-images.jpg', 'https://www.charliebears.com/', '2025-09-21 07:43:22'),
+(8, 'Mandager chafiging', 'Thương hiệu cổ điển với nhiều nhân vật đáng yêu', '/brandimg/1758469927286-5872533530759873544-OIP-4-.webp', 'https://www.gund.com/', '2025-09-21 07:59:57');
 
 -- --------------------------------------------------------
 
@@ -233,6 +237,13 @@ CREATE TABLE `favorites` (
   `product_id` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `favorites`
+--
+
+INSERT INTO `favorites` (`id`, `user_id`, `product_id`, `created_at`) VALUES
+(3, 37, 13, '2025-09-21 12:21:13');
 
 -- --------------------------------------------------------
 
@@ -599,7 +610,7 @@ INSERT INTO `permissions` (`id`, `name`, `description`) VALUES
 (18, 'manage_livechat', 'Quản lý và trả lời live chat'),
 (19, 'manage_coupons', 'Quản lý phiếu giảm giá'),
 (20, 'manage_shippingvoucher', 'Quản lý phiếu vận chuyển'),
-(21, 'manage_custommer', 'Quản lý khách hàng'),
+(21, 'manage_customer', 'Quản lý khách hàng'),
 (22, 'view_reports', 'Xem báo cáo'),
 (23, 'manage_users', 'Quản lý nhóm người dùng'),
 (24, 'manage_permission', 'Quản lý phân quyền chức năng');
@@ -904,6 +915,9 @@ CREATE TABLE `users` (
   `email` varchar(255) DEFAULT NULL,
   `address` varchar(255) DEFAULT NULL,
   `phone` varchar(255) DEFAULT NULL,
+  `status` enum('ACTIVE','INACTIVE','BANNED') NOT NULL DEFAULT 'ACTIVE',
+  `tier` enum('DONG','BAC','VANG','BACHKIM','KIMCUONG') NOT NULL DEFAULT 'DONG',
+  `points` int(11) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -911,27 +925,26 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `password`, `email`, `address`, `phone`, `created_at`) VALUES
-(1, 'khachhang1', 'hashed_pass1', 'khachhang1@example.com', '123 Đường Láng, Hà Nội', '0901234567', '2025-08-25 14:50:57'),
-(2, 'seller1', 'hashed_pass2', 'seller1@example.com', '456 Nguyễn Huệ, TP.HCM', '0912345678', '2025-08-25 14:50:57'),
-(3, 'admin1', 'hashed_pass3', 'admin1@example.com', '789 Lê Lợi, Đà Nẵng', '0923456789', '2025-08-25 14:50:57'),
-(4, 'trangtrang', '$2a$10$NvitG1bWsRQHA8hY2mhU1.Aam5/sQM62N9g1JruiuZnk/HNCtomxa', 'phungtrang19012004@gmail.com', 'fffffff', '0349459165', '2025-08-26 03:52:55'),
-(8, 'geoserver', '1', 'pwea@gmail.com', 'ss', '0368498289', '2025-08-26 05:16:11'),
-(26, 'customer', '1', 'customer@test', 'hanoi', '0349459165', '2025-08-26 14:19:39'),
-(27, 'admin', '1', 'admin@test', 'hanoi', '03', '2025-08-26 14:20:23'),
-(28, 'lua', '123', 'lua@gmail.com', NULL, NULL, '2025-09-10 11:49:44'),
-(29, 'trang', '123', 'trang@gmail.com', NULL, NULL, '2025-09-10 12:34:00'),
-(30, 'Nguyen Van A', '$2a$10$jg4lUFNGWYbrqETGuMhBuusX.KdbfQIbmcgNjoI8vT/EYXHxBvh/.', 'abc@gmail.com', 'nam dinh', '0349459165', '2025-09-10 14:24:35'),
-(31, 'tien dat', '$2a$10$Jbw9XjQiRYzNa7TVbdihyuO59SBI56UgGTNbYJinZ37g.93UXIT.i', 'a@gmail.com', NULL, NULL, '2025-09-10 14:58:31'),
-(32, 'Nguyen Van A', '$2a$10$grUUt5EDoYTpU0AZ4i6GjO9tn8vbxI3oBBauviwknkouOWt24uyvG', 'aaa@gmail.com', NULL, NULL, '2025-09-10 15:16:34'),
-(33, 'khachhang_test', '$2a$10$gy1jz2u5ZuXWC14tB4B1i.8kvTEt.LMKV8LjQTMgMZjGS7IXXsR32', 'khachhang_test@example.com', '123 Hà Nội', '0909999999', '2025-09-11 01:47:29'),
-(35, 'tiendat', '$2a$10$Hh05Mbc2C/i5cgwqKUhZ5OpjpUa9/m6nTv111/YMxhNXwpzBck55C', 'atest@example.com', NULL, NULL, '2025-09-11 14:19:56'),
-(36, 'tiendatngu', '$2a$10$iqs9cMI36IfRmgr9l/PjvORx.1v919EsLp5yYKyqAyqENxKVgCO8u', 'tiendat9012004@gmail.com', 'ha noi', '0349459165', '2025-09-11 14:29:02'),
-(37, 'tiendatngu', '$2a$10$tOmpK/6WzSSG3Iya/O1H2epxi.Dmy1i3IuU.BO7YTNP7nFtfoQZq2', 'dat9012004@gmail.com', 'fffffff', '0349459165', '2025-09-11 16:54:02'),
-(38, 'hoa@gmail.com', '$2a$10$5YX.1dsRgeTn7TdMu8tdq.swj3cqVvpaSujqQpGhKPCw7RDEeH1LS', 'hoahoavuive2004@gmail.com', NULL, '0349459165', '2025-09-19 22:41:38'),
-(39, 'dat9012004@gmail.com', '$2a$10$ZfphGHZPRSN73iMqdMpvpOuIpWiYeavmWy/ZLTlorGkuANPDMvNAG', 'mai@gmail.com', NULL, '0349459165', '2025-09-20 03:47:34'),
-(41, 'combongu', '$2a$10$1WRmds2qFnZhqcxjwtPUwutwisLh0XJZx979bbDIRH.BMMS9QvIvq', 'nhamnhi@gmail.com', NULL, '0978467297', '2025-09-20 03:58:37'),
-(42, 'hello', '$2a$10$VCWI6ghVP/H0SY.K3B6oouLwZPDkMOfAooDyQMDgIg5xlcMeeKCk.', 'doconlon@gmail.com', NULL, '0349459165', '2025-09-20 03:59:52');
+INSERT INTO `users` (`id`, `username`, `password`, `email`, `address`, `phone`, `status`, `tier`, `points`, `created_at`) VALUES
+(1, 'khachhang1', 'hashed_pass1', 'khachhang1@example.com', '123 Đường Láng, Hà Nội', '0901234567', 'ACTIVE', 'DONG', 0, '2025-08-25 14:50:57'),
+(2, 'seller1', 'hashed_pass2', 'seller1@example.com', '456 Nguyễn Huệ, TP.HCM', '0912345678', 'ACTIVE', 'DONG', 0, '2025-08-25 14:50:57'),
+(3, 'admin1', 'hashed_pass3', 'admin1@example.com', '789 Lê Lợi, Đà Nẵng', '0923456789', 'ACTIVE', 'DONG', 0, '2025-08-25 14:50:57'),
+(4, 'trangtrang', '$2a$10$NvitG1bWsRQHA8hY2mhU1.Aam5/sQM62N9g1JruiuZnk/HNCtomxa', 'phungtrang19012004@gmail.com', 'fffffff', '0349459165', 'ACTIVE', 'DONG', 0, '2025-08-26 03:52:55'),
+(8, 'geoserver', '1', 'pwea@gmail.com', 'ss', '0368498289', 'ACTIVE', 'DONG', 0, '2025-08-26 05:16:11'),
+(26, 'customer', '1', 'customer@test', 'hanoi', '0349459165', 'ACTIVE', 'DONG', 0, '2025-08-26 14:19:39'),
+(27, 'admin', '1', 'admin@test', 'hanoi', '03', 'ACTIVE', 'DONG', 0, '2025-08-26 14:20:23'),
+(29, 'trang', '123', 'trang@gmail.com', NULL, NULL, 'ACTIVE', 'DONG', 0, '2025-09-10 12:34:00'),
+(30, 'Nguyen Van A', '$2a$10$jg4lUFNGWYbrqETGuMhBuusX.KdbfQIbmcgNjoI8vT/EYXHxBvh/.', 'abc@gmail.com', 'nam dinh', '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-10 14:24:35'),
+(31, 'tien dat', '$2a$10$Jbw9XjQiRYzNa7TVbdihyuO59SBI56UgGTNbYJinZ37g.93UXIT.i', 'a@gmail.com', NULL, NULL, 'ACTIVE', 'DONG', 0, '2025-09-10 14:58:31'),
+(32, 'Nguyen Van A', '$2a$10$grUUt5EDoYTpU0AZ4i6GjO9tn8vbxI3oBBauviwknkouOWt24uyvG', 'aaa@gmail.com', NULL, NULL, 'ACTIVE', 'DONG', 0, '2025-09-10 15:16:34'),
+(33, 'khachhang_test', '$2a$10$gy1jz2u5ZuXWC14tB4B1i.8kvTEt.LMKV8LjQTMgMZjGS7IXXsR32', 'khachhang_test@example.com', '123 Hà Nội', '0909999999', 'ACTIVE', 'DONG', 0, '2025-09-11 01:47:29'),
+(35, 'tiendat', '$2a$10$Hh05Mbc2C/i5cgwqKUhZ5OpjpUa9/m6nTv111/YMxhNXwpzBck55C', 'atest@example.com', NULL, NULL, 'ACTIVE', 'DONG', 0, '2025-09-11 14:19:56'),
+(36, 'tiendatngu', '$2a$10$iqs9cMI36IfRmgr9l/PjvORx.1v919EsLp5yYKyqAyqENxKVgCO8u', 'tiendat9012004@gmail.com', 'ha noi', '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-11 14:29:02'),
+(37, 'tiendatngu', '$2a$10$tOmpK/6WzSSG3Iya/O1H2epxi.Dmy1i3IuU.BO7YTNP7nFtfoQZq2', 'dat9012004@gmail.com', 'fffffff', '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-11 16:54:02'),
+(38, 'hoa@gmail.com', '$2a$10$5YX.1dsRgeTn7TdMu8tdq.swj3cqVvpaSujqQpGhKPCw7RDEeH1LS', 'hoahoavuive2004@gmail.com', NULL, '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-19 22:41:38'),
+(39, 'dat9012004@gmail.com', '$2a$10$ZfphGHZPRSN73iMqdMpvpOuIpWiYeavmWy/ZLTlorGkuANPDMvNAG', 'mai@gmail.com', NULL, '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-20 03:47:34'),
+(41, 'combongu', '$2a$10$1WRmds2qFnZhqcxjwtPUwutwisLh0XJZx979bbDIRH.BMMS9QvIvq', 'nhamnhi@gmail.com', NULL, '0978467297', 'ACTIVE', 'DONG', 0, '2025-09-20 03:58:37'),
+(42, 'hello', '$2a$10$VCWI6ghVP/H0SY.K3B6oouLwZPDkMOfAooDyQMDgIg5xlcMeeKCk.', 'doconlon@gmail.com', NULL, '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-20 03:59:52');
 
 -- --------------------------------------------------------
 
@@ -1200,7 +1213,11 @@ ALTER TABLE `suppliers`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`),
-  ADD UNIQUE KEY `email_2` (`email`);
+  ADD UNIQUE KEY `email_2` (`email`),
+  ADD KEY `idx_users_username` (`username`),
+  ADD KEY `idx_users_email` (`email`),
+  ADD KEY `idx_users_status` (`status`),
+  ADD KEY `idx_users_tier` (`tier`);
 
 --
 -- Indexes for table `user_roles`
@@ -1225,7 +1242,7 @@ ALTER TABLE `attributes`
 -- AUTO_INCREMENT for table `brands`
 --
 ALTER TABLE `brands`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `carts`
@@ -1255,7 +1272,7 @@ ALTER TABLE `coupons`
 -- AUTO_INCREMENT for table `favorites`
 --
 ALTER TABLE `favorites`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `imports`
