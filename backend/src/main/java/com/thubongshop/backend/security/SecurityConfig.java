@@ -48,8 +48,10 @@ public class SecurityConfig {
           "/api/attributes/**",
           "/api/reviews/products/**",
           "/api/imports/**",
-          "/api/import-details/**"
+          "/api/import-details/**",
+          "/api/favorites/**"
         ).permitAll()
+.requestMatchers("/{path:^(?!api).*}/**").permitAll()
 
         // Static & docs
         .requestMatchers(

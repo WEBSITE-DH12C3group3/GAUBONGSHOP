@@ -15,9 +15,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -29,6 +27,7 @@ public class ProductService {
     private final ReviewRepository reviewRepo;
     private final BrandRepository brandRepo;
     private final CategoryRepository categoryRepo;
+    
 
     public ProductService(ProductRepository repo,
                           AttributeRepository attributeRepo,
@@ -46,12 +45,14 @@ public class ProductService {
 
     // -------------------- Client --------------------
 
+    /** Tìm kiếm + phân trang */
     public Page<ProductResponse> search(String keyword, Integer categoryId, Integer brandId,
                                         Double minPrice, Double maxPrice, Pageable pageable) {
         return repo.search(keyword, categoryId, brandId, minPrice, maxPrice, pageable)
                    .map(this::mapToResponseBasic);
     }
 
+    /** Chi tiết sản phẩm (bao gồm attributes + reviews) */
     public ProductResponse getFullDetail(Integer id) {
         Product product = repo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
@@ -64,7 +65,7 @@ public class ProductService {
                 .map(pa -> new ProductResponse.AttributeDTO(
                         pa.getAttributeId(),
                         attributeRepo.findById(pa.getAttributeId())
-                                    .map(Attribute::getName).orElse(""),
+                                     .map(Attribute::getName).orElse(""),
                         pa.getValue()
                 )).toList());
 
@@ -76,51 +77,54 @@ public class ProductService {
         }
 
         // 3. Brand + Category
-        String brandName = brandRepo.findById(product.getBrandId())
-                .map(Brand::getName).orElse(null);
-
-        String categoryName = categoryRepo.findById(product.getCategoryId().longValue())
-                .map(Category::getName).orElse(null);
-
-
-        resp.setBrandName(brandName);
-        resp.setCategoryName(categoryName);
+        resp.setBrandName(
+                brandRepo.findById(product.getBrandId())
+                         .map(Brand::getName).orElse(null)
+        );
+        resp.setCategoryName(
+                categoryRepo.findById(product.getCategoryId().longValue())
+                            .map(Category::getName).orElse(null)
+        );
 
         return resp;
     }
- 
 
+    /** Lấy sản phẩm mới nhất */
     public List<ProductResponse> getLatest(int limit) {
         Pageable pageable = PageRequest.of(0, limit);
         return repo.findAllByOrderByCreatedAtDesc(pageable)
                    .stream().map(this::mapToResponseBasic).toList();
     }
 
+    /** Lấy sản phẩm liên quan cùng danh mục */
     public List<ProductResponse> getRelated(Integer productId, int limit) {
         Product product = repo.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
         Pageable pageable = PageRequest.of(0, limit);
         return repo.findByCategoryIdAndIdNot(product.getCategoryId(), product.getId(), pageable)
-           .stream().map(this::mapToResponseBasic).toList();
+                   .stream().map(this::mapToResponseBasic).toList();
+    }
 
+    /** Lấy sản phẩm theo danh sách ID (dùng cho Favorites) */
+    public List<ProductResponse> getProductsByIds(List<Integer> ids) {
+        return repo.findAllById(ids)
+                   .stream().map(this::mapToResponseBasic).toList();
     }
 
     // -------------------- Admin --------------------
 
     public Page<ProductResponse> listPaged(String keyword, Integer categoryId, Integer brandId,
-                                            Double minPrice, Double maxPrice, Pageable pageable) {
-            return repo.search(keyword, categoryId, brandId, minPrice, maxPrice, pageable)
-                    .map(this::mapToResponseBasic);
-        }
+                                           Double minPrice, Double maxPrice, Pageable pageable) {
+        return repo.search(keyword, categoryId, brandId, minPrice, maxPrice, pageable)
+                   .map(this::mapToResponseBasic);
+    }
 
-        public ProductResponse getDetail(Integer id) {
-            // Trả luôn FULL detail cho Admin để panel chi tiết giàu thông tin
-            return getFullDetail(id);
-        }
+    public ProductResponse getDetail(Integer id) {
+        return getFullDetail(id);
+    }
 
-    /**
-     * Thêm mới sản phẩm cơ bản (không attributes/images).
-     */
+    /** Thêm sản phẩm cơ bản */
     public ProductResponse create(ProductRequest req) {
         Product p = new Product();
         p.setName(req.name());
@@ -133,11 +137,8 @@ public class ProductService {
         return mapToResponseBasic(repo.save(p));
     }
 
-    /**
-     * Thêm mới sản phẩm đầy đủ (bao gồm attributes + images).
-     */
+    /** Thêm sản phẩm đầy đủ (bao gồm attributes) */
     public ProductResponse createFull(ProductRequest req) {
-        // 1. Tạo product cơ bản
         Product p = new Product();
         p.setName(req.name());
         p.setDescription(req.description());
@@ -148,19 +149,15 @@ public class ProductService {
         p.setStock(req.stock());
         p = repo.save(p);
 
-        // 2. Lưu attributes
         if (req.attributes() != null) {
             for (ProductAttributeRequest attr : req.attributes()) {
                 ProductAttribute pa = ProductAttribute.builder()
-                    .id(new ProductAttributeKey(p.getId(), attr.attributeId().intValue()))
-                    .value(attr.value())
-                    .build();
+                        .id(new ProductAttributeKey(p.getId(), attr.attributeId().intValue()))
+                        .value(attr.value())
+                        .build();
                 paRepo.save(pa);
             }
         }
-
-
-        // TODO: 3. Lưu images nếu bạn có bảng riêng cho images
 
         return getFullDetail(p.getId());
     }
@@ -181,19 +178,21 @@ public class ProductService {
     public void delete(Integer id) {
         repo.deleteById(id);
     }
+public List<Product> findByIds(List<Integer> ids) {
+        return repo.findAllById(ids);
+    }
 
     // -------------------- Helpers --------------------
 
     private ProductResponse mapToResponseBasic(Product p) {
-        String brandName = null;
-        String categoryName = null;
-        if (p.getBrandId() != null) {
-            brandName = brandRepo.findById(p.getBrandId()).map(Brand::getName).orElse(null);
-        }
-        if (p.getCategoryId() != null) {
-            categoryName = categoryRepo.findById(p.getCategoryId().longValue())
-                                       .map(Category::getName).orElse(null);
-        }
+        String brandName = (p.getBrandId() != null)
+                ? brandRepo.findById(p.getBrandId()).map(Brand::getName).orElse(null)
+                : null;
+
+        String categoryName = (p.getCategoryId() != null)
+                ? categoryRepo.findById(p.getCategoryId().longValue())
+                              .map(Category::getName).orElse(null)
+                : null;
 
         return ProductResponse.builder()
                 .id(p.getId())
@@ -207,4 +206,4 @@ public class ProductService {
                 .categoryName(categoryName)
                 .build();
     }
-} 
+}

@@ -44,6 +44,7 @@ import { ShipVoucherAdminFormComponent } from './admin/shipping-vouchers-admin/s
 
 // Live chat
 import { LiveChatAdminComponent } from './admin/live-chat/live-chat-admin';
+import { WishlistComponent } from './features/wishlist/wishlist.component';
 
 export const routes: Routes = [
   // ===== Customer layout =====
@@ -58,6 +59,8 @@ export const routes: Routes = [
       { path: 'profile', component: ProfileComponent },
       { path: 'products', component: ProductsComponent },
       { path: 'product/:id', component: ProductDetailComponent },
+      { path: '', component: HomeComponent },
+      { path: 'wishlist', component: WishlistComponent },
     ],
   },
 
@@ -143,11 +146,13 @@ export const routes: Routes = [
           { path: ':id', component: ShipVoucherAdminFormComponent },
         ],
       },
+      // Imports
       { path: 'imports', component: ImportListComponent },
-{ path: 'imports/add', component: ImportAddComponent },
-{ path: 'imports/:id/edit', component: ImportEditComponent },
-{ path: 'imports/:id/details', component: ImportDetailComponent },
+      { path: 'imports/add', component: ImportAddComponent },
+      { path: 'imports/:id/edit', component: ImportEditComponent },
+      { path: 'imports/:id/details', component: ImportDetailComponent },
 
+      
     ],
   },
 
