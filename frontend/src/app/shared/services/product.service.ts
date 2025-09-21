@@ -107,4 +107,10 @@ export class ProductService {
   getProductBySlug(slug: string): Observable<Product> {
     return this.http.get<Product>(`${this.apiUrl}/slug/${slug}`);
   }
+// product.service.ts
+getProductsByIds(ids: number[]): Observable<Product[]> {
+  return this.http.get<Product[]>(`http://localhost:8080/api/products/by-ids?ids=${ids.join(',')}`);
+}
+
+
 }

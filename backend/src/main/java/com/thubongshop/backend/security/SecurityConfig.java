@@ -40,14 +40,18 @@ public class SecurityConfig {
                 // Auth public
                 .requestMatchers("/api/users/login", "/api/users/register","/api/users/forgot-password/**", "/error").permitAll()
 
-                // Catalog public GET
-                .requestMatchers(HttpMethod.GET,
-                    "/api/products/**",
-                    "/api/categories/**",
-                    "/api/brands/**",
-                    "/api/attributes/**",
-                    "/api/reviews/products/**"
-                ).permitAll()
+        // Catalog public GET
+        .requestMatchers(HttpMethod.GET,
+          "/api/products/**",
+          "/api/categories/**",
+          "/api/brands/**",
+          "/api/attributes/**",
+          "/api/reviews/products/**",
+          "/api/imports/**",
+          "/api/import-details/**",
+          "/api/favorites/**"
+        ).permitAll()
+            .requestMatchers("/{path:^(?!api).*}/**").permitAll()
 
                 // Static & docs
                 .requestMatchers(

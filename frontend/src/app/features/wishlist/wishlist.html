@@ -1,0 +1,53 @@
+<div class="container mx-auto px-6 py-8">
+  <h2 class="text-2xl font-bold text-gray-800 mb-6">Danh sách yêu thích</h2>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="text-center py-8">
+    <i class="fa-solid fa-spinner fa-spin text-pink-600 text-3xl"></i>
+    <p class="mt-2 text-gray-600">Đang tải danh sách yêu thích...</p>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!isLoading && favorites.length === 0" class="text-center py-12">
+    <i class="fa-regular fa-heart text-5xl text-gray-300 mb-4"></i>
+    <p class="text-gray-600">Chưa có sản phẩm nào trong danh sách yêu thích.</p>
+    <a routerLink="/products"
+       class="mt-4 inline-block px-6 py-2 bg-pink-600 text-white rounded-lg shadow hover:bg-pink-700 transition">
+      Xem sản phẩm
+    </a>
+  </div>
+
+  <!-- Favorites list -->
+  <div *ngIf="!isLoading && favorites.length > 0"
+       class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div *ngFor="let product of favorites"
+         class="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden relative">
+
+      <!-- Product image -->
+      <a [routerLink]="['/product', product.id]">
+        <img [src]="product.imageUrl || 'assets/images/no-image.png'"
+             [alt]="product.name"
+             class="w-full h-56 object-cover">
+      </a>
+
+      <!-- Product info -->
+      <div class="p-4">
+        <a [routerLink]="['/product', product.id]" class="block">
+          <h3 class="text-lg font-semibold text-gray-800 hover:text-pink-600 transition">
+            {{ product.name }}
+          </h3>
+        </a>
+        <p class="text-pink-600 font-bold mt-2">
+          {{ product.price | currency:'VND':'symbol':'1.0-0' }}
+        </p>
+      </div>
+
+      <!-- Remove button -->
+      <button (click)="removeFavorite(product.id)"
+              class="absolute top-3 right-3 text-red-500 hover:text-red-700 transition"
+              title="Xóa khỏi yêu thích">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+    </div>
+  </div>
+</div>
