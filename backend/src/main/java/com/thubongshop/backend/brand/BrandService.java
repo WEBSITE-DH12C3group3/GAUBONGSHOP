@@ -27,38 +27,39 @@ public class BrandService {
         return toResponse(b);
     }
 
-    // create kiểu “upsert theo name” để dễ test:
+    // create: nếu tên đã tồn tại thì báo lỗi (đúng nghiệp vụ quản trị)
     public BrandResponse create(BrandRequest req) {
         String name = req.getName().trim();
-        Brand b = repo.findByNameIgnoreCase(name).orElseGet(Brand::new);
+        if (repo.existsByNameIgnoreCase(name)) {
+            throw new IllegalArgumentException("Brand name already exists");
+        }
+        Brand b = new Brand();
         b.setName(name);
         b.setDescription(req.getDescription());
         b.setLogoUrl(req.getLogoUrl());
         b.setWebsiteUrl(req.getWebsiteUrl());
         return toResponse(repo.save(b));
     }
-    // Nếu bạn muốn STRICT (trùng tên báo lỗi), thay create() bằng:
-    // if (repo.existsByNameIgnoreCase(name)) throw new IllegalArgumentException("Brand name already exists");
 
     public BrandResponse update(Integer id, BrandRequest req) {
         Brand b = repo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Brand not found"));
-        String name = req.getName().trim();
-        // không cho trùng tên với brand khác
-        repo.findByNameIgnoreCase(name).ifPresent(ex -> {
-            if (!ex.getId().equals(id)) {
-                throw new IllegalArgumentException("Brand name already exists");
-            }
-        });
-        b.setName(name);
+
+        String newName = req.getName().trim();
+        if (!b.getName().equalsIgnoreCase(newName) && repo.existsByNameIgnoreCase(newName)) {
+            throw new IllegalArgumentException("Brand name already exists");
+        }
+        b.setName(newName);
         b.setDescription(req.getDescription());
-        b.setLogoUrl(req.getLogoUrl());
+        if (req.getLogoUrl() != null) b.setLogoUrl(req.getLogoUrl());
         b.setWebsiteUrl(req.getWebsiteUrl());
         return toResponse(repo.save(b));
     }
 
     public void delete(Integer id) {
-        if (!repo.existsById(id)) throw new IllegalArgumentException("Brand not found");
+        if (!repo.existsById(id)) {
+            throw new IllegalArgumentException("Brand not found");
+        }
         repo.deleteById(id);
     }
 

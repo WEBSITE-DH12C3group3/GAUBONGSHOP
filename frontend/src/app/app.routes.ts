@@ -30,7 +30,7 @@ import { ProductsAdminComponent } from './admin/products-admin/products-admin';
 import { ProductAdminFormComponent } from './admin/products-admin/product-admin-form';
 
 // Brands
-import { BrandAdminListComponent } from './admin/brands-admin/brand-admin-list';
+import { BrandsAdminListComponent } from './admin/brands-admin/brand-admin-list';
 import { BrandAdminFormComponent } from './admin/brands-admin/brand-admin-form';
 
 // Suppliers
@@ -111,7 +111,7 @@ export const routes: Routes = [
         canActivate: [permissionGuard],
         data: { permissions: ['manage_brands'] },
         children: [
-          { path: '', component: BrandAdminListComponent },
+          { path: '', component: BrandsAdminListComponent },
           { path: 'new', component: BrandAdminFormComponent },
           { path: ':id', component: BrandAdminFormComponent },
         ],

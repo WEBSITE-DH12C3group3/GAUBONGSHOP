@@ -1,13 +1,11 @@
 package com.thubongshop.backend.brand.controller;
 
+import com.thubongshop.backend.brand.BrandResponse;
+import com.thubongshop.backend.brand.BrandService;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.thubongshop.backend.brand.BrandResponse;
-import com.thubongshop.backend.brand.BrandService;
-
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -21,26 +19,24 @@ public class BrandController {
         this.service = service;
     }
 
-    // GET /api/brands?q=&page=0&size=10&sort=id,desc
     @GetMapping
     public ResponseEntity<?> list(
-            @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id,desc") String sort
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "name,asc") String sort,
+            @RequestParam(required = false) String q
     ) {
         Pageable pageable = buildPageable(page, size, sort);
         Page<BrandResponse> data = service.list(q, pageable);
-        Map<String,Object> resp = new HashMap<>();
-        resp.put("items", data.getContent());
-        resp.put("page", data.getNumber());
-        resp.put("size", data.getSize());
-        resp.put("totalPages", data.getTotalPages());
-        resp.put("totalElements", data.getTotalElements());
-        return ResponseEntity.ok(resp);
+        return ResponseEntity.ok(Map.of(
+                "content", data.getContent(),
+                "number", data.getNumber(),
+                "size", data.getSize(),
+                "totalElements", data.getTotalElements(),
+                "totalPages", data.getTotalPages()
+        ));
     }
 
-    // GET /api/brands/{id}
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Integer id) {
         return ResponseEntity.ok(Map.of("brand", service.get(id)));

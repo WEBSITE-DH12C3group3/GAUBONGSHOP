@@ -1,15 +1,16 @@
 package com.thubongshop.backend.brand.controller;
 
+import com.thubongshop.backend.brand.*;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.*;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.thubongshop.backend.brand.BrandRequest;
-import com.thubongshop.backend.brand.BrandResponse;
-import com.thubongshop.backend.brand.BrandService;
 
-import java.util.HashMap;
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -18,53 +19,78 @@ import java.util.Map;
 public class AdminBrandController {
 
     private final BrandService service;
+    private final BrandImageService imageService;
 
-    public AdminBrandController(BrandService service) {
+    public AdminBrandController(BrandService service, BrandImageService imageService) {
         this.service = service;
+        this.imageService = imageService;
     }
 
-    // GET /api/admin/brands?q=&page=0&size=10&sort=id,desc
+    // List + search + paging
     @GetMapping
     public ResponseEntity<?> list(
-            @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id,desc") String sort
+            @RequestParam(defaultValue = "id,desc") String sort,
+            @RequestParam(required = false) String q
     ) {
         Pageable pageable = buildPageable(page, size, sort);
         Page<BrandResponse> data = service.list(q, pageable);
-        Map<String,Object> resp = new HashMap<>();
-        resp.put("items", data.getContent());
-        resp.put("page", data.getNumber());
-        resp.put("size", data.getSize());
-        resp.put("totalPages", data.getTotalPages());
-        resp.put("totalElements", data.getTotalElements());
-        return ResponseEntity.ok(resp);
+        return ResponseEntity.ok(Map.of(
+                "content", data.getContent(),
+                "number", data.getNumber(),
+                "size", data.getSize(),
+                "totalElements", data.getTotalElements(),
+                "totalPages", data.getTotalPages()
+        ));
     }
 
-    // GET /api/admin/brands/{id}
-    @GetMapping("/{id}")
-    public ResponseEntity<?> get(@PathVariable Integer id) {
-        return ResponseEntity.ok(Map.of("brand", service.get(id)));
-    }
-
-    // POST /api/admin/brands
+    // Create (JSON) – logoUrl có thể đi kèm nếu đã upload trước
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody BrandRequest req) {
         return ResponseEntity.ok(Map.of("brand", service.create(req)));
     }
 
-    // PUT /api/admin/brands/{id}
+    // Update (JSON)
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Integer id, @Valid @RequestBody BrandRequest req) {
         return ResponseEntity.ok(Map.of("brand", service.update(id, req)));
     }
 
-    // DELETE /api/admin/brands/{id}
+    // Xoá brand (không tự xoá file cũ để an toàn – tuỳ bạn bật ở dưới)
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id) {
         service.delete(id);
         return ResponseEntity.ok(Map.of("message", "Deleted"));
+    }
+
+    // Tải logo trước (2 bước): trả URL để FE set vào form create/update
+    @PostMapping(path = "/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadLogo(@RequestPart("file") MultipartFile file) throws IOException {
+        String url = imageService.saveLogo(file);
+        return ResponseEntity.ok(Map.of("url", url));
+    }
+
+    // Upload & gán logo cho brand (1 bước)
+    @PostMapping(path = "/{id}/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadAndAssignLogo(@PathVariable Integer id,
+                                                 @RequestPart("file") MultipartFile file,
+                                                 @RequestParam(defaultValue = "false") boolean deleteOld) throws IOException {
+        var current = service.get(id);
+        String url = imageService.saveLogo(file);
+
+        // gán logo mới
+        BrandRequest req = new BrandRequest();
+        req.setName(current.getName());
+        req.setDescription(current.getDescription());
+        req.setWebsiteUrl(current.getWebsiteUrl());
+        req.setLogoUrl(url);
+        var updated = service.update(id, req);
+
+        // tuỳ chọn xoá file cũ nếu là file local trong /brandimg/
+        if (deleteOld) imageService.deleteByUrlIfLocal(current.getLogoUrl());
+
+        return ResponseEntity.ok(Map.of("brand", updated));
     }
 
     private Pageable buildPageable(int page, int size, String sort) {

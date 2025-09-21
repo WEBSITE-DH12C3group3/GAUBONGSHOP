@@ -1,42 +1,183 @@
-<div class="max-w-3xl mx-auto p-6 space-y-6">
-  <a routerLink="/admin/brands" class="underline text-sm">&larr; Quay lại danh sách</a>
-  <h2 class="text-xl font-bold">{{ id() ? 'Sửa thương hiệu' : 'Thêm thương hiệu' }}</h2>
+<div class="max-w-5xl mx-auto p-6">
+  <!-- Breadcrumb -->
+  <nav class="mb-4 text-sm">
+    <a routerLink="/admin/brands" class="text-gray-600 hover:text-gray-900 underline decoration-dotted">
+      &larr; Quay lại danh sách
+    </a>
+  </nav>
 
-  <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
-    <div class="grid md:grid-cols-2 gap-4">
-      <div class="space-y-1">
-        <label class="text-sm">Tên <span class="text-red-600">*</span></label>
-        <input formControlName="name" class="border rounded-xl px-3 py-2 w-full" placeholder="VD: Teddy" />
-        <div class="text-xs text-red-600" *ngIf="form.controls.name.touched && form.controls.name.invalid">
-          Tên là bắt buộc (tối đa 100 ký tự)
+  <!-- Header -->
+  <header class="mb-6">
+    <h1 class="text-2xl font-bold tracking-tight">
+      {{ id() ? 'Sửa thương hiệu' : 'Thêm thương hiệu' }}
+    </h1>
+    <p class="text-gray-500 mt-1">Điền thông tin cơ bản và tải logo chuẩn (PNG/SVG/WebP).</p>
+  </header>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="space-y-6">
+    <!-- Card: Thông tin cơ bản -->
+    <section class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-200/70">
+      <div class="p-5 border-b border-gray-100">
+        <h2 class="text-base font-semibold">Thông tin cơ bản</h2>
+        <p class="text-sm text-gray-500">Tên, website và mô tả thương hiệu.</p>
+      </div>
+
+      <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <!-- Tên -->
+        <div>
+          <label class="block text-sm font-medium">Tên <span class="text-red-600">*</span></label>
+          <input
+            formControlName="name"
+            class="mt-1 w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-black/80"
+            [class.border-rose-500]="form.controls.name.touched && form.controls.name.invalid"
+            placeholder="VD: Teddy"
+            aria-required="true"
+            aria-invalid="{{form.controls.name.invalid}}"
+          />
+          <div class="mt-1 text-xs text-rose-600"
+               *ngIf="form.controls.name.touched && form.controls.name.invalid">
+            Tên là bắt buộc (tối đa 100 ký tự).
+          </div>
+        </div>
+
+        <!-- Website -->
+        <div>
+          <label class="block text-sm font-medium">Website</label>
+          <input
+            formControlName="websiteUrl"
+            class="mt-1 w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-black/80"
+            placeholder="https://..."
+            inputmode="url"
+          />
+          <p class="mt-1 text-xs text-gray-500">Để trống nếu chưa có trang chính thức.</p>
+        </div>
+
+        <!-- Mô tả (full width) -->
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium">Mô tả</label>
+          <textarea
+            formControlName="description"
+            rows="4"
+            class="mt-1 w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-black/80"
+            placeholder="Mô tả ngắn về thương hiệu..."
+          ></textarea>
+          <div class="mt-1 text-xs text-gray-500">Tối đa ~ 10.000 ký tự.</div>
         </div>
       </div>
+    </section>
 
-      <div class="space-y-1">
-        <label class="text-sm">Website</label>
-        <input formControlName="websiteUrl" class="border rounded-xl px-3 py-2 w-full" placeholder="https://..." />
+    <!-- Card: Logo -->
+    <section class="bg-white rounded-2xl shadow-sm ring-1 ring-gray-200/70">
+      <div class="p-5 border-b border-gray-100">
+        <h2 class="text-base font-semibold">Logo thương hiệu</h2>
+        <p class="text-sm text-gray-500">Tải ảnh lên hoặc dán URL trực tiếp. Khuyến nghị PNG nền trong suốt hoặc SVG.</p>
       </div>
-    </div>
 
-    <div class="space-y-1">
-      <label class="text-sm">Mô tả</label>
-      <textarea formControlName="description" rows="3" class="border rounded-xl px-3 py-2 w-full"
-                placeholder="Mô tả ngắn"></textarea>
-    </div>
+      <div class="p-5 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Preview (trái) -->
+        <div class="lg:col-span-4">
+          <div class="aspect-square rounded-xl border bg-gray-50 overflow-hidden flex items-center justify-center">
+            <img
+              *ngIf="previewUrl || form.value.logoUrl"
+              [src]="previewUrl || form.value.logoUrl"
+              [alt]="form.value.name || 'logo preview'"
+              class="max-h-full max-w-full object-contain"
+            />
+            <div *ngIf="!previewUrl && !form.value.logoUrl" class="text-xs text-gray-500 px-4 text-center">
+              Chưa có ảnh — tải ảnh hoặc nhập URL để xem trước.
+            </div>
+          </div>
+          <div class="mt-2 flex items-center justify-between">
+            <span class="text-xs text-gray-500 truncate"
+                  *ngIf="pickedFileName">{{ pickedFileName }} <span *ngIf="pickedFileSize">· {{ pickedFileSize }}</span></span>
+            <button
+              type="button"
+              class="text-xs underline decoration-dotted text-gray-600 hover:text-gray-900"
+              *ngIf="previewUrl"
+              (click)="clearPickedFile()"
+            >
+              Xoá ảnh tạm
+            </button>
+          </div>
+        </div>
 
-    <div class="space-y-1">
-      <label class="text-sm">Logo URL</label>
-      <input formControlName="logoUrl" class="border rounded-xl px-3 py-2 w-full" placeholder="/Brandimg/logo.webp hoặc https://..." />
-      <div *ngIf="form.value.logoUrl" class="mt-2">
-        <img [src]="form.value.logoUrl!" alt="Preview" class="h-20 object-contain border rounded-lg p-2"
-             (error)="form.patchValue({logoUrl: ''})">
+        <!-- Dropzone + URL (phải) -->
+        <div class="lg:col-span-8 space-y-4">
+          <!-- Dropzone -->
+          <div
+            class="rounded-2xl border-2 border-dashed p-5 text-center transition"
+            [class.border-gray-300]="!dropActive"
+            [class.border-black]="dropActive"
+            [class.bg-gray-50]="!dropActive"
+            [class.bg-gray-100]="dropActive"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event)"
+          >
+            <div class="space-y-2">
+              <p class="font-medium">Kéo & thả logo vào đây</p>
+              <p class="text-xs text-gray-500">hoặc</p>
+              <div class="flex items-center justify-center">
+                <label class="relative inline-flex">
+                  <input type="file" accept="image/*" class="sr-only" (change)="onPickFile($event)" />
+                  <span class="px-3 py-2 rounded-xl border bg-white hover:bg-gray-50 cursor-pointer">
+                    Chọn ảnh từ máy
+                  </span>
+                </label>
+              </div>
+              <p class="text-xs text-gray-500">Hỗ trợ: jpg, jpeg, png, webp, gif, svg · Tối đa 10MB</p>
+            </div>
+          </div>
+
+          <!-- Hành động upload / gán -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button"
+                    class="px-3 py-2 rounded-xl border hover:bg-gray-50"
+                    (click)="uploadLogo()"
+                    [disabled]="!pickedFile || uploading()">
+              {{ uploading() ? 'Đang tải...' : 'Tải logo lên máy chủ' }}
+            </button>
+
+            <button type="button"
+                    class="px-3 py-2 rounded-xl border hover:bg-gray-50"
+                    (click)="assignLogoDirect()"
+                    [disabled]="!pickedFile || !id() || uploading()">
+              {{ uploading() ? 'Đang gán...' : 'Upload & gán trực tiếp' }}
+            </button>
+
+            <label class="ml-auto text-xs text-gray-500"
+                   *ngIf="form.value.logoUrl">URL hiện tại: <span class="underline decoration-dotted">{{ form.value.logoUrl }}</span></label>
+          </div>
+
+          <!-- Hoặc nhập URL -->
+          <div>
+            <label class="block text-sm font-medium">Hoặc nhập Logo URL</label>
+            <input
+              formControlName="logoUrl"
+              class="mt-1 w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-black/80"
+              placeholder="/brandimg/logo.webp hoặc https://..."
+              (input)="syncPreviewFromUrl()"
+            />
+            <p class="mt-1 text-xs text-gray-500">
+              Nếu đã có URL (CDN, S3...), dán vào đây. Ưu tiên dùng <code>/brandimg/...</code> từ server để tải nhanh.
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <div class="pt-2">
-      <button type="submit" class="px-4 py-2 rounded-xl bg-black text-white" [disabled]="saving()">
-        {{ saving() ? 'Đang lưu...' : 'Lưu' }}
-      </button>
+    <!-- Sticky footer actions -->
+    <div class="sticky bottom-0 left-0 right-0 bg-white/80 backdrop-blur mt-2 border-t">
+      <div class="max-w-5xl mx-auto p-4 flex items-center gap-2 justify-end">
+        <button type="button" class="px-4 py-2 rounded-xl border hover:bg-gray-50" (click)="cancel()">
+          Huỷ
+        </button>
+        <button type="submit"
+                class="px-4 py-2 rounded-xl bg-black text-white hover:bg-black/90 disabled:opacity-50"
+                [disabled]="saving() || form.invalid">
+          {{ saving() ? 'Đang lưu...' : (id() ? 'Lưu thay đổi' : 'Tạo thương hiệu') }}
+        </button>
+      </div>
     </div>
   </form>
 </div>
