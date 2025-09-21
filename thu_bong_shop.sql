@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 19, 2025 at 08:12 PM
+-- Generation Time: Sep 21, 2025 at 03:44 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -132,7 +132,11 @@ INSERT INTO `chat_sessions` (`id`, `participant1_id`, `participant2_id`, `status
 (1, 1, 3, 'open', '2025-09-16 06:50:18', '2025-09-19 01:09:31'),
 (2, 1, 36, 'closed', '2025-09-16 16:10:19', '2025-09-19 01:09:14'),
 (3, 30, 1, 'open', '2025-09-18 10:02:04', '2025-09-19 01:08:24'),
-(4, 37, 1, 'closed', '2025-09-18 16:55:08', '2025-09-19 01:08:10');
+(4, 37, 1, 'closed', '2025-09-18 16:55:08', '2025-09-19 01:08:10'),
+(5, 36, 1, 'open', '2025-09-20 06:50:34', '2025-09-20 06:50:34'),
+(6, 42, 1, 'open', '2025-09-20 06:51:54', '2025-09-20 08:51:27'),
+(7, 4, 1, 'open', '2025-09-21 06:26:29', '2025-09-21 06:26:29'),
+(8, 38, 1, 'open', '2025-09-21 06:32:52', '2025-09-21 06:32:52');
 
 -- --------------------------------------------------------
 
@@ -328,25 +332,50 @@ INSERT INTO `messages` (`id`, `chat_session_id`, `sender_id`, `content`, `is_rea
 (21, 4, 37, 'tao đây', 0, '2025-09-19 03:43:55'),
 (22, 2, 36, 'ê', 1, '2025-09-19 03:56:41'),
 (23, 2, 36, 'ê', 1, '2025-09-19 03:57:02'),
-(24, 2, 30, 'ê', 0, '2025-09-19 03:59:03'),
-(25, 2, 30, 'ê', 0, '2025-09-19 03:59:31'),
+(24, 2, 30, 'ê', 1, '2025-09-19 03:59:03'),
+(25, 2, 30, 'ê', 1, '2025-09-19 03:59:31'),
 (26, 3, 37, 'đây nha\\', 0, '2025-09-19 04:00:28'),
 (27, 3, 37, 'hh', 0, '2025-09-19 04:05:15'),
-(28, 2, 30, 'dfgh', 0, '2025-09-19 04:05:45'),
+(28, 2, 30, 'dfgh', 1, '2025-09-19 04:05:45'),
 (29, 3, 37, 'chào nhá', 0, '2025-09-19 04:12:43'),
-(30, 2, 30, 'hú', 0, '2025-09-19 04:14:17'),
-(31, 2, 30, 'hú', 0, '2025-09-19 04:14:22'),
-(32, 2, 30, 'ê ê', 0, '2025-09-19 04:18:23'),
-(33, 2, 30, 'ê', 0, '2025-09-19 04:18:26'),
-(34, 2, 30, 'hello', 0, '2025-09-19 07:36:54'),
-(35, 2, 30, 'chào nhé', 0, '2025-09-19 07:37:01'),
+(30, 2, 30, 'hú', 1, '2025-09-19 04:14:17'),
+(31, 2, 30, 'hú', 1, '2025-09-19 04:14:22'),
+(32, 2, 30, 'ê ê', 1, '2025-09-19 04:18:23'),
+(33, 2, 30, 'ê', 1, '2025-09-19 04:18:26'),
+(34, 2, 30, 'hello', 1, '2025-09-19 07:36:54'),
+(35, 2, 30, 'chào nhé', 1, '2025-09-19 07:37:01'),
 (36, 3, 37, 'cin chao', 0, '2025-09-19 07:37:49'),
 (37, 3, 37, 'hi', 0, '2025-09-19 07:40:05'),
 (38, 2, 36, 'hello', 1, '2025-09-19 07:42:43'),
 (39, 3, 37, 'ê', 0, '2025-09-19 08:08:24'),
-(40, 2, 30, 'chài]', 0, '2025-09-19 08:09:12'),
-(41, 2, 30, 'adfhiusafguia', 0, '2025-09-19 08:09:14'),
-(42, 1, 37, 'ddda', 0, '2025-09-19 08:09:30');
+(40, 2, 30, 'chài]', 1, '2025-09-19 08:09:12'),
+(41, 2, 30, 'adfhiusafguia', 1, '2025-09-19 08:09:14'),
+(42, 1, 37, 'ddda', 0, '2025-09-19 08:09:30'),
+(43, 6, 42, 'chào shop', 1, '2025-09-20 13:52:18'),
+(44, 6, 42, 'chop cho mình hỏi', 1, '2025-09-20 13:52:33'),
+(45, 6, 37, 'mình đây bạn ơi', 1, '2025-09-20 13:52:52'),
+(46, 6, 42, 'bạn ơi', 1, '2025-09-20 13:57:48'),
+(47, 6, 42, 'bạn ơi', 1, '2025-09-20 13:58:06'),
+(48, 6, 42, 'ê', 1, '2025-09-20 13:58:10'),
+(49, 6, 37, 'đây đĩ mẹ m', 1, '2025-09-20 13:58:29'),
+(50, 6, 42, 'con chó', 1, '2025-09-20 13:59:05'),
+(51, 6, 37, 'm thích gì', 1, '2025-09-20 14:00:59'),
+(52, 6, 42, 'á à', 1, '2025-09-20 14:01:26'),
+(53, 6, 37, 'heloo', 1, '2025-09-20 14:10:55'),
+(54, 6, 42, 'xin lỗi tao đi', 1, '2025-09-20 14:11:20'),
+(55, 6, 37, 'del thích', 1, '2025-09-20 14:26:10'),
+(56, 6, 37, 'ê', 1, '2025-09-20 14:29:11'),
+(57, 6, 37, 'ê', 1, '2025-09-20 14:29:13'),
+(58, 6, 37, 'dfhasdhfsaiu', 1, '2025-09-20 14:29:17'),
+(59, 6, 37, 'dfuid', 1, '2025-09-20 14:29:20'),
+(60, 6, 37, 'ê m', 1, '2025-09-20 14:44:57'),
+(61, 6, 42, 'sdfasdhfioas', 1, '2025-09-20 14:55:55'),
+(62, 6, 37, 'đù mé', 1, '2025-09-20 15:00:13'),
+(63, 6, 37, 'húdhksdhjkaddsbjsadk', 1, '2025-09-20 15:30:15'),
+(64, 6, 42, 'djfhsf', 1, '2025-09-20 15:30:50'),
+(65, 6, 37, 'ê', 1, '2025-09-20 15:51:08'),
+(66, 6, 37, 'tao bảo', 1, '2025-09-20 15:51:13'),
+(67, 6, 42, 'oiioi', 1, '2025-09-20 15:51:27');
 
 -- --------------------------------------------------------
 
@@ -401,7 +430,32 @@ INSERT INTO `notifications` (`id`, `user_id`, `message_id`, `type`, `is_read`, `
 (38, 30, 39, 'new_message', 1, '2025-09-19 08:08:24'),
 (39, 36, 40, 'new_message', 0, '2025-09-19 08:09:12'),
 (40, 36, 41, 'new_message', 0, '2025-09-19 08:09:14'),
-(41, 1, 42, 'new_message', 0, '2025-09-19 08:09:30');
+(41, 1, 42, 'new_message', 0, '2025-09-19 08:09:30'),
+(42, 1, 43, 'new_message', 0, '2025-09-20 13:52:18'),
+(43, 1, 44, 'new_message', 0, '2025-09-20 13:52:33'),
+(44, 42, 45, 'new_message', 1, '2025-09-20 13:52:52'),
+(45, 1, 46, 'new_message', 0, '2025-09-20 13:57:48'),
+(46, 1, 47, 'new_message', 0, '2025-09-20 13:58:06'),
+(47, 1, 48, 'new_message', 0, '2025-09-20 13:58:10'),
+(48, 42, 49, 'new_message', 1, '2025-09-20 13:58:29'),
+(49, 1, 50, 'new_message', 0, '2025-09-20 13:59:05'),
+(50, 42, 51, 'new_message', 1, '2025-09-20 14:00:59'),
+(51, 1, 52, 'new_message', 0, '2025-09-20 14:01:26'),
+(52, 42, 53, 'new_message', 1, '2025-09-20 14:10:55'),
+(53, 1, 54, 'new_message', 0, '2025-09-20 14:11:20'),
+(54, 42, 55, 'new_message', 1, '2025-09-20 14:26:10'),
+(55, 42, 56, 'new_message', 1, '2025-09-20 14:29:11'),
+(56, 42, 57, 'new_message', 1, '2025-09-20 14:29:13'),
+(57, 42, 58, 'new_message', 1, '2025-09-20 14:29:17'),
+(58, 42, 59, 'new_message', 1, '2025-09-20 14:29:20'),
+(59, 42, 60, 'new_message', 1, '2025-09-20 14:44:57'),
+(60, 1, 61, 'new_message', 0, '2025-09-20 14:55:55'),
+(61, 42, 62, 'new_message', 1, '2025-09-20 15:00:13'),
+(62, 42, 63, 'new_message', 1, '2025-09-20 15:30:15'),
+(63, 1, 64, 'new_message', 0, '2025-09-20 15:30:50'),
+(64, 42, 65, 'new_message', 1, '2025-09-20 15:51:08'),
+(65, 42, 66, 'new_message', 1, '2025-09-20 15:51:13'),
+(66, 1, 67, 'new_message', 0, '2025-09-20 15:51:27');
 
 -- --------------------------------------------------------
 
@@ -470,6 +524,29 @@ CREATE TABLE `order_shipping_vouchers` (
   `voucher_id` int(11) NOT NULL,
   `shipping_discount_amount` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `password_reset_codes`
+--
+
+CREATE TABLE `password_reset_codes` (
+  `id` bigint(20) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `code` varchar(6) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `used` bit(1) NOT NULL DEFAULT b'0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `password_reset_codes`
+--
+
+INSERT INTO `password_reset_codes` (`id`, `email`, `code`, `created_at`, `expires_at`, `used`) VALUES
+(14, 'hoahoavuive2004@gmail.com', '151411', '2025-09-21 13:40:56', '2025-09-21 13:45:56', b'1'),
+(15, 'phungtrang19012004@gmail.com', '504295', '2025-09-21 13:42:24', '2025-09-21 13:47:24', b'1');
 
 -- --------------------------------------------------------
 
@@ -838,15 +915,8 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `address`, `phone`, 
 (1, 'khachhang1', 'hashed_pass1', 'khachhang1@example.com', '123 Đường Láng, Hà Nội', '0901234567', '2025-08-25 14:50:57'),
 (2, 'seller1', 'hashed_pass2', 'seller1@example.com', '456 Nguyễn Huệ, TP.HCM', '0912345678', '2025-08-25 14:50:57'),
 (3, 'admin1', 'hashed_pass3', 'admin1@example.com', '789 Lê Lợi, Đà Nẵng', '0923456789', '2025-08-25 14:50:57'),
-(4, 'trangtrang', '$2b$10$dIvyvZ4yYNA82C.IPksJnOnF9mmMNtwMdCthgOAuo1StQC0x8qdqm', 'phungtrang19012004@gmail.com', 'fffffff', '0349459165', '2025-08-26 03:52:55'),
+(4, 'trangtrang', '$2a$10$NvitG1bWsRQHA8hY2mhU1.Aam5/sQM62N9g1JruiuZnk/HNCtomxa', 'phungtrang19012004@gmail.com', 'fffffff', '0349459165', '2025-08-26 03:52:55'),
 (8, 'geoserver', '1', 'pwea@gmail.com', 'ss', '0368498289', '2025-08-26 05:16:11'),
-(10, 'ad', '1', 'banh@gmail.com', 'ss', '0368498289', '2025-08-26 05:23:50'),
-(12, 'ad', '1', 'anh@gmail.com', 'ss', '0368498289', '2025-08-26 05:31:59'),
-(16, 'ad', '1', 'affnh@gmail.com', 'ss', '0368498289', '2025-08-26 05:45:47'),
-(21, 'ad', '1', 'nh@gmail.com', 'ss', '0368498289', '2025-08-26 05:53:21'),
-(23, 'ad', '1', 'nhi@gmail.com', 'ss', '0368498289', '2025-08-26 05:57:18'),
-(24, 'ad', '1', 'nhie@gmail.com', 'ss', '0368498289', '2025-08-26 05:59:33'),
-(25, 'ad', '1', 'nhien@gmail.com', 'ss', '0368498289', '2025-08-26 07:27:57'),
 (26, 'customer', '1', 'customer@test', 'hanoi', '0349459165', '2025-08-26 14:19:39'),
 (27, 'admin', '1', 'admin@test', 'hanoi', '03', '2025-08-26 14:20:23'),
 (28, 'lua', '123', 'lua@gmail.com', NULL, NULL, '2025-09-10 11:49:44'),
@@ -855,10 +925,13 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `address`, `phone`, 
 (31, 'tien dat', '$2a$10$Jbw9XjQiRYzNa7TVbdihyuO59SBI56UgGTNbYJinZ37g.93UXIT.i', 'a@gmail.com', NULL, NULL, '2025-09-10 14:58:31'),
 (32, 'Nguyen Van A', '$2a$10$grUUt5EDoYTpU0AZ4i6GjO9tn8vbxI3oBBauviwknkouOWt24uyvG', 'aaa@gmail.com', NULL, NULL, '2025-09-10 15:16:34'),
 (33, 'khachhang_test', '$2a$10$gy1jz2u5ZuXWC14tB4B1i.8kvTEt.LMKV8LjQTMgMZjGS7IXXsR32', 'khachhang_test@example.com', '123 Hà Nội', '0909999999', '2025-09-11 01:47:29'),
-(34, 'ad', '$2a$10$527LwUd3c3shgkMpfowDg.DNiiM7Cy4NfwYBxpJLCIbeuw1oOgYsO', 'phu19012004@gmail.com', 'fffffff', '0349459165', '2025-09-11 13:24:45'),
 (35, 'tiendat', '$2a$10$Hh05Mbc2C/i5cgwqKUhZ5OpjpUa9/m6nTv111/YMxhNXwpzBck55C', 'atest@example.com', NULL, NULL, '2025-09-11 14:19:56'),
 (36, 'tiendatngu', '$2a$10$iqs9cMI36IfRmgr9l/PjvORx.1v919EsLp5yYKyqAyqENxKVgCO8u', 'tiendat9012004@gmail.com', 'ha noi', '0349459165', '2025-09-11 14:29:02'),
-(37, 'tiendatngu', '$2a$10$tOmpK/6WzSSG3Iya/O1H2epxi.Dmy1i3IuU.BO7YTNP7nFtfoQZq2', 'dat9012004@gmail.com', 'fffffff', '0349459165', '2025-09-11 16:54:02');
+(37, 'tiendatngu', '$2a$10$tOmpK/6WzSSG3Iya/O1H2epxi.Dmy1i3IuU.BO7YTNP7nFtfoQZq2', 'dat9012004@gmail.com', 'fffffff', '0349459165', '2025-09-11 16:54:02'),
+(38, 'hoa@gmail.com', '$2a$10$5YX.1dsRgeTn7TdMu8tdq.swj3cqVvpaSujqQpGhKPCw7RDEeH1LS', 'hoahoavuive2004@gmail.com', NULL, '0349459165', '2025-09-19 22:41:38'),
+(39, 'dat9012004@gmail.com', '$2a$10$ZfphGHZPRSN73iMqdMpvpOuIpWiYeavmWy/ZLTlorGkuANPDMvNAG', 'mai@gmail.com', NULL, '0349459165', '2025-09-20 03:47:34'),
+(41, 'combongu', '$2a$10$1WRmds2qFnZhqcxjwtPUwutwisLh0XJZx979bbDIRH.BMMS9QvIvq', 'nhamnhi@gmail.com', NULL, '0978467297', '2025-09-20 03:58:37'),
+(42, 'hello', '$2a$10$VCWI6ghVP/H0SY.K3B6oouLwZPDkMOfAooDyQMDgIg5xlcMeeKCk.', 'doconlon@gmail.com', NULL, '0349459165', '2025-09-20 03:59:52');
 
 -- --------------------------------------------------------
 
@@ -877,9 +950,12 @@ CREATE TABLE `user_roles` (
 --
 
 INSERT INTO `user_roles` (`id`, `user_id`, `role_id`) VALUES
-(4, 30, 3),
-(1, 36, 2),
-(2, 37, 3);
+(13, 31, 5),
+(2, 37, 3),
+(9, 38, 2),
+(8, 39, 3),
+(10, 41, 2),
+(12, 42, 1);
 
 --
 -- Indexes for dumped tables
@@ -1028,6 +1104,14 @@ ALTER TABLE `order_shipping_vouchers`
   ADD KEY `fk_osv_voucher` (`voucher_id`);
 
 --
+-- Indexes for table `password_reset_codes`
+--
+ALTER TABLE `password_reset_codes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_prc_email` (`email`),
+  ADD KEY `idx_prc_email_code` (`email`,`code`);
+
+--
 -- Indexes for table `payments`
 --
 ALTER TABLE `payments`
@@ -1159,7 +1243,7 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `chat_sessions`
 --
 ALTER TABLE `chat_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `coupons`
@@ -1189,13 +1273,13 @@ ALTER TABLE `import_details`
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
 -- AUTO_INCREMENT for table `orders`
@@ -1208,6 +1292,12 @@ ALTER TABLE `orders`
 --
 ALTER TABLE `order_items`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `password_reset_codes`
+--
+ALTER TABLE `password_reset_codes`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `payments`
@@ -1267,13 +1357,13 @@ ALTER TABLE `suppliers`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `user_roles`
 --
 ALTER TABLE `user_roles`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- Constraints for dumped tables
