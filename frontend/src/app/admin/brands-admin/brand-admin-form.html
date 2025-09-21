@@ -26,14 +26,16 @@
         <!-- Tên -->
         <div>
           <label class="block text-sm font-medium">Tên <span class="text-red-600">*</span></label>
-          <input
-            formControlName="name"
-            class="mt-1 w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-black/80"
-            [class.border-rose-500]="form.controls.name.touched && form.controls.name.invalid"
-            placeholder="VD: Teddy"
-            aria-required="true"
-            aria-invalid="{{form.controls.name.invalid}}"
-          />
+            <input
+              type="text"
+              formControlName="name"
+              class="mt-1 w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-black/80"
+              [class.border-rose-500]="form.controls.name.touched && form.controls.name.invalid"
+              placeholder="VD: Teddy"
+              aria-required="true"
+              [attr.aria-invalid]="form.controls.name.invalid ? 'true' : 'false'"
+            />
+
           <div class="mt-1 text-xs text-rose-600"
                *ngIf="form.controls.name.touched && form.controls.name.invalid">
             Tên là bắt buộc (tối đa 100 ký tự).
