@@ -1,0 +1,38 @@
+<div class="p-4">
+  <div class="flex gap-2 mb-3">
+    <input class="border p-2 rounded w-64" placeholder="Tìm theo mã/tên..." [(ngModel)]="q" (ngModelChange)="load()">
+    <select class="border p-2 rounded" [(ngModel)]="active" (change)="load()">
+      <option value="all">Tất cả</option>
+      <option value="true">Đang bật</option>
+      <option value="false">Đang tắt</option>
+    </select>
+    <a [routerLink]="['carriers','new']"
+    class="px-4 py-2 rounded-xl bg-pink-600 text-white hover:opacity-90">+ Thêm hãng</a>
+  </div>
+
+  <table class="min-w-full bg-white rounded shadow">
+    <thead><tr class="text-left">
+      <th class="p-3 cursor-pointer" (click)="sort = sort==='code,asc'?'code,desc':'code,asc'; load()">Mã</th>
+      <th class="p-3">Tên</th>
+      <th class="p-3">Trạng thái</th>
+      <th class="p-3 w-40">Hành động</th>
+    </tr></thead>
+    <tbody>
+      <tr *ngFor="let r of rows" class="border-t">
+        <td class="p-3">{{r.code}}</td>
+        <td class="p-3">{{r.name}}</td>
+        <td class="p-3">
+          <span class="px-2 py-1 rounded text-xs" [class.bg-green-100]="r.active" [class.bg-gray-100]="!r.active">
+            {{ r.active ? 'Đang bật' : 'Đang tắt' }}
+          </span>
+        </td>
+        <td class="p-3 flex gap-2">
+            <a [routerLink]="['services','by-carrier', r.id]" class="px-3 py-1 rounded-xl border">Dịch vụ</a>
+            <a [routerLink]="['carriers', r.id]" class="px-3 py-1 rounded-xl border">Sửa</a>          
+            <button class="text-yellow-600" (click)="onToggle(r)">{{ r.active ? 'Tắt' : 'Bật' }}</button>
+          <button class="text-red-600" (click)="onDelete(r.id!)">Xoá</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

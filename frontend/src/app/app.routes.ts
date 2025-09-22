@@ -47,8 +47,9 @@ import { CouponAdminListComponent } from './admin/coupons-admin/coupon-admin-lis
 import { CouponAdminFormComponent } from './admin/coupons-admin/coupon-admin-form';
 
 // Shipping vouchers
-import { ShipVoucherAdminListComponent } from './admin/shipping-vouchers-admin/ship-voucher-admin-list';
-import { ShipVoucherAdminFormComponent } from './admin/shipping-vouchers-admin/ship-voucher-admin-form';
+import { ShippingCarrierListComponent } from './admin/shipping-rates/shipping-carrier-list';
+import { ShippingCarrierFormComponent } from './admin/shipping-rates/shipping-carrier-form';
+import { ShippingServiceListComponent } from './admin/shipping-rates/shipping-service-list';
 
 // Live chat
 import { AdminLivechatPage } from './admin/livechat/admin-livechat';
@@ -204,15 +205,11 @@ export const routes: Routes = [
 
       // Phiếu vận chuyển
       {
-        path: 'shipping-vouchers',
-        canActivate: [permissionGuard],
-        data: { permissions: ['manage_shippingvoucher'] },
-        children: [
-          { path: '', component: ShipVoucherAdminListComponent },
-          { path: 'new', component: ShipVoucherAdminFormComponent },
-          { path: ':id', component: ShipVoucherAdminFormComponent },
-        ],
+        path: 'shipping-rates',
+        loadChildren: () => import('./admin/shipping-rates/shipping-rates.module')
+                              .then(m => m.ShippingRatesModule)
       },
+
 
       {
         path: 'users',

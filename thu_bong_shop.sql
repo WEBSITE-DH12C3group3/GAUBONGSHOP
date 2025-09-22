@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 21, 2025 at 10:22 PM
+-- Generation Time: Sep 22, 2025 at 08:13 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -73,7 +73,38 @@ INSERT INTO `brands` (`id`, `name`, `description`, `logo_url`, `website_url`, `c
 (5, 'Kẹo ngọt', 'Gấu xinh mềm mại', '/brandimg/1758465449927-9019866415158050303-brandstuffed.jpg', 'https://www.buildabear.com/', '2025-09-21 07:37:37'),
 (6, 'Jellycat', 'Thương hiệu gấu bông siêu mềm mại', '/brandimg/1758465607659-437977114948579399-download.jpg', 'https://www.jellycat.com/', '2025-09-21 07:40:19'),
 (7, 'Charlie Bears', 'Thương hiệu chuyên về gấu bông sưu tầm với thiết kế tỉ mỉ, có hồn và giới hạn số lượng', '/brandimg/1758465768750-7353927941000966383-images.jpg', 'https://www.charliebears.com/', '2025-09-21 07:43:22'),
-(8, 'Mandager chafiging', 'Thương hiệu cổ điển với nhiều nhân vật đáng yêu', '/brandimg/1758469927286-5872533530759873544-OIP-4-.webp', 'https://www.gund.com/', '2025-09-21 07:59:57');
+(8, 'Mandager chafiging', 'Thương hiệu cổ điển với nhiều nhân vật đáng yêu', '/brandimg/1758507157140-2028542488617070697-OIP-5-.webp', 'https://www.gund.com/', '2025-09-21 07:59:57');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `carrier_rate_rules`
+--
+
+CREATE TABLE `carrier_rate_rules` (
+  `id` int(11) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  `min_km` decimal(8,2) NOT NULL DEFAULT 0.00,
+  `max_km` decimal(8,2) DEFAULT NULL,
+  `base_fee` decimal(12,2) NOT NULL,
+  `per_km_fee` decimal(12,2) NOT NULL,
+  `min_fee` decimal(12,2) DEFAULT 0.00,
+  `free_km` decimal(8,2) DEFAULT 0.00,
+  `cod_surcharge` decimal(12,2) DEFAULT 0.00,
+  `area_surcharge` decimal(12,2) DEFAULT 0.00,
+  `active_from` date DEFAULT NULL,
+  `active_to` date DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1
+) ;
+
+--
+-- Dumping data for table `carrier_rate_rules`
+--
+
+INSERT INTO `carrier_rate_rules` (`id`, `service_id`, `min_km`, `max_km`, `base_fee`, `per_km_fee`, `min_fee`, `free_km`, `cod_surcharge`, `area_surcharge`, `active_from`, `active_to`, `is_active`) VALUES
+(1, 1, 0.00, 5.00, 15000.00, 2000.00, 15000.00, 1.00, 0.00, 0.00, NULL, NULL, 1),
+(2, 1, 5.00, 20.00, 20000.00, 3000.00, 25000.00, 0.00, 0.00, 0.00, NULL, NULL, 1),
+(3, 1, 20.00, NULL, 30000.00, 4000.00, 40000.00, 0.00, 0.00, 0.00, NULL, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -223,6 +254,23 @@ CREATE TABLE `coupon_uses` (
   `coupon_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `used_count` int(11) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `distance_cache`
+--
+
+CREATE TABLE `distance_cache` (
+  `id` bigint(20) NOT NULL,
+  `from_lat` decimal(10,7) NOT NULL,
+  `from_lng` decimal(10,7) NOT NULL,
+  `to_lat` decimal(10,7) NOT NULL,
+  `to_lng` decimal(10,7) NOT NULL,
+  `distance_km` decimal(8,2) NOT NULL,
+  `source` enum('DRIVING','HAVERSINE') NOT NULL DEFAULT 'HAVERSINE',
+  `cached_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -477,6 +525,16 @@ INSERT INTO `notifications` (`id`, `user_id`, `message_id`, `type`, `is_read`, `
 CREATE TABLE `orders` (
   `id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL,
+  `shipping_address_id` int(11) DEFAULT NULL,
+  `shipping_carrier_id` int(11) DEFAULT NULL,
+  `shipping_service_id` int(11) DEFAULT NULL,
+  `shipping_distance_km` decimal(8,2) DEFAULT NULL,
+  `shipping_fee_before` decimal(12,2) DEFAULT NULL,
+  `shipping_discount` decimal(12,2) DEFAULT NULL,
+  `shipping_fee_final` decimal(12,2) DEFAULT NULL,
+  `shipping_eta_min` int(11) DEFAULT NULL,
+  `shipping_eta_max` int(11) DEFAULT NULL,
+  `shipping_quote_id` bigint(20) DEFAULT NULL,
   `order_date` timestamp NOT NULL DEFAULT current_timestamp(),
   `status` enum('pending','processing','shipped','delivered','cancelled') DEFAULT 'pending',
   `total_amount` decimal(10,2) NOT NULL
@@ -486,9 +544,9 @@ CREATE TABLE `orders` (
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id`, `user_id`, `order_date`, `status`, `total_amount`) VALUES
-(1, 1, '2025-08-25 14:50:57', 'pending', 890000.00),
-(2, 1, '2025-08-25 14:50:57', 'shipped', 250000.00);
+INSERT INTO `orders` (`id`, `user_id`, `shipping_address_id`, `shipping_carrier_id`, `shipping_service_id`, `shipping_distance_km`, `shipping_fee_before`, `shipping_discount`, `shipping_fee_final`, `shipping_eta_min`, `shipping_eta_max`, `shipping_quote_id`, `order_date`, `status`, `total_amount`) VALUES
+(1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-08-25 14:50:57', 'pending', 890000.00),
+(2, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-08-25 14:50:57', 'shipped', 250000.00);
 
 -- --------------------------------------------------------
 
@@ -817,6 +875,14 @@ INSERT INTO `role_permissions` (`role_id`, `permission_id`, `id`) VALUES
 CREATE TABLE `shipping` (
   `id` int(11) NOT NULL,
   `order_id` int(11) DEFAULT NULL,
+  `address_id` int(11) DEFAULT NULL,
+  `carrier_id` int(11) DEFAULT NULL,
+  `service_code` varchar(50) DEFAULT NULL,
+  `fee` decimal(12,2) DEFAULT NULL,
+  `distance_km` decimal(8,2) DEFAULT NULL,
+  `status` varchar(30) DEFAULT 'created',
+  `eta_days_min` int(11) DEFAULT NULL,
+  `eta_days_max` int(11) DEFAULT NULL,
   `address` varchar(255) NOT NULL,
   `shipping_method` varchar(100) DEFAULT NULL,
   `tracking_number` varchar(50) DEFAULT NULL,
@@ -827,9 +893,76 @@ CREATE TABLE `shipping` (
 -- Dumping data for table `shipping`
 --
 
-INSERT INTO `shipping` (`id`, `order_id`, `address`, `shipping_method`, `tracking_number`, `shipped_date`) VALUES
-(1, 1, '123 Đường Láng, Hà Nội', 'GHTK', 'GH12345', '2025-08-25 14:50:57'),
-(2, 2, '123 Đường Láng, Hà Nội', 'Viettel Post', 'VT67890', '2025-08-25 14:50:57');
+INSERT INTO `shipping` (`id`, `order_id`, `address_id`, `carrier_id`, `service_code`, `fee`, `distance_km`, `status`, `eta_days_min`, `eta_days_max`, `address`, `shipping_method`, `tracking_number`, `shipped_date`) VALUES
+(1, 1, NULL, NULL, NULL, NULL, NULL, 'created', NULL, NULL, '123 Đường Láng, Hà Nội', 'GHTK', 'GH12345', '2025-08-25 14:50:57'),
+(2, 2, NULL, NULL, NULL, NULL, NULL, 'created', NULL, NULL, '123 Đường Láng, Hà Nội', 'Viettel Post', 'VT67890', '2025-08-25 14:50:57');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `shipping_carriers`
+--
+
+CREATE TABLE `shipping_carriers` (
+  `id` int(11) NOT NULL,
+  `code` varchar(50) NOT NULL,
+  `name` varchar(120) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ;
+
+--
+-- Dumping data for table `shipping_carriers`
+--
+
+INSERT INTO `shipping_carriers` (`id`, `code`, `name`, `is_active`, `created_at`) VALUES
+(1, 'INTERNAL', 'Giao nội bộ', 1, '2025-09-22 03:20:53');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `shipping_quotes`
+--
+
+CREATE TABLE `shipping_quotes` (
+  `id` bigint(20) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `cart_hash` varchar(64) NOT NULL,
+  `warehouse_id` int(11) NOT NULL,
+  `address_id` int(11) NOT NULL,
+  `service_id` int(11) NOT NULL,
+  `distance_km` decimal(8,2) NOT NULL,
+  `fee_before_voucher` decimal(12,2) NOT NULL,
+  `fee_after_voucher` decimal(12,2) NOT NULL,
+  `eta_days_min` int(11) DEFAULT NULL,
+  `eta_days_max` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `expires_at` timestamp NULL DEFAULT NULL,
+  `details_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`details_json`))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `shipping_services`
+--
+
+CREATE TABLE `shipping_services` (
+  `id` int(11) NOT NULL,
+  `carrier_id` int(11) NOT NULL,
+  `code` varchar(50) NOT NULL,
+  `label` varchar(120) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `base_days_min` int(11) DEFAULT 2,
+  `base_days_max` int(11) DEFAULT 4
+) ;
+
+--
+-- Dumping data for table `shipping_services`
+--
+
+INSERT INTO `shipping_services` (`id`, `carrier_id`, `code`, `label`, `is_active`, `base_days_min`, `base_days_max`) VALUES
+(1, 1, 'STD', 'Tiêu chuẩn (2–4 ngày)', 1, 2, 4);
 
 -- --------------------------------------------------------
 
@@ -949,6 +1082,29 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `address`, `phone`, 
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `user_addresses`
+--
+
+CREATE TABLE `user_addresses` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `label` varchar(60) DEFAULT NULL,
+  `receiver_name` varchar(120) NOT NULL,
+  `phone` varchar(20) NOT NULL,
+  `province_code` varchar(10) NOT NULL,
+  `district_code` varchar(10) NOT NULL,
+  `ward_code` varchar(10) NOT NULL,
+  `address_line` varchar(255) NOT NULL,
+  `latitude` decimal(10,7) DEFAULT NULL,
+  `longitude` decimal(10,7) DEFAULT NULL,
+  `is_default` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
+) ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `user_roles`
 --
 
@@ -970,6 +1126,67 @@ INSERT INTO `user_roles` (`id`, `user_id`, `role_id`) VALUES
 (10, 41, 2),
 (12, 42, 1);
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `vn_districts`
+--
+
+CREATE TABLE `vn_districts` (
+  `code` varchar(10) NOT NULL,
+  `province_code` varchar(10) NOT NULL,
+  `name` varchar(120) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `vn_provinces`
+--
+
+CREATE TABLE `vn_provinces` (
+  `code` varchar(10) NOT NULL,
+  `name` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `vn_wards`
+--
+
+CREATE TABLE `vn_wards` (
+  `code` varchar(10) NOT NULL,
+  `district_code` varchar(10) NOT NULL,
+  `name` varchar(120) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `warehouses`
+--
+
+CREATE TABLE `warehouses` (
+  `id` int(11) NOT NULL,
+  `name` varchar(120) NOT NULL,
+  `address_line` varchar(255) NOT NULL,
+  `province_code` varchar(10) NOT NULL,
+  `district_code` varchar(10) NOT NULL,
+  `ward_code` varchar(10) NOT NULL,
+  `latitude` decimal(10,7) NOT NULL,
+  `longitude` decimal(10,7) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ;
+
+--
+-- Dumping data for table `warehouses`
+--
+
+INSERT INTO `warehouses` (`id`, `name`, `address_line`, `province_code`, `district_code`, `ward_code`, `latitude`, `longitude`, `is_active`, `created_at`) VALUES
+(1, 'Cửa hàng chính', '123 Trần Duy Hưng', '01', '001', '00001', 21.0075000, 105.7980000, 1, '2025-09-22 03:20:53');
+
 --
 -- Indexes for dumped tables
 --
@@ -986,6 +1203,15 @@ ALTER TABLE `attributes`
 ALTER TABLE `brands`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `carrier_rate_rules`
+--
+ALTER TABLE `carrier_rate_rules`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_crr_service` (`service_id`),
+  ADD KEY `idx_rate_range` (`min_km`,`max_km`),
+  ADD KEY `idx_rate_active` (`is_active`,`active_from`,`active_to`);
 
 --
 -- Indexes for table `carts`
@@ -1047,6 +1273,14 @@ ALTER TABLE `coupon_uses`
   ADD KEY `fk_cu_user` (`user_id`);
 
 --
+-- Indexes for table `distance_cache`
+--
+ALTER TABLE `distance_cache`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_pair` (`from_lat`,`from_lng`,`to_lat`,`to_lng`),
+  ADD KEY `idx_cached` (`cached_at`);
+
+--
 -- Indexes for table `favorites`
 --
 ALTER TABLE `favorites`
@@ -1092,7 +1326,10 @@ ALTER TABLE `notifications`
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user_id` (`user_id`),
-  ADD KEY `idx_order_status` (`status`);
+  ADD KEY `idx_order_status` (`status`),
+  ADD KEY `idx_orders_ship_addr` (`shipping_address_id`),
+  ADD KEY `idx_orders_ship_srv` (`shipping_service_id`),
+  ADD KEY `idx_orders_ship_car` (`shipping_carrier_id`);
 
 --
 -- Indexes for table `order_coupons`
@@ -1184,7 +1421,35 @@ ALTER TABLE `role_permissions`
 --
 ALTER TABLE `shipping`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `order_id` (`order_id`);
+  ADD KEY `order_id` (`order_id`),
+  ADD KEY `idx_shipping_status` (`status`),
+  ADD KEY `fk_shipping_addr` (`address_id`),
+  ADD KEY `fk_shipping_car` (`carrier_id`);
+
+--
+-- Indexes for table `shipping_carriers`
+--
+ALTER TABLE `shipping_carriers`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `code` (`code`);
+
+--
+-- Indexes for table `shipping_quotes`
+--
+ALTER TABLE `shipping_quotes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_quote_user` (`user_id`,`cart_hash`),
+  ADD KEY `idx_quote_exp` (`expires_at`),
+  ADD KEY `fk_sq_wh` (`warehouse_id`),
+  ADD KEY `fk_sq_addr` (`address_id`),
+  ADD KEY `fk_sq_srv` (`service_id`);
+
+--
+-- Indexes for table `shipping_services`
+--
+ALTER TABLE `shipping_services`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_carrier_service` (`carrier_id`,`code`);
 
 --
 -- Indexes for table `shipping_vouchers`
@@ -1220,6 +1485,14 @@ ALTER TABLE `users`
   ADD KEY `idx_users_tier` (`tier`);
 
 --
+-- Indexes for table `user_addresses`
+--
+ALTER TABLE `user_addresses`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_ua_user` (`user_id`,`is_default`),
+  ADD KEY `idx_ua_geo` (`latitude`,`longitude`);
+
+--
 -- Indexes for table `user_roles`
 --
 ALTER TABLE `user_roles`
@@ -1227,6 +1500,33 @@ ALTER TABLE `user_roles`
   ADD UNIQUE KEY `uq_user_roles_user_role` (`user_id`,`role_id`),
   ADD UNIQUE KEY `uq_user_roles_user` (`user_id`),
   ADD KEY `role_id` (`role_id`);
+
+--
+-- Indexes for table `vn_districts`
+--
+ALTER TABLE `vn_districts`
+  ADD PRIMARY KEY (`code`),
+  ADD KEY `idx_vnd_prov` (`province_code`);
+
+--
+-- Indexes for table `vn_provinces`
+--
+ALTER TABLE `vn_provinces`
+  ADD PRIMARY KEY (`code`);
+
+--
+-- Indexes for table `vn_wards`
+--
+ALTER TABLE `vn_wards`
+  ADD PRIMARY KEY (`code`),
+  ADD KEY `idx_vnw_dist` (`district_code`);
+
+--
+-- Indexes for table `warehouses`
+--
+ALTER TABLE `warehouses`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_wh_active` (`is_active`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -1243,6 +1543,12 @@ ALTER TABLE `attributes`
 --
 ALTER TABLE `brands`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `carrier_rate_rules`
+--
+ALTER TABLE `carrier_rate_rules`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `carts`
@@ -1269,10 +1575,16 @@ ALTER TABLE `coupons`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `distance_cache`
+--
+ALTER TABLE `distance_cache`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `favorites`
 --
 ALTER TABLE `favorites`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `imports`
@@ -1359,6 +1671,24 @@ ALTER TABLE `shipping`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `shipping_carriers`
+--
+ALTER TABLE `shipping_carriers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `shipping_quotes`
+--
+ALTER TABLE `shipping_quotes`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `shipping_services`
+--
+ALTER TABLE `shipping_services`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `shipping_vouchers`
 --
 ALTER TABLE `shipping_vouchers`
@@ -1377,14 +1707,32 @@ ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
+-- AUTO_INCREMENT for table `user_addresses`
+--
+ALTER TABLE `user_addresses`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `user_roles`
 --
 ALTER TABLE `user_roles`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
+-- AUTO_INCREMENT for table `warehouses`
+--
+ALTER TABLE `warehouses`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `carrier_rate_rules`
+--
+ALTER TABLE `carrier_rate_rules`
+  ADD CONSTRAINT `fk_crr_service` FOREIGN KEY (`service_id`) REFERENCES `shipping_services` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `carts`
@@ -1466,6 +1814,9 @@ ALTER TABLE `notifications`
 -- Constraints for table `orders`
 --
 ALTER TABLE `orders`
+  ADD CONSTRAINT `fk_orders_ship_addr` FOREIGN KEY (`shipping_address_id`) REFERENCES `user_addresses` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_orders_ship_car` FOREIGN KEY (`shipping_carrier_id`) REFERENCES `shipping_carriers` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_orders_ship_srv` FOREIGN KEY (`shipping_service_id`) REFERENCES `shipping_services` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
@@ -1527,7 +1878,24 @@ ALTER TABLE `role_permissions`
 -- Constraints for table `shipping`
 --
 ALTER TABLE `shipping`
+  ADD CONSTRAINT `fk_shipping_addr` FOREIGN KEY (`address_id`) REFERENCES `user_addresses` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_shipping_car` FOREIGN KEY (`carrier_id`) REFERENCES `shipping_carriers` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `shipping_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `shipping_quotes`
+--
+ALTER TABLE `shipping_quotes`
+  ADD CONSTRAINT `fk_sq_addr` FOREIGN KEY (`address_id`) REFERENCES `user_addresses` (`id`),
+  ADD CONSTRAINT `fk_sq_srv` FOREIGN KEY (`service_id`) REFERENCES `shipping_services` (`id`),
+  ADD CONSTRAINT `fk_sq_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_sq_wh` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouses` (`id`);
+
+--
+-- Constraints for table `shipping_services`
+--
+ALTER TABLE `shipping_services`
+  ADD CONSTRAINT `fk_ss_carrier` FOREIGN KEY (`carrier_id`) REFERENCES `shipping_carriers` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `shipping_voucher_uses`
@@ -1537,11 +1905,29 @@ ALTER TABLE `shipping_voucher_uses`
   ADD CONSTRAINT `fk_svu_voucher` FOREIGN KEY (`voucher_id`) REFERENCES `shipping_vouchers` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `user_addresses`
+--
+ALTER TABLE `user_addresses`
+  ADD CONSTRAINT `fk_ua_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `user_roles`
 --
 ALTER TABLE `user_roles`
   ADD CONSTRAINT `user_roles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `user_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `vn_districts`
+--
+ALTER TABLE `vn_districts`
+  ADD CONSTRAINT `fk_vnd_prov` FOREIGN KEY (`province_code`) REFERENCES `vn_provinces` (`code`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `vn_wards`
+--
+ALTER TABLE `vn_wards`
+  ADD CONSTRAINT `fk_vnw_dist` FOREIGN KEY (`district_code`) REFERENCES `vn_districts` (`code`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -1,172 +1,168 @@
 package com.thubongshop.backend.order;
 
-import com.thubongshop.backend.cart.Cart;
-import com.thubongshop.backend.cart.CartService;
-import com.thubongshop.backend.order.dto.OrderItemResponse;
+import com.thubongshop.backend.order.dto.CreateOrderRequest;
 import com.thubongshop.backend.order.dto.OrderResponse;
-import com.thubongshop.backend.product.Product;
-import com.thubongshop.backend.product.ProductRepository;
+import com.thubongshop.backend.shippingcore.ShippingCalculatorService;
+import com.thubongshop.backend.shippingcore.dto.ShippingQuoteRequest;
+import com.thubongshop.backend.shippingvoucher.ShipVoucher;
+import com.thubongshop.backend.shippingvoucher.ShipVoucherService;
+import com.thubongshop.backend.shared.BusinessException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+  private final OrderRepo orderRepo;
+  private final OrderItemRepo itemRepo;
+  private final ShippingRecordRepo shippingRecordRepo;
 
-    private final OrderRepository orderRepo;
-    private final OrderItemRepository itemRepo;
-    private final ProductRepository productRepo;
-    private final CartService cartService;
+  private final ShippingCalculatorService shippingCalc;
+  private final ShipVoucherService voucherService;
 
-    @Transactional
-    public OrderResponse checkout(Integer userId) {
-        List<Cart> cart = cartService.getCartRows(userId);
-        if (cart.isEmpty()) throw new IllegalStateException("Giỏ hàng trống");
+  @Transactional
+  public OrderResponse createOrder(CreateOrderRequest req) {
+    if (req.items() == null || req.items().isEmpty())
+      throw new BusinessException("EMPTY_ITEMS", "Đơn hàng không có sản phẩm");
 
-        // Load products
-        Map<Integer, Product> products = productRepo.findAllById(
-            cart.stream().map(Cart::getProductId).collect(Collectors.toSet())
-        ).stream().collect(Collectors.toMap(Product::getId, p -> p));
-
-        // Validate stock & total
-        BigDecimal total = BigDecimal.ZERO;
-        for (Cart c : cart) {
-            Product p = Optional.ofNullable(products.get(c.getProductId()))
-                    .orElseThrow(() -> new NoSuchElementException("Sản phẩm không tồn tại: " + c.getProductId()));
-            int stock = Optional.ofNullable(p.getStock()).orElse(0);
-            if (c.getQuantity() > stock) {
-                throw new IllegalStateException("Tồn kho không đủ cho sản phẩm: " + p.getName());
-            }
-            BigDecimal unit = BigDecimal.valueOf(Optional.ofNullable(p.getPrice()).orElse(0.0));
-            total = total.add(unit.multiply(BigDecimal.valueOf(c.getQuantity())));
-        }
-
-        // Tạo order
-        Order order = new Order();
-        order.setUserId(userId);
-        order.setStatus(OrderStatus.pending);
-        order.setTotalAmount(total);
-        order = orderRepo.save(order);
-
-        // Tạo order items + trừ kho
-        for (Cart c : cart) {
-            Product p = products.get(c.getProductId());
-            BigDecimal unit = BigDecimal.valueOf(Optional.ofNullable(p.getPrice()).orElse(0.0));
-
-            OrderItem oi = new OrderItem();
-            oi.setOrderId(order.getId());
-            oi.setProductId(p.getId());
-            oi.setQuantity(c.getQuantity());
-            oi.setPrice(unit);
-            itemRepo.save(oi);
-
-            int stock = Optional.ofNullable(p.getStock()).orElse(0);
-            p.setStock(Math.max(0, stock - c.getQuantity()));
-            productRepo.save(p);
-        }
-
-        // Xoá giỏ
-        cartService.clear(userId);
-
-        return mapOrder(order);
+    BigDecimal itemsTotal = BigDecimal.ZERO;
+    BigDecimal weightKg = BigDecimal.ZERO;
+    for (var it : req.items()) {
+      itemsTotal = itemsTotal.add(it.unitPrice().multiply(new BigDecimal(it.quantity())));
+      weightKg = weightKg.add(it.weightKgPerItem().multiply(new BigDecimal(it.quantity())));
     }
 
-    public List<OrderResponse> myOrders(Integer userId) {
-        List<Order> rows = orderRepo.findByUserIdOrderByIdDesc(userId);
-        return rows.stream().map(this::mapOrderWithItems).toList();
+    var quote = shippingCalc.quote(new ShippingQuoteRequest(
+      itemsTotal, weightKg, req.province(), req.voucherCode()
+    ));
+
+    Order o = Order.builder()
+      .userId(req.userId())
+      .status(OrderStatus.PENDING_PAYMENT)
+      .itemsTotal(itemsTotal)
+      .shippingFee(quote.finalFee())
+      .shippingDiscount(quote.discount())
+      .grandTotal(itemsTotal.add(quote.finalFee()))
+      .voucherCode(quote.appliedVoucher())
+      .receiverName(req.receiverName())
+      .phone(req.phone())
+      .addressLine(req.addressLine())
+      .province(req.province())
+      .weightKg(weightKg)
+      .build();
+    o = orderRepo.save(o);
+
+    for (var it : req.items()) {
+      var e = OrderItem.builder()
+        .order(o)
+        .productId(it.productId())
+        .productName(it.productName())
+        .unitPrice(it.unitPrice())
+        .quantity(it.quantity())
+        .weightKgPerItem(it.weightKgPerItem())
+        .build();
+      itemRepo.save(e);
     }
 
-    public OrderResponse myOrderDetail(Integer userId, Integer orderId) {
-        Order o = orderRepo.findById(orderId)
-                .orElseThrow(() -> new NoSuchElementException("Không tìm thấy đơn hàng"));
-        if (!Objects.equals(o.getUserId(), userId))
-            throw new SecurityException("Không có quyền truy cập đơn hàng này");
+    var sr = ShippingRecord.builder()
+      .order(o)
+      .carrier(quote.carrier())
+      .trackingCode(null)
+      .status(ShippingRecord.ShipStatus.CREATED)
+      .feeCharged(quote.finalFee())
+      .build();
+    shippingRecordRepo.save(sr);
 
-        return mapOrderWithItems(o);
+    if (quote.appliedVoucher() != null) {
+      ShipVoucher v = voucherService.getActiveOrThrow(quote.appliedVoucher());
+      voucherService.increaseUsed(v);
     }
 
-    @Transactional
-    public OrderResponse cancelMyOrder(Integer userId, Integer orderId) {
-        Order o = orderRepo.findById(orderId)
-                .orElseThrow(() -> new NoSuchElementException("Không tìm thấy đơn hàng"));
-        if (!Objects.equals(o.getUserId(), userId))
-            throw new SecurityException("Không có quyền");
+    return toDto(o);
+  }
 
-        if (o.getStatus() == OrderStatus.cancelled || o.getStatus() == OrderStatus.delivered)
-            throw new IllegalStateException("Đơn hàng không thể hủy ở trạng thái hiện tại");
+  public Page<OrderResponse> findMyOrders(Integer userId, Pageable pageable) {
+    return orderRepo.findByUserId(userId, pageable).map(this::toDto);
+  }
 
-        o.setStatus(OrderStatus.cancelled);
-        orderRepo.save(o);
-        // (Tùy chọn) hoàn kho nếu cần
-        return mapOrderWithItems(o);
+  public OrderResponse getById(Integer id, Integer userId) {
+    var o = orderRepo.findById(id).orElseThrow(() -> new BusinessException("ORDER_NOT_FOUND", "Không thấy đơn hàng"));
+    if (!o.getUserId().equals(userId))
+      throw new BusinessException("FORBIDDEN", "Bạn không có quyền xem đơn hàng này");
+    return toDto(o);
+  }
+
+  @Transactional
+  public OrderResponse markPaid(Integer orderId, Integer userId) {
+    var o = orderRepo.findById(orderId).orElseThrow(() -> new BusinessException("ORDER_NOT_FOUND", "Không thấy đơn hàng"));
+    if (!o.getUserId().equals(userId))
+      throw new BusinessException("FORBIDDEN", "Bạn không có quyền cập nhật đơn này");
+    if (o.getStatus() != OrderStatus.PENDING_PAYMENT)
+      throw new BusinessException("INVALID_STATE", "Trạng thái đơn không hợp lệ để thanh toán");
+
+    o.setStatus(OrderStatus.PAID);
+    o = orderRepo.save(o);
+    return toDto(o);
+  }
+
+  @Transactional
+  public OrderResponse cancel(Integer orderId, Integer userId) {
+    var o = orderRepo.findById(orderId).orElseThrow(() -> new BusinessException("ORDER_NOT_FOUND", "Không thấy đơn hàng"));
+    if (!o.getUserId().equals(userId))
+      throw new BusinessException("FORBIDDEN", "Bạn không có quyền hủy đơn này");
+    if (o.getStatus() == OrderStatus.SHIPPED || o.getStatus() == OrderStatus.DELIVERED)
+      throw new BusinessException("INVALID_STATE", "Đơn đã giao cho hãng, không thể hủy");
+
+    o.setStatus(OrderStatus.CANCELED);
+    o = orderRepo.save(o);
+    return toDto(o);
+  }
+
+  @Transactional
+  public OrderResponse updateShipping(Integer orderId, String trackingCode, ShippingRecord.ShipStatus status) {
+    var o = orderRepo.findById(orderId).orElseThrow(() -> new BusinessException("ORDER_NOT_FOUND", "Không thấy đơn hàng"));
+    var sr = shippingRecordRepo.findByOrderId(orderId)
+      .orElseThrow(() -> new BusinessException("SHIP_RECORD_NOT_FOUND", "Không thấy ShippingRecord"));
+
+    if (trackingCode != null && !trackingCode.isBlank())
+      sr.setTrackingCode(trackingCode);
+
+    sr.setStatus(status);
+    shippingRecordRepo.save(sr);
+
+    switch (status) {
+      case PICKED, IN_TRANSIT -> o.setStatus(OrderStatus.PACKING);
+      case DELIVERED -> o.setStatus(OrderStatus.DELIVERED);
+      case FAILED -> { }
+      default -> {}
+    }
+    orderRepo.save(o);
+
+    return toDto(o);
+  }
+
+  private OrderResponse toDto(Order o) {
+    var itemDtos = o.getItems().stream().map(
+      it -> new OrderResponse.Item(it.getProductId(), it.getProductName(), it.getUnitPrice(), it.getQuantity(), it.getWeightKgPerItem())
+    ).toList();
+
+    OrderResponse.Shipping shipDto = null;
+    if (o.getShippingRecord() != null) {
+      var s = o.getShippingRecord();
+      shipDto = new OrderResponse.Shipping(s.getCarrier(), s.getTrackingCode(),
+        s.getStatus().name(), s.getFeeCharged());
     }
 
-    /* ========= Admin ========= */
-
-    public Page<OrderResponse> adminList(String status, Pageable pageable) {
-        if (status == null || status.isBlank()) {
-            return orderRepo.findAllByOrderByIdDesc(pageable).map(this::mapOrder);
-        } else {
-            OrderStatus st = OrderStatus.from(status);
-            return orderRepo.findByStatusOrderByIdDesc(st, pageable).map(this::mapOrder);
-        }
-    }
-
-    public OrderResponse adminDetail(Integer orderId) {
-        Order o = orderRepo.findById(orderId)
-                .orElseThrow(() -> new NoSuchElementException("Không tìm thấy đơn hàng"));
-        return mapOrderWithItems(o);
-    }
-
-    @Transactional
-    public OrderResponse adminUpdateStatus(Integer orderId, OrderStatus status) {
-        Order o = orderRepo.findById(orderId)
-                .orElseThrow(() -> new NoSuchElementException("Không tìm thấy đơn hàng"));
-        o.setStatus(status);
-        orderRepo.save(o);
-        return mapOrderWithItems(o);
-    }
-
-    /* ===== Mapping helpers ===== */
-
-    private OrderResponse mapOrder(Order o) {
-        OrderResponse resp = new OrderResponse();
-        resp.setId(o.getId());
-        resp.setOrderDate(o.getOrderDate());
-        resp.setStatus(o.getStatus());
-        resp.setTotalAmount(o.getTotalAmount());
-        return resp;
-    }
-
-    private OrderResponse mapOrderWithItems(Order o) {
-        List<OrderItem> items = itemRepo.findByOrderId(o.getId());
-
-        Map<Integer, Product> products = productRepo.findAllById(
-            items.stream().map(OrderItem::getProductId).collect(Collectors.toSet())
-        ).stream().collect(Collectors.toMap(Product::getId, p -> p));
-
-        List<OrderItemResponse> list = items.stream().map(oi -> {
-            Product p = products.get(oi.getProductId());
-            OrderItemResponse dto = new OrderItemResponse();
-            dto.setProductId(oi.getProductId());
-            dto.setQuantity(oi.getQuantity());
-            dto.setUnitPrice(oi.getPrice());
-            dto.setLineTotal(oi.getPrice().multiply(BigDecimal.valueOf(oi.getQuantity())));
-            if (p != null) {
-                dto.setProductName(p.getName());
-                dto.setImageUrl(p.getImageUrl());
-            }
-            return dto;
-        }).toList();
-
-        OrderResponse resp = mapOrder(o);
-        resp.setItems(list);
-        return resp;
-    }
+    return new OrderResponse(
+      o.getId(), o.getUserId(), o.getStatus(),
+      o.getItemsTotal(), o.getShippingFee(), o.getShippingDiscount(), o.getGrandTotal(),
+      o.getVoucherCode(), o.getReceiverName(), o.getPhone(), o.getAddressLine(), o.getProvince(),
+      o.getWeightKg(), o.getCreatedAt(), shipDto, itemDtos
+    );
+  }
 }

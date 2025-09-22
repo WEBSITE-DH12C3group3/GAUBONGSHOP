@@ -1,0 +1,74 @@
+<div class="p-5">
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <h2 class="text-xl font-semibold">Quy tắc phí – Service #{{ serviceId }}</h2>
+      <p class="text-sm text-gray-500">Cấu hình theo khoảng km + phụ phí + hiệu lực.</p>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <!-- ⬅️ Nút quay về dịch vụ -->
+      <a *ngIf="carrierId"
+         [routerLink]="['/admin/shipping-rates/services/by-carrier', carrierId]"
+         class="px-3 py-2 rounded-xl border hover:bg-gray-50">
+        ← Quay về dịch vụ
+      </a>
+
+      <button (click)="goCreate()" class="px-4 py-2 rounded-xl bg-pink-600 text-white hover:opacity-90">
+        + Thêm rule
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="rounded-xl bg-gray-50 text-gray-600 px-3 py-2 mb-3">Đang tải...</div>
+
+  <div class="overflow-auto rounded-2xl border" *ngIf="!loading">
+    <table class="min-w-full text-sm" *ngIf="rows.length > 0; else empty">
+      <thead class="bg-gray-50 text-gray-700">
+        <tr>
+          <th class="px-4 py-3 w-24">Từ km</th>
+          <th class="px-4 py-3 w-24">Đến km</th>
+          <th class="px-4 py-3 w-28">Base</th>
+          <th class="px-4 py-3 w-28">/km</th>
+          <th class="px-4 py-3 w-28">Min</th>
+          <th class="px-4 py-3 w-28">Free km</th>
+          <th class="px-4 py-3 w-28">COD</th>
+          <th class="px-4 py-3 w-28">KV</th>
+          <th class="px-4 py-3 w-44">Hiệu lực</th>
+          <th class="px-4 py-3 w-28">TT</th>
+          <th class="px-4 py-3 w-40 text-right">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of rows" class="border-t hover:bg-gray-50">
+          <td class="px-4 py-3">{{ r.minKm }}</td>
+          <td class="px-4 py-3">{{ r.maxKm ?? '∞' }}</td>
+          <td class="px-4 py-3">{{ r.baseFee | number }}</td>
+          <td class="px-4 py-3">{{ r.perKmFee | number }}</td>
+          <td class="px-4 py-3">{{ (r.minFee || 0) | number }}</td>
+          <td class="px-4 py-3">{{ r.freeKm || 0 }}</td>
+          <td class="px-4 py-3">{{ (r.codSurcharge || 0) | number }}</td>
+          <td class="px-4 py-3">{{ (r.areaSurcharge || 0) | number }}</td>
+          <td class="px-4 py-3 text-xs">{{ r.activeFrom || '—' }} → {{ r.activeTo || '—' }}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-1 rounded-full text-xs"
+                  [class.bg-green-100]="r.active" [class.text-green-700]="r.active"
+                  [class.bg-gray-100]="!r.active" [class.text-gray-600]="!r.active">
+              {{ r.active ? 'Bật' : 'Tắt' }}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            <div class="flex justify-end gap-2">
+              <button class="px-3 py-1 rounded-xl border"
+                      [routerLink]="['/admin/shipping-rates/rules/edit', r.id]">
+                Sửa
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #empty>
+      <div class="px-4 py-10 text-center text-gray-500">Chưa có rule.</div>
+    </ng-template>
+  </div>
+</div>
