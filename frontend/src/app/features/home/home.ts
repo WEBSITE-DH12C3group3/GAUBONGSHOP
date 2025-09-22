@@ -30,13 +30,9 @@ export class HomeComponent implements OnInit {
   constructor(
     private categoryService: CategoryService,
     private productService: ProductService,
-<<<<<<< Updated upstream
     private favoriteService: FavoriteService,
-    private cdr: ChangeDetectorRef
-=======
     private cdr: ChangeDetectorRef,
     private cartService: CartService
->>>>>>> Stashed changes
   ) {}
 
   ngOnInit() {
@@ -77,7 +73,6 @@ export class HomeComponent implements OnInit {
               products: results[i].items ?? []
             }))
             .filter(cat => cat.products.length > 0);
-<<<<<<< Updated upstream
 
           // ✅ check favorite cho từng sản phẩm
           this.categoriesWithProducts.forEach(cat => {
@@ -89,9 +84,7 @@ export class HomeComponent implements OnInit {
             });
           });
 
-=======
           
->>>>>>> Stashed changes
           this.cdr.detectChanges();
         });
       },
@@ -122,7 +115,6 @@ export class HomeComponent implements OnInit {
     });
   }
 
-<<<<<<< Updated upstream
   /** Lấy tất cả favorites */
   loadFavorites() {
     this.favoriteService.getFavorites().subscribe({
@@ -170,7 +162,6 @@ export class HomeComponent implements OnInit {
   }
 
   /** 🎨 Màu cho danh mục */
-=======
   /** ====== ADD TO CART + FLY EFFECT ====== */
   addToCart(p: { id: number; imageUrl?: string }, ev?: MouseEvent, fromImgEl?: HTMLImageElement) {
     if (!p?.id) return;
@@ -258,7 +249,6 @@ export class HomeComponent implements OnInit {
   }
 
   // ===== màu & helper giữ nguyên =====
->>>>>>> Stashed changes
   private categoryColors = [
     { bg: 'bg-blue-100', icon: 'text-blue-600', text: 'text-blue-600 hover:text-blue-700' },
     { bg: 'bg-pink-100', icon: 'text-pink-600', text: 'text-pink-600 hover:text-pink-700' },
@@ -279,7 +269,6 @@ export class HomeComponent implements OnInit {
     { bg: 'bg-teal-200', text: 'text-teal-800' },
     { bg: 'bg-red-200', text: 'text-red-800' }
   ];
-<<<<<<< Updated upstream
 
   getCategoryColor(index: number): string {
     return this.categoryColors[index % this.categoryColors.length].bg;
@@ -296,11 +285,4 @@ export class HomeComponent implements OnInit {
   getCategoryHeaderTextColor(index: number): string {
     return this.categoryHeaderColors[index % this.categoryHeaderColors.length].text;
   }
-=======
-  getCategoryColor(index: number): string { return this.categoryColors[index % this.categoryColors.length].bg; }
-  getCategoryIconColor(index: number): string { return this.categoryColors[index % this.categoryColors.length].icon; }
-  getCategoryTextColor(index: number): string { return this.categoryColors[index % this.categoryColors.length].text; }
-  getCategoryHeaderColor(index: number): string { return this.categoryHeaderColors[index % this.categoryHeaderColors.length].bg; }
-  getCategoryHeaderTextColor(index: number): string { return this.categoryHeaderColors[index % this.categoryHeaderColors.length].text; }
->>>>>>> Stashed changes
 }

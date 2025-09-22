@@ -73,10 +73,8 @@ export const routes: Routes = [
       { path: 'product/:id', component: ProductDetailComponent },
       { path: 'chat', component: ClientChatPage },
       { path: 'forgot-password', component: ForgotPasswordComponent },
-<<<<<<< Updated upstream
       { path: '', component: HomeComponent },
       { path: 'wishlist', component: WishlistComponent },
-=======
 
       // ===== Cart + Orders (customer) — dùng loadComponent thay vì await import trong component =====
       {
@@ -99,7 +97,6 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/orders/order-detail').then(m => m.OrderDetailPage),
       },
->>>>>>> Stashed changes
     ],
   },
 
@@ -217,7 +214,6 @@ export const routes: Routes = [
         ],
       },
 
-<<<<<<< Updated upstream
       {
         path: 'users',
         canActivate: [permissionGuard],
@@ -236,8 +232,6 @@ export const routes: Routes = [
       //     import('./admin/reports-admin/reports-admin').then(m => m.ReportsAdminComponent),
       // },
 
-=======
->>>>>>> Stashed changes
       // RBAC - Nhóm người dùng
       {
         path: 'roles',
@@ -255,7 +249,6 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./admin/roles/role-permissions-page').then(m => m.RolePermissionsPageComponent),
       },
-<<<<<<< Updated upstream
 
       // Settings (nếu muốn ràng buộc quyền riêng, ví dụ: manage_settings)
       // {
@@ -270,8 +263,6 @@ export const routes: Routes = [
       { path: 'imports/:id/details', component: ImportDetailComponent },
 
       
-=======
->>>>>>> Stashed changes
     ],
   },
 
