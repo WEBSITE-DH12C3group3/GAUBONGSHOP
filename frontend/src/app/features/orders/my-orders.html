@@ -1,0 +1,18 @@
+<div class="container mx-auto p-4">
+  <h2 class="text-2xl font-semibold mb-4">Đơn hàng của tôi</h2>
+
+  <div *ngIf="orders.length === 0" class="text-gray-500">
+    Chưa có đơn nào. <a routerLink="/products" class="text-blue-600 underline">Mua sắm ngay</a>
+  </div>
+
+  <div class="grid gap-3" *ngIf="orders.length > 0">
+    <a *ngFor="let o of orders" class="p-4 rounded-2xl border shadow bg-white flex justify-between items-center" [routerLink]="['/orders', o.id]">
+      <div>
+        <div class="font-semibold">Đơn #{{ o.id }}</div>
+        <div class="text-sm text-gray-500">Ngày: {{ o.orderDate | date:'short' }}</div>
+        <div class="text-sm">Trạng thái: <b class="uppercase">{{ o.status }}</b></div>
+      </div>
+      <div class="text-xl font-bold">{{ o.totalAmount | currency:'VND':'symbol':'1.0-0' }}</div>
+    </a>
+  </div>
+</div>

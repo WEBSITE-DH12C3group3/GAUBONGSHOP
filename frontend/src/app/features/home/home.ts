@@ -9,6 +9,7 @@ import { ProductService } from '../../shared/services/product.service';
 import { FavoriteService } from '../../shared/services/favorite.service';
 import { Category } from '../../models/category.model';
 import { Product } from '../../models/product.model';
+import { CartService } from '../../shared/services/cart.service';
 
 @Component({
   selector: 'app-home',
@@ -29,8 +30,13 @@ export class HomeComponent implements OnInit {
   constructor(
     private categoryService: CategoryService,
     private productService: ProductService,
+<<<<<<< Updated upstream
     private favoriteService: FavoriteService,
     private cdr: ChangeDetectorRef
+=======
+    private cdr: ChangeDetectorRef,
+    private cartService: CartService
+>>>>>>> Stashed changes
   ) {}
 
   ngOnInit() {
@@ -71,6 +77,7 @@ export class HomeComponent implements OnInit {
               products: results[i].items ?? []
             }))
             .filter(cat => cat.products.length > 0);
+<<<<<<< Updated upstream
 
           // ✅ check favorite cho từng sản phẩm
           this.categoriesWithProducts.forEach(cat => {
@@ -82,6 +89,9 @@ export class HomeComponent implements OnInit {
             });
           });
 
+=======
+          
+>>>>>>> Stashed changes
           this.cdr.detectChanges();
         });
       },
@@ -112,6 +122,7 @@ export class HomeComponent implements OnInit {
     });
   }
 
+<<<<<<< Updated upstream
   /** Lấy tất cả favorites */
   loadFavorites() {
     this.favoriteService.getFavorites().subscribe({
@@ -159,6 +170,95 @@ export class HomeComponent implements OnInit {
   }
 
   /** 🎨 Màu cho danh mục */
+=======
+  /** ====== ADD TO CART + FLY EFFECT ====== */
+  addToCart(p: { id: number; imageUrl?: string }, ev?: MouseEvent, fromImgEl?: HTMLImageElement) {
+    if (!p?.id) return;
+
+    // 1) Hiệu ứng bay vào giỏ (chạy ngay)
+    const imgUrl = this.getImgUrl(p);
+    this.flyToCart(ev, fromImgEl, imgUrl);
+
+    // 2) Gọi API thêm giỏ như cũ
+    this.cartService.add(p.id, 1).subscribe({
+      next: () => {
+        // bắn event nếu bạn muốn badge cập nhật (không bắt buộc)
+        // window.dispatchEvent(new CustomEvent('CartUpdated', { detail: { delta: 1, productId: p.id } }));
+      },
+      error: (err) => console.error('Không thêm được vào giỏ:', err)
+    });
+  }
+
+  /** Lấy URL ảnh hiển thị (đã thấy bạn đang build 'http://localhost:8080' + imageUrl) */
+  private getImgUrl(p: any): string | undefined {
+    if (!p) return undefined;
+    if (p.imageUrl?.startsWith('http')) return p.imageUrl;
+    if (p.imageUrl) return 'http://localhost:8080' + p.imageUrl;
+    return undefined;
+  }
+
+  /** Hiệu ứng bay vào giỏ */
+  private flyToCart(ev?: MouseEvent, fromImgEl?: HTMLImageElement, fallbackImgUrl?: string) {
+    try {
+      // target: ưu tiên phần tử gắn data-cart-target (nếu bạn thêm), sau đó link cart, rồi icon
+      const target =
+        document.querySelector('[data-cart-target]') ||
+        document.querySelector('a[routerLink="/cart"]') ||
+        document.querySelector('.fa-shopping-cart') ||
+        document.body;
+
+      const targetRect = (target as HTMLElement).getBoundingClientRect();
+
+      // nguồn: ưu tiên ảnh trong card gần nút; nếu không có thì dùng fallback
+      let srcImg: HTMLImageElement | null = fromImgEl || null;
+      if (!srcImg && ev?.target) {
+        const btn = (ev.target as HTMLElement).closest('.product-card') as HTMLElement | null;
+        if (btn) srcImg = btn.querySelector('img');
+      }
+
+      const startRect = srcImg?.getBoundingClientRect();
+      const imgSrc = srcImg?.src || fallbackImgUrl;
+      if (!imgSrc || !startRect) return;
+
+      // tạo ảnh bay
+      const flyer = document.createElement('img');
+      flyer.src = imgSrc;
+      flyer.style.position = 'fixed';
+      flyer.style.left = startRect.left + 'px';
+      flyer.style.top = startRect.top + 'px';
+      flyer.style.width = startRect.width + 'px';
+      flyer.style.height = startRect.height + 'px';
+      flyer.style.borderRadius = '12px';
+      flyer.style.zIndex = '9999';
+      flyer.style.pointerEvents = 'none';
+      flyer.style.boxShadow = '0 8px 24px rgba(0,0,0,0.2)';
+      document.body.appendChild(flyer);
+
+      // tính toán điểm đích (hơi lệch vào giữa badge)
+      const endX = targetRect.left + targetRect.width * 0.7;
+      const endY = targetRect.top + targetRect.height * 0.3;
+
+      // animate: bay + thu nhỏ + mờ dần
+      const keyframes = [
+        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+        { transform: `translate(${endX - startRect.left}px, ${endY - startRect.top}px) scale(0.2)`, opacity: 0.4 }
+      ];
+      const anim = flyer.animate(keyframes, { duration: 600, easing: 'cubic-bezier(.3,.7,.4,1)' });
+
+      anim.onfinish = () => {
+        flyer.remove();
+        // cart pulse nhẹ
+        const t = target as HTMLElement;
+        t.classList.add('cart-pulse');
+        setTimeout(() => t.classList.remove('cart-pulse'), 300);
+      };
+    } catch {
+      /* bỏ qua mọi lỗi để không ảnh hưởng UX */
+    }
+  }
+
+  // ===== màu & helper giữ nguyên =====
+>>>>>>> Stashed changes
   private categoryColors = [
     { bg: 'bg-blue-100', icon: 'text-blue-600', text: 'text-blue-600 hover:text-blue-700' },
     { bg: 'bg-pink-100', icon: 'text-pink-600', text: 'text-pink-600 hover:text-pink-700' },
@@ -169,7 +269,6 @@ export class HomeComponent implements OnInit {
     { bg: 'bg-teal-100', icon: 'text-teal-600', text: 'text-teal-600 hover:text-teal-700' },
     { bg: 'bg-red-100', icon: 'text-red-600', text: 'text-red-600 hover:text-red-700' }
   ];
-
   private categoryHeaderColors = [
     { bg: 'bg-blue-200', text: 'text-blue-800' },
     { bg: 'bg-pink-200', text: 'text-pink-800' },
@@ -180,6 +279,7 @@ export class HomeComponent implements OnInit {
     { bg: 'bg-teal-200', text: 'text-teal-800' },
     { bg: 'bg-red-200', text: 'text-red-800' }
   ];
+<<<<<<< Updated upstream
 
   getCategoryColor(index: number): string {
     return this.categoryColors[index % this.categoryColors.length].bg;
@@ -196,4 +296,11 @@ export class HomeComponent implements OnInit {
   getCategoryHeaderTextColor(index: number): string {
     return this.categoryHeaderColors[index % this.categoryHeaderColors.length].text;
   }
+=======
+  getCategoryColor(index: number): string { return this.categoryColors[index % this.categoryColors.length].bg; }
+  getCategoryIconColor(index: number): string { return this.categoryColors[index % this.categoryColors.length].icon; }
+  getCategoryTextColor(index: number): string { return this.categoryColors[index % this.categoryColors.length].text; }
+  getCategoryHeaderColor(index: number): string { return this.categoryHeaderColors[index % this.categoryHeaderColors.length].bg; }
+  getCategoryHeaderTextColor(index: number): string { return this.categoryHeaderColors[index % this.categoryHeaderColors.length].text; }
+>>>>>>> Stashed changes
 }

@@ -94,6 +94,7 @@
           <p class="text-pink-600 text-base md:text-lg font-bold mb-3 md:mb-4">
             {{ p.price | currency: 'VND':'symbol':'1.0-0' }}
           </p>
+<<<<<<< Updated upstream
           <button (click)="toggleFavorite(p.id, $event)"
             class="w-10 h-10 flex items-center justify-center rounded-lg border transition" [ngClass]="isFavorite(p.id) 
             ? 'bg-red-500 text-white border-red-500' 
@@ -105,6 +106,15 @@
             <i class="fas fa-shopping-cart mr-2"></i>
             Thêm vào giỏ
           </button>
+=======
+          <button
+  type="button"
+  class="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 px-3 md:px-4 rounded-lg transition font-medium flex items-center justify-center text-sm md:text-base"
+  (click)="addToCart(p, $event, $any($event.target).closest('.product-card')?.querySelector('img'))">
+  <i class="fas fa-shopping-cart mr-2"></i>
+  Thêm vào giỏ
+</button>
+>>>>>>> Stashed changes
 
         </div>
       </div>
@@ -151,6 +161,7 @@
             <p class="text-pink-600 text-base md:text-lg font-bold mb-3 md:mb-4">
               {{ p.price | currency: 'VND':'symbol':'1.0-0' }}
             </p>
+<<<<<<< Updated upstream
             <button (click)="toggleFavorite(p.id, $event)"
           class="w-10 h-10 flex items-center justify-center rounded-lg border transition"
           [ngClass]="isFavorite(p.id) 
@@ -163,6 +174,15 @@
               <i class="fas fa-shopping-cart mr-2"></i>
               Thêm vào giỏ
             </button>
+=======
+              <button
+  type="button"
+  class="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 px-3 md:px-4 rounded-lg transition font-medium flex items-center justify-center text-sm md:text-base"
+  (click)="addToCart(p, $event, $any($event.target).closest('.product-card')?.querySelector('img'))">
+  <i class="fas fa-shopping-cart mr-2"></i>
+  Thêm vào giỏ
+</button>
+>>>>>>> Stashed changes
           </div>
         </div>
       </div>

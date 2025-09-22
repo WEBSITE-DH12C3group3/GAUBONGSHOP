@@ -36,13 +36,16 @@
       </a>
 
       <!-- Giỏ hàng -->
-      <a routerLink="/cart" class="relative text-gray-600 hover:text-pink-600 transition">
-        <i class="fa-solid fa-cart-shopping text-xl"></i>
-        <span
-          class="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold rounded-full px-2 py-0.5 shadow">
-          {{ cartCount || 0 }}
-        </span>
-      </a>
+<a routerLink="/cart"
+   data-cart-target
+   class="relative text-gray-600 hover:text-pink-600 transition">
+  <i class="fa-solid fa-cart-shopping text-xl"></i>
+  <span
+    class="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold rounded-full px-2 py-0.5 shadow">
+    {{ cartCount || 0 }}
+  </span>
+</a>
+
 
       <!-- nút Messenger trong header -->
       <button *ngIf="showChat" (click)="openChat()"

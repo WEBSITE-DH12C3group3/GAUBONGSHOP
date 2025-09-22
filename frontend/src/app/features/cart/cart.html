@@ -1,1 +1,41 @@
-<p>cart works!</p>
+<div class="container mx-auto p-4">
+  <h2 class="text-2xl font-semibold mb-4">Giỏ hàng</h2>
+
+  <div *ngIf="!data || data.items.length === 0" class="text-gray-500">
+    Giỏ hàng trống. <a routerLink="/products" class="text-blue-600 underline">Mua sắm ngay</a>
+  </div>
+
+  <div *ngIf="data && data.items.length > 0" class="grid gap-4">
+    <div class="grid gap-3">
+      <div *ngFor="let it of data.items" class="flex items-center gap-3 p-3 rounded-2xl shadow border">
+        <img [src]="it.imageUrl || '/assets/placeholder.png'" alt="" class="w-16 h-16 object-cover rounded-xl">
+        <div class="flex-1">
+          <div class="font-medium">{{ it.productName }}</div>
+          <div class="text-sm text-gray-500">Còn: {{ it.availableStock }} | Giá: {{ it.unitPrice | currency:'VND':'symbol':'1.0-0' }}</div>
+          <div class="flex items-center gap-2 mt-2">
+            <button class="px-3 py-1 rounded-xl border" (click)="dec(it)">-</button>
+            <span class="w-10 text-center">{{ it.quantity }}</span>
+            <button class="px-3 py-1 rounded-xl border" (click)="inc(it)">+</button>
+            <button class="ml-4 px-3 py-1 rounded-xl border text-red-600" (click)="remove(it.productId)">Xóa</button>
+          </div>
+        </div>
+        <div class="font-semibold">{{ it.lineTotal | currency:'VND':'symbol':'1.0-0' }}</div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between p-4 rounded-2xl border shadow bg-white">
+      <div>
+        <div class="text-gray-500 text-sm">Tổng số lượng</div>
+        <div class="text-xl font-semibold">{{ data.totalQuantity }}</div>
+      </div>
+      <div>
+        <div class="text-gray-500 text-sm">Tổng tiền</div>
+        <div class="text-2xl font-bold">{{ data.totalAmount | currency:'VND':'symbol':'1.0-0' }}</div>
+      </div>
+      <div class="flex gap-2">
+        <button class="px-4 py-2 rounded-2xl border" (click)="clear()">Xóa hết</button>
+        <a class="px-4 py-2 rounded-2xl bg-black text-white" routerLink="/orders/checkout">Đặt hàng</a>
+      </div>
+    </div>
+  </div>
+</div>

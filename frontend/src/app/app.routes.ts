@@ -16,7 +16,6 @@ import { ProductDetailComponent } from './features/product_detail/product_detail
 import { ClientChatPage } from './features/chat/client-chat';
 import { ForgotPasswordComponent } from './features/forgot-password/forgot-password';
 
-
 // Admin
 import { Dashboard } from './admin/dashboard/dashboard';
 
@@ -74,8 +73,33 @@ export const routes: Routes = [
       { path: 'product/:id', component: ProductDetailComponent },
       { path: 'chat', component: ClientChatPage },
       { path: 'forgot-password', component: ForgotPasswordComponent },
+<<<<<<< Updated upstream
       { path: '', component: HomeComponent },
       { path: 'wishlist', component: WishlistComponent },
+=======
+
+      // ===== Cart + Orders (customer) — dùng loadComponent thay vì await import trong component =====
+      {
+        path: 'cart',
+        loadComponent: () =>
+          import('./features/cart/cart').then(m => m.Cart),
+      },
+      {
+        path: 'orders',
+        loadComponent: () =>
+          import('./features/orders/my-orders').then(m => m.MyOrdersPage),
+      },
+      {
+        path: 'orders/checkout',
+        loadComponent: () =>
+          import('./features/checkout/checkout').then(m => m.CheckoutPage),
+      },
+      {
+        path: 'orders/:id',
+        loadComponent: () =>
+          import('./features/orders/order-detail').then(m => m.OrderDetailPage),
+      },
+>>>>>>> Stashed changes
     ],
   },
 
@@ -149,14 +173,17 @@ export const routes: Routes = [
         ],
       },
 
-      // Đơn hàng
-      // {
-      //   path: 'orders',
-      //   canActivate: [permissionGuard],
-      //   data: { permissions: ['manage_orders'] },
-      //   loadComponent: () =>
-      //     import('./admin/orders-admin/orders-admin').then(m => m.OrdersAdminComponent),
-      // },
+      // Đơn hàng (admin) — dùng loadComponent
+      {
+        path: 'orders',
+        loadComponent: () =>
+          import('./admin/orders-admin/orders-admin').then(m => m.OrdersAdminPage),
+      },
+      {
+        path: 'orders/:id',
+        loadComponent: () =>
+          import('./admin/orders-admin/orders-admin').then(m => m.OrdersAdminPage),
+      },
 
       // Live chat
       {
@@ -190,6 +217,7 @@ export const routes: Routes = [
         ],
       },
 
+<<<<<<< Updated upstream
       {
         path: 'users',
         canActivate: [permissionGuard],
@@ -208,6 +236,8 @@ export const routes: Routes = [
       //     import('./admin/reports-admin/reports-admin').then(m => m.ReportsAdminComponent),
       // },
 
+=======
+>>>>>>> Stashed changes
       // RBAC - Nhóm người dùng
       {
         path: 'roles',
@@ -225,6 +255,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./admin/roles/role-permissions-page').then(m => m.RolePermissionsPageComponent),
       },
+<<<<<<< Updated upstream
 
       // Settings (nếu muốn ràng buộc quyền riêng, ví dụ: manage_settings)
       // {
@@ -239,6 +270,8 @@ export const routes: Routes = [
       { path: 'imports/:id/details', component: ImportDetailComponent },
 
       
+=======
+>>>>>>> Stashed changes
     ],
   },
 

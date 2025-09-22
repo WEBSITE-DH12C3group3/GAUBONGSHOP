@@ -1,0 +1,94 @@
+<div class="p-4">
+  <h2 class="text-2xl font-semibold mb-4">Quản lý đơn hàng</h2>
+
+  <!-- ===== LIST ===== -->
+  <ng-container *ngIf="!orderId">
+    <div class="flex items-center gap-2 mb-3">
+      <label>Trạng thái:</label>
+      <select class="border rounded-xl px-3 py-2" [(ngModel)]="statusFilter" (change)="applyFilter()">
+        <option value="">(Tất cả)</option>
+        <option value="pending">pending</option>
+        <option value="processing">processing</option>
+        <option value="shipped">shipped</option>
+        <option value="delivered">delivered</option>
+        <option value="cancelled">cancelled</option>
+      </select>
+    </div>
+
+    <!-- Luôn render; không dùng cờ loading -->
+    <div class="grid gap-3" *ngIf="items.length > 0; else emptyList">
+      <div
+        *ngFor="let o of items"
+        class="p-4 rounded-2xl border shadow bg-white flex items-center justify-between"
+      >
+        <div>
+          <div class="font-semibold">Đơn #{{ o.id }}</div>
+          <div class="text-sm text-gray-500">Ngày: {{ o.orderDate | date:'short' }}</div>
+          <div class="text-sm">Trạng thái: <b class="uppercase">{{ o.status }}</b></div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="text-xl font-bold">{{ o.totalAmount | currency:'VND':'symbol':'1.0-0' }}</div>
+          <!-- 👉 dùng routerLink trực tiếp, tránh cần click lần 2 -->
+          <a
+            class="px-3 py-2 rounded-2xl border inline-block"
+            [routerLink]="['/admin/orders', o.id]">
+            Chi tiết
+          </a>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between mt-3">
+        <button type="button" class="px-3 py-2 rounded-2xl border" (click)="prevPage()" [disabled]="page<=0">← Trước</button>
+        <div>Trang {{ page + 1 }}</div>
+        <button type="button" class="px-3 py-2 rounded-2xl border" (click)="nextPage()">Sau →</button>
+      </div>
+    </div>
+
+    <ng-template #emptyList>
+      <div class="text-gray-500">Không có đơn nào.</div>
+    </ng-template>
+  </ng-container>
+
+  <!-- ===== DETAIL ===== -->
+  <ng-container *ngIf="orderId">
+    <a class="text-blue-600 underline" (click)="backToList()">← Quay lại danh sách</a>
+
+    <!-- Luôn render khung; dùng optional chaining để tránh lỗi khi detail chưa có -->
+    <div class="grid md:grid-cols-3 gap-4 mt-3">
+      <div class="md:col-span-2 p-4 rounded-2xl border shadow bg-white">
+        <div class="font-semibold text-lg">
+          Đơn #{{ detail?.id || '...' }}
+        </div>
+        <div class="text-sm text-gray-500">Ngày: {{ detail?.orderDate | date:'short' }}</div>
+        <div class="text-sm">Trạng thái: <b class="uppercase">{{ detail?.status || '...' }}</b></div>
+
+        <div class="mt-3 border-t pt-3 grid gap-3">
+          <div *ngFor="let it of (detail?.items || [])" class="flex items-center gap-3">
+            <img [src]="it.imageUrl || '/assets/placeholder.png'" class="w-14 h-14 rounded-xl object-cover">
+            <div class="flex-1">
+              <div class="font-medium">{{ it.productName || ('SP #' + it.productId) }}</div>
+              <div class="text-sm text-gray-500">
+                SL: {{ it.quantity }} × {{ it.unitPrice | currency:'VND':'symbol':'1.0-0' }}
+              </div>
+            </div>
+            <div class="font-semibold">{{ it.lineTotal | currency:'VND':'symbol':'1.0-0' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl border shadow bg-white h-fit">
+        <div class="text-gray-500 text-sm">Tổng tiền</div>
+        <div class="text-2xl font-bold">{{ detail?.totalAmount | currency:'VND':'symbol':'1.0-0' }}</div>
+
+        <div class="mt-3 grid gap-2">
+          <button type="button" class="px-4 py-2 rounded-2xl border" [disabled]="updating || !detail" (click)="updateStatus('pending')">pending</button>
+          <button type="button" class="px-4 py-2 rounded-2xl border" [disabled]="updating || !detail" (click)="updateStatus('processing')">processing</button>
+          <button type="button" class="px-4 py-2 rounded-2xl border" [disabled]="updating || !detail" (click)="updateStatus('shipped')">shipped</button>
+          <button type="button" class="px-4 py-2 rounded-2xl border" [disabled]="updating || !detail" (click)="updateStatus('delivered')">delivered</button>
+          <button type="button" class="px-4 py-2 rounded-2xl border text-red-600" [disabled]="updating || !detail" (click)="updateStatus('cancelled')">cancelled</button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>
