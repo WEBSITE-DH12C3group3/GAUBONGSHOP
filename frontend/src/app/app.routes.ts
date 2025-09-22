@@ -58,7 +58,6 @@ import { WishlistComponent } from './features/wishlist/wishlist.component';
 // mânger cusyomer
 import { CustomersAdminComponent } from './admin/customers-admin/customers-admin';
 
-
 export const routes: Routes = [
   // ===== Customer layout =====
   {
@@ -77,11 +76,11 @@ export const routes: Routes = [
       { path: '', component: HomeComponent },
       { path: 'wishlist', component: WishlistComponent },
 
-      // ===== Cart + Orders (customer) — dùng loadComponent thay vì await import trong component =====
+      // ===== Cart + Orders (customer)
       {
         path: 'cart',
         loadComponent: () =>
-          import('./features/cart/cart').then(m => m.Cart),
+          import('./features/cart/cart').then(m => m.CartComponent), // ✅ sửa đúng export name
       },
       {
         path: 'orders',
@@ -206,10 +205,10 @@ export const routes: Routes = [
       // Phiếu vận chuyển
       {
         path: 'shipping-rates',
-        loadChildren: () => import('./admin/shipping-rates/shipping-rates.module')
-                              .then(m => m.ShippingRatesModule)
+        loadChildren: () =>
+          import('./admin/shipping-rates/shipping-rates.module')
+            .then(m => m.ShippingRatesModule)
       },
-
 
       {
         path: 'users',
@@ -220,46 +219,11 @@ export const routes: Routes = [
         ]
       },
 
-      // Báo cáo
-      // {
-      //   path: 'reports',
-      //   canActivate: [permissionGuard],
-      //   data: { permissions: ['view_reports'] },
-      //   loadComponent: () =>
-      //     import('./admin/reports-admin/reports-admin').then(m => m.ReportsAdminComponent),
-      // },
-
-      // RBAC - Nhóm người dùng
-      {
-        path: 'roles',
-        canActivate: [permissionGuard],
-        data: { permissions: ['manage_users'] },
-        loadComponent: () =>
-          import('./admin/roles/roles-page').then(m => m.RolesPageComponent),
-      },
-
-      // RBAC - Quản lý chức năng
-      {
-        path: 'role-permissions',
-        canActivate: [permissionGuard],
-        data: { permissions: ['manage_permission'] },
-        loadComponent: () =>
-          import('./admin/roles/role-permissions-page').then(m => m.RolePermissionsPageComponent),
-      },
-
-      // Settings (nếu muốn ràng buộc quyền riêng, ví dụ: manage_settings)
-      // {
-      //   path: 'settings',
-      //   loadComponent: () =>
-      //     import('/home').then(m => m.SettingsPageComponent),
-      // },
-      // Imports
+      // Imports (duplicated direct routes kept as-is)
       { path: 'imports', component: ImportListComponent },
       { path: 'imports/add', component: ImportAddComponent },
       { path: 'imports/:id/edit', component: ImportEditComponent },
       { path: 'imports/:id/details', component: ImportDetailComponent },
-
-      
     ],
   },
 

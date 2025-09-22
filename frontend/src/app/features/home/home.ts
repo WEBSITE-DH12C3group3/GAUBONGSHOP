@@ -2,14 +2,17 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { forkJoin } from 'rxjs';
+
 import { HeaderComponent } from '../../shared/header/header';
 import { FooterComponent } from '../../shared/footer/footer';
+
 import { CategoryService } from '../../shared/services/category.service';
 import { ProductService } from '../../shared/services/product.service';
 import { FavoriteService } from '../../shared/services/favorite.service';
+import { CartService } from '../../shared/services/cart.service';
+
 import { Category } from '../../models/category.model';
 import { Product } from '../../models/product.model';
-import { CartService } from '../../shared/services/cart.service';
 
 @Component({
   selector: 'app-home',
@@ -36,6 +39,9 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    // ✅ đồng bộ badge giỏ ở header khi vào trang
+    this.cartService.refreshCount();
+
     this.loadFeaturedCategories();
     this.loadCategoriesWithProducts();
     this.loadNewProducts();
@@ -84,7 +90,6 @@ export class HomeComponent implements OnInit {
             });
           });
 
-          
           this.cdr.detectChanges();
         });
       },
@@ -161,41 +166,41 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  /** 🎨 Màu cho danh mục */
   /** ====== ADD TO CART + FLY EFFECT ====== */
-  addToCart(p: { id: number; imageUrl?: string }, ev?: MouseEvent, fromImgEl?: HTMLImageElement) {
-    if (!p?.id) return;
+    addToCart(p: { id: number; name?: string; price?: number; imageUrl?: string }, ev?: MouseEvent, fromImgEl?: HTMLImageElement) {
+  if (!p?.id) return;
 
-    // 1) Hiệu ứng bay vào giỏ (chạy ngay)
-    const imgUrl = this.getImgUrl(p);
-    this.flyToCart(ev, fromImgEl, imgUrl);
+  // 1) Hiệu ứng bay
+  const imgUrl = this.getImgUrl(p);
+  this.flyToCart(ev, fromImgEl, imgUrl);
 
-    // 2) Gọi API thêm giỏ như cũ
-    this.cartService.add(p.id, 1).subscribe({
-      next: () => {
-        // bắn event nếu bạn muốn badge cập nhật (không bắt buộc)
-        // window.dispatchEvent(new CustomEvent('CartUpdated', { detail: { delta: 1, productId: p.id } }));
-      },
-      error: (err) => console.error('Không thêm được vào giỏ:', err)
-    });
-  }
+  // 2) Thêm vào giỏ (truyền meta cho guest)
+  this.cartService.add(p.id, 1, {
+    name: (p as any).name,
+    price: (p as any).price,
+    imageUrl: p.imageUrl
+  }).subscribe({
+    error: (err) => console.error('Không thêm được vào giỏ:', err)
+  });
+}
 
-  /** Lấy URL ảnh hiển thị (đã thấy bạn đang build 'http://localhost:8080' + imageUrl) */
+  /** Lấy URL ảnh hiển thị (tùy backend của bạn) */
   private getImgUrl(p: any): string | undefined {
     if (!p) return undefined;
-    if (p.imageUrl?.startsWith('http')) return p.imageUrl;
-    if (p.imageUrl) return 'http://localhost:8080' + p.imageUrl;
+    if (p.imageUrl?.startsWith?.('http')) return p.imageUrl;
+    if (p.imageUrl) return 'http://localhost:8080' + p.imageUrl; // giữ nguyên như bạn đang dùng
     return undefined;
   }
 
   /** Hiệu ứng bay vào giỏ */
   private flyToCart(ev?: MouseEvent, fromImgEl?: HTMLImageElement, fallbackImgUrl?: string) {
     try {
-      // target: ưu tiên phần tử gắn data-cart-target (nếu bạn thêm), sau đó link cart, rồi icon
+      // target: ưu tiên phần tử gắn data-cart-target, sau đó đến id #cartIcon, rồi link cart
       const target =
         document.querySelector('[data-cart-target]') ||
+        document.querySelector('#cartIcon') ||
         document.querySelector('a[routerLink="/cart"]') ||
-        document.querySelector('.fa-shopping-cart') ||
+        document.querySelector('.fa-cart-shopping') ||
         document.body;
 
       const targetRect = (target as HTMLElement).getBoundingClientRect();
@@ -203,8 +208,8 @@ export class HomeComponent implements OnInit {
       // nguồn: ưu tiên ảnh trong card gần nút; nếu không có thì dùng fallback
       let srcImg: HTMLImageElement | null = fromImgEl || null;
       if (!srcImg && ev?.target) {
-        const btn = (ev.target as HTMLElement).closest('.product-card') as HTMLElement | null;
-        if (btn) srcImg = btn.querySelector('img');
+        const card = (ev.target as HTMLElement).closest('.product-card') as HTMLElement | null;
+        if (card) srcImg = card.querySelector('img');
       }
 
       const startRect = srcImg?.getBoundingClientRect();

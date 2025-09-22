@@ -22,7 +22,7 @@
           class="flex-1 px-4 py-2 bg-transparent outline-none text-gray-700"
         />
 
-        <button (click)="onSearch()" class="px-4 text-pink-600 hover:text-pink-800 transition">
+        <button (click)="onSearch()" class="px-4 text-pink-600 hover:text-pink-800 transition" aria-label="Tìm kiếm">
           <i class="fa-solid fa-magnifying-glass"></i>
         </button>
       </div>
@@ -31,25 +31,30 @@
     <!-- Icons -->
     <div class="flex items-center space-x-6">
       <!-- Yêu thích -->
-      <a routerLink="/wishlist" class="relative text-gray-600 hover:text-pink-600 transition">
+      <a routerLink="/wishlist" class="relative text-gray-600 hover:text-pink-600 transition" aria-label="Yêu thích">
         <i class="fa-solid fa-heart text-xl"></i>
       </a>
 
-      <!-- Giỏ hàng -->
-<a routerLink="/cart"
-   data-cart-target
-   class="relative text-gray-600 hover:text-pink-600 transition">
-  <i class="fa-solid fa-cart-shopping text-xl"></i>
-  <span
-    class="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold rounded-full px-2 py-0.5 shadow">
-    {{ cartCount || 0 }}
-  </span>
-</a>
-
+      <!-- Giỏ hàng (đã thêm id="cartIcon" để hiệu ứng bay tới) -->
+      <a
+        id="cartIcon"
+        routerLink="/cart"
+        class="relative text-gray-600 hover:text-pink-600 transition"
+        aria-label="Giỏ hàng"
+      >
+        <i class="fa-solid fa-cart-shopping text-xl"></i>
+        <span
+          *ngIf="(cartCount || 0) > 0"
+          class="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold rounded-full px-2 py-0.5 shadow"
+        >
+          {{ cartCount || 0 }}
+        </span>
+      </a>
 
       <!-- nút Messenger trong header -->
       <button *ngIf="showChat" (click)="openChat()"
-        class="relative inline-flex items-center justify-center w-10 h-10 rounded-full hover:bg-pink-50">
+        class="relative inline-flex items-center justify-center w-10 h-10 rounded-full hover:bg-pink-50"
+        aria-label="Mở chat">
         <i class="fa-brands fa-facebook-messenger text-pink-600 text-xl"></i>
         <span *ngIf="unreadTotal > 0"
               class="absolute -top-1 -right-1 bg-pink-600 text-white text-[10px] leading-none px-1.5 py-0.5 rounded-full">
@@ -59,7 +64,7 @@
 
       <!-- Tài khoản -->
       <div class="relative">
-        <button (click)="toggleDropdown()" class="text-gray-600 hover:text-pink-600 transition">
+        <button (click)="toggleDropdown()" class="text-gray-600 hover:text-pink-600 transition" aria-haspopup="menu" aria-expanded="{{dropdownOpen}}">
           <i class="fa-solid fa-user text-xl"></i>
         </button>
 

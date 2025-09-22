@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 22, 2025 at 08:13 AM
+-- Generation Time: Sep 23, 2025 at 12:15 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -72,8 +72,7 @@ INSERT INTO `brands` (`id`, `name`, `description`, `logo_url`, `website_url`, `c
 (4, 'Steiff', 'Hãng gấu bông cao cấp đến từ Đức', '/brandimg/1758470000060-7755539213327187156-OIP.jpg', 'https://www.steiff.com/en', '2025-08-27 08:47:07'),
 (5, 'Kẹo ngọt', 'Gấu xinh mềm mại', '/brandimg/1758465449927-9019866415158050303-brandstuffed.jpg', 'https://www.buildabear.com/', '2025-09-21 07:37:37'),
 (6, 'Jellycat', 'Thương hiệu gấu bông siêu mềm mại', '/brandimg/1758465607659-437977114948579399-download.jpg', 'https://www.jellycat.com/', '2025-09-21 07:40:19'),
-(7, 'Charlie Bears', 'Thương hiệu chuyên về gấu bông sưu tầm với thiết kế tỉ mỉ, có hồn và giới hạn số lượng', '/brandimg/1758465768750-7353927941000966383-images.jpg', 'https://www.charliebears.com/', '2025-09-21 07:43:22'),
-(8, 'Mandager chafiging', 'Thương hiệu cổ điển với nhiều nhân vật đáng yêu', '/brandimg/1758507157140-2028542488617070697-OIP-5-.webp', 'https://www.gund.com/', '2025-09-21 07:59:57');
+(7, 'Charlie Bears', 'Thương hiệu chuyên về gấu bông sưu tầm với thiết kế tỉ mỉ, có hồn và giới hạn số lượng', '/brandimg/1758465768750-7353927941000966383-images.jpg', 'https://www.charliebears.com/', '2025-09-21 07:43:22');
 
 -- --------------------------------------------------------
 
@@ -95,7 +94,7 @@ CREATE TABLE `carrier_rate_rules` (
   `active_from` date DEFAULT NULL,
   `active_to` date DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 1
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `carrier_rate_rules`
@@ -117,8 +116,17 @@ CREATE TABLE `carts` (
   `user_id` int(11) DEFAULT NULL,
   `product_id` int(11) DEFAULT NULL,
   `quantity` int(11) DEFAULT 1,
+  `selected` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `carts`
+--
+
+INSERT INTO `carts` (`id`, `user_id`, `product_id`, `quantity`, `selected`, `created_at`) VALUES
+(5, 43, 13, 1, 1, '2025-09-22 21:32:12'),
+(6, 43, 12, 1, 0, '2025-09-22 21:32:13');
 
 -- --------------------------------------------------------
 
@@ -171,7 +179,8 @@ INSERT INTO `chat_sessions` (`id`, `participant1_id`, `participant2_id`, `status
 (5, 36, 1, 'open', '2025-09-20 06:50:34', '2025-09-20 06:50:34'),
 (6, 42, 1, 'open', '2025-09-20 06:51:54', '2025-09-20 08:51:27'),
 (7, 4, 1, 'open', '2025-09-21 06:26:29', '2025-09-21 06:26:29'),
-(8, 38, 1, 'open', '2025-09-21 06:32:52', '2025-09-21 06:32:52');
+(8, 38, 1, 'open', '2025-09-21 06:32:52', '2025-09-21 06:32:52'),
+(9, 43, 1, 'open', '2025-09-22 10:56:08', '2025-09-22 10:56:08');
 
 -- --------------------------------------------------------
 
@@ -909,7 +918,7 @@ CREATE TABLE `shipping_carriers` (
   `name` varchar(120) NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `shipping_carriers`
@@ -955,7 +964,7 @@ CREATE TABLE `shipping_services` (
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `base_days_min` int(11) DEFAULT 2,
   `base_days_max` int(11) DEFAULT 4
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `shipping_services`
@@ -1077,7 +1086,8 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `address`, `phone`, 
 (38, 'hoa@gmail.com', '$2a$10$5YX.1dsRgeTn7TdMu8tdq.swj3cqVvpaSujqQpGhKPCw7RDEeH1LS', 'hoahoavuive2004@gmail.com', NULL, '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-19 22:41:38'),
 (39, 'dat9012004@gmail.com', '$2a$10$ZfphGHZPRSN73iMqdMpvpOuIpWiYeavmWy/ZLTlorGkuANPDMvNAG', 'mai@gmail.com', NULL, '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-20 03:47:34'),
 (41, 'combongu', '$2a$10$1WRmds2qFnZhqcxjwtPUwutwisLh0XJZx979bbDIRH.BMMS9QvIvq', 'nhamnhi@gmail.com', NULL, '0978467297', 'ACTIVE', 'DONG', 0, '2025-09-20 03:58:37'),
-(42, 'hello', '$2a$10$VCWI6ghVP/H0SY.K3B6oouLwZPDkMOfAooDyQMDgIg5xlcMeeKCk.', 'doconlon@gmail.com', NULL, '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-20 03:59:52');
+(42, 'hello', '$2a$10$VCWI6ghVP/H0SY.K3B6oouLwZPDkMOfAooDyQMDgIg5xlcMeeKCk.', 'doconlon@gmail.com', NULL, '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-20 03:59:52'),
+(43, 'anhhamc', '$2a$10$w8hm/Kprp.Ky6Ikq0k53xOUTECtxHLZUvtoAkyzs2cK50NxXYM.ki', 'anhha19052004@gmail.com', 'Đông Dương Nam Sơn Tp.Bắc Ninh', '0366379629', 'ACTIVE', 'DONG', 0, '2025-09-22 10:55:37');
 
 -- --------------------------------------------------------
 
@@ -1100,7 +1110,7 @@ CREATE TABLE `user_addresses` (
   `is_default` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -1124,7 +1134,8 @@ INSERT INTO `user_roles` (`id`, `user_id`, `role_id`) VALUES
 (9, 38, 2),
 (8, 39, 3),
 (10, 41, 2),
-(12, 42, 1);
+(12, 42, 1),
+(14, 43, 3);
 
 -- --------------------------------------------------------
 
@@ -1178,7 +1189,7 @@ CREATE TABLE `warehouses` (
   `longitude` decimal(10,7) NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `warehouses`
@@ -1548,13 +1559,13 @@ ALTER TABLE `brands`
 -- AUTO_INCREMENT for table `carrier_rate_rules`
 --
 ALTER TABLE `carrier_rate_rules`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -1566,7 +1577,7 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `chat_sessions`
 --
 ALTER TABLE `chat_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `coupons`
@@ -1584,7 +1595,7 @@ ALTER TABLE `distance_cache`
 -- AUTO_INCREMENT for table `favorites`
 --
 ALTER TABLE `favorites`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `imports`
@@ -1674,7 +1685,7 @@ ALTER TABLE `shipping`
 -- AUTO_INCREMENT for table `shipping_carriers`
 --
 ALTER TABLE `shipping_carriers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `shipping_quotes`
@@ -1686,7 +1697,7 @@ ALTER TABLE `shipping_quotes`
 -- AUTO_INCREMENT for table `shipping_services`
 --
 ALTER TABLE `shipping_services`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `shipping_vouchers`
@@ -1704,7 +1715,7 @@ ALTER TABLE `suppliers`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `user_addresses`
@@ -1716,13 +1727,13 @@ ALTER TABLE `user_addresses`
 -- AUTO_INCREMENT for table `user_roles`
 --
 ALTER TABLE `user_roles`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `warehouses`
 --
 ALTER TABLE `warehouses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables

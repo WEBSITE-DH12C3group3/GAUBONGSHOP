@@ -16,4 +16,18 @@ public interface CartRepository extends JpaRepository<Cart, Integer> {
     @Modifying
     @Query("update Cart c set c.quantity = :quantity where c.userId = :userId and c.productId = :productId")
     int updateQuantity(Integer userId, Integer productId, Integer quantity);
+
+    // NEW: chọn/bỏ chọn từng item
+    @Modifying
+    @Query("update Cart c set c.selected = :selected where c.userId = :userId and c.productId = :productId")
+    int updateSelected(Integer userId, Integer productId, Boolean selected);
+
+    // NEW: chọn/bỏ chọn tất cả
+    @Modifying
+    @Query("update Cart c set c.selected = :selected where c.userId = :userId")
+    int updateAllSelectedByUser(Integer userId, Boolean selected);
+
+    // NEW: đếm xem có item nào được chọn không
+    @Query("select count(c) from Cart c where c.userId = :userId and c.selected = true")
+    long countSelectedByUser(Integer userId);
 }

@@ -3,11 +3,16 @@ import { Component, OnInit, ChangeDetectorRef, DestroyRef } from '@angular/core'
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { FavoriteService } from '../../shared/services/favorite.service';
 
+import { FavoriteService } from '../../shared/services/favorite.service';
 import { ProductService } from '../../shared/services/product.service';
 import { CategoryService } from '../../shared/services/category.service';
 import { environment } from '../../../environments/environment';
+
+// ➕ Cart + hiệu ứng bay
+import { CartService } from '../../shared/services/cart.service';
+import { flyToCart } from '../../shared/utils/fly-to-cart';
+
 type Product = {
   id: number;
   name: string;
@@ -18,9 +23,7 @@ type Product = {
   rating?: number | null;
   isNew?: boolean | null;
   description?: string | null;
-
   reviewCount?: number | null;
-
 };
 
 type Category = { id: number; name: string };
@@ -73,8 +76,11 @@ export class ProductsComponent implements OnInit {
     { id: '1000000+', label: 'Trên 1.000.000₫' },
   ];
 
-  // Image helpers
-  private apiBase = (environment as any).apiBase ?? 'http://localhost:8080';
+  // Image helpers (chuẩn hoá từ env; nếu apiUrl có /api thì cắt bỏ để hiển thị ảnh tĩnh)
+  private apiBase = (() => {
+    const raw = (environment as any).apiBase ?? (environment as any).apiUrl ?? 'http://localhost:8080';
+    return String(raw).replace(/\/+$/, '').replace(/\/api$/, '');
+  })();
   private fallbackImg = 'https://placehold.co/480x360?text=No+Image';
 
   constructor(
@@ -84,11 +90,15 @@ export class ProductsComponent implements OnInit {
     private categoryService: CategoryService,
     private cdr: ChangeDetectorRef,
     private destroyRef: DestroyRef,
-    private favoriteService: FavoriteService
+    private favoriteService: FavoriteService,
+    private cartService: CartService, // ✅ inject
   ) {}
 
   // ========== Lifecycle ==========
   ngOnInit(): void {
+    // ✅ đồng bộ badge giỏ ở header khi vào trang
+    this.cartService.refreshCount();
+
     this.loadCategories();
 
     const sub = this.route.queryParams.subscribe((params) => {
@@ -151,36 +161,59 @@ export class ProductsComponent implements OnInit {
       },
     });
   }
+
   // ========= Favorites ==========
-toggleFavorite(productId: number, event: Event) {
-  event.stopPropagation();
-  event.preventDefault();
+  toggleFavorite(productId: number, event: Event) {
+    event.stopPropagation();
+    event.preventDefault();
 
-  if (this.isFavorite(productId)) {
-    this.favoriteService.removeFavorite(productId).subscribe(() => {
-      console.log('Removed from favorites:', productId);
-      this.favoriteService.removeSessionFavorite(productId);
+    if (this.isFavorite(productId)) {
+      this.favoriteService.removeFavorite(productId).subscribe(() => {
+        this.favoriteService.removeSessionFavorite(productId);
+        this.cdr.detectChanges();
+      });
+    } else {
+      this.favoriteService.addFavorite(productId).subscribe(() => {
+        this.favoriteService.addSessionFavorite(productId);
+        this.cdr.detectChanges();
+      });
+    }
+  }
 
-      this.cdr.detectChanges(); // 👈 ép Angular render lại
-    });
-  } else {
-    this.favoriteService.addFavorite(productId).subscribe(() => {
-      console.log('Added to favorites:', productId);
-      this.favoriteService.addSessionFavorite(productId);
+  isFavorite(productId: number): boolean {
+    return this.favoriteService.getSessionFavorites().includes(productId);
+  }
 
-      this.cdr.detectChanges(); // 👈 ép Angular render lại
+  // ========= Add to Cart (+ fly) ==========
+  addToCart(p: Product, ev?: MouseEvent, imgEl?: HTMLImageElement) {
+    if (!p?.id) return;
+
+    // chặn điều hướng ngoài ý muốn nếu button nằm trong <a>
+    ev?.preventDefault();
+    ev?.stopPropagation();
+
+    // hiệu ứng bay: ưu tiên ảnh được truyền từ template
+    try {
+      if (imgEl) {
+        flyToCart(imgEl);
+      } else if (ev?.currentTarget) {
+        flyToCart(ev.currentTarget as HTMLElement);
+      }
+    } catch {}
+
+    // ✅ QUAN TRỌNG: truyền meta để giỏ khách vãng lai hiển thị ảnh/tên/giá
+    // LƯU Ý: dùng p.imageUrl "thô" (relative) để cart FE ghép đúng base URL, tránh bị "double host"
+    this.cartService.add(p.id, 1, {
+      name: p.name,
+      price: Number(p.price || 0),
+      imageUrl: p.imageUrl ?? undefined, // giữ path gốc từ API (thường là '/uploads/...'), KHÔNG đổi sang absolute ở đây
+    }).subscribe({
+      next: () => {
+        // count$ đã tự cập nhật trong service
+      },
+      error: (e) => console.error('Không thêm được vào giỏ:', e),
     });
   }
-}
-
-
-
-isFavorite(productId: number): boolean {
-  return this.favoriteService.getSessionFavorites().includes(productId);
-}
-
-
-
 
   // ========== Filters / Sort / Paging ==========
   /** Tính toán lại list theo filter & sort; reset trang nếu vừa đổi filter */
@@ -368,14 +401,9 @@ isFavorite(productId: number): boolean {
   onImgErr(ev: Event): void {
     const img = ev?.target as HTMLImageElement | null;
     if (!img) return;
-
     const ds = img.dataset as DOMStringMap;
     if (ds['fallback'] === '1') return;   // đã gán fallback rồi thì thôi
-
     ds['fallback'] = '1';                 // đánh dấu để tránh lặp vô hạn
     img.src = this.fallbackImg;           // ảnh thay thế
   }
-
-  
-
 }

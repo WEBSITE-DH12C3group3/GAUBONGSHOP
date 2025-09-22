@@ -55,6 +55,7 @@
   color: white;
   padding: 0.5rem 0.8rem;
   cursor: pointer;
+  transition: background .2s ease;
 }
 .search-box button:hover {
   background: #ff1744;
@@ -70,10 +71,37 @@
   font-size: 1.3rem;
   cursor: pointer;
   position: relative;
+  transition: color .2s ease;
 }
 .icon:hover {
   color: #ffe082;
 }
+
+/* Giỏ hàng (tương thích cả id và data-attr) */
+#cartIcon,
+[data-cart-target] {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+#cartIcon .badge,
+[data-cart-target] .badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  background: #ffe082;
+  color: #000;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  line-height: 1;
+  min-width: 18px;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0,0,0,.2);
+}
+
 /* Dropdown Account */
 .icon.dropdown {
   position: relative;
@@ -100,7 +128,7 @@
   color: #333;
   text-decoration: none;
   font-size: 0.9rem;
-  transition: background 0.2s ease, padding-left 0.2s ease;
+  transition: background 0.2s ease, padding-left 0.2s ease, color .2s ease;
 }
 .icon.dropdown .dropdown-menu a:hover {
   background: #ffeef2;
@@ -108,6 +136,7 @@
   color: #ff416c;
 }
 
+/* Nếu bạn vẫn dùng mở dropdown bằng hover (song song với *ngIf) */
 .icon.dropdown:hover .dropdown-menu {
   display: flex;
 }
@@ -116,23 +145,6 @@
   margin: 0.3rem 0;
   border: none;
   border-top: 1px solid #eee;
-}
-
-/* Animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.cart .badge {
-  position: absolute;
-  top: -6px;
-  right: -10px;
-  background: #ffe082;
-  color: #000;
-  border-radius: 50%;
-  padding: 2px 6px;
-  font-size: 0.7rem;
-  font-weight: bold;
 }
 
 /* Navbar dưới */
@@ -165,7 +177,7 @@
   transform: translateY(-2px);
 }
 
-/* Dropdown */
+/* Dropdown menu (navbar) */
 .dropdown span {
   display: flex;
   align-items: center;
@@ -190,7 +202,7 @@
   display: block;
   color: #333;
   text-decoration: none;
-  transition: background 0.2s ease, padding-left 0.2s ease;
+  transition: background 0.2s ease, padding-left 0.2s ease, color .2s ease;
 }
 .dropdown-menu a:hover {
   background: #ffeef2;
@@ -203,14 +215,35 @@
   display: flex;
 }
 
-/* Animation */
+/* ================= Animations ================= */
+
+/* FadeIn (hợp nhất, tránh trùng tên) */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Cart pulse dùng cho hiệu ứng “bay vào giỏ” chạm đích */
 .cart-pulse { animation: cartPulse .3s ease-out; }
 @keyframes cartPulse {
   0% { transform: scale(1) }
   50% { transform: scale(1.15) }
   100% { transform: scale(1) }
+}
+
+/* Giảm chuyển động nếu người dùng chọn reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .cart-pulse,
+  .icon.dropdown .dropdown-menu,
+  .dropdown-menu {
+    animation: none !important;
+  }
+  .menu-item:hover { transform: none; }
+}
+
+/* ================= Responsive tweaks ================= */
+@media (max-width: 768px) {
+  .container { padding: .6rem .8rem; }
+  .search-box { max-width: 100%; margin: 0 .5rem; }
+  .navbar { top: 60px; }
 }

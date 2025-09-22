@@ -1,12 +1,16 @@
 import { Component, OnInit, signal, ChangeDetectorRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, DecimalPipe, DatePipe, SlicePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+
 import { ProductService } from '../../shared/services/product.service';
+import { ReviewService } from '../../shared/services/review.service';
+import { FavoriteService } from '../../shared/services/favorite.service';
+import { CartService } from '../../shared/services/cart.service';
+import { flyToCart } from '../../shared/utils/fly-to-cart';
+
 import { Comment } from '../../models/comment.model';
 import { Product } from '../../models/product.model';
-import { ReviewService } from '../../shared/services/review.service'; // nếu bạn tách riêng review API
-import { FavoriteService } from '../../shared/services/favorite.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -30,15 +34,18 @@ export class ProductDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private productService: ProductService,
     private favoriteService: FavoriteService,
     private cdr: ChangeDetectorRef,
-
-    private reviewService: ReviewService // hoặc dùng HttpClient trực tiếp nếu chưa có service
-
-  ) { }
+    private reviewService: ReviewService,
+    private cartService: CartService
+  ) {}
 
   ngOnInit(): void {
+    // Đồng bộ badge giỏ ngay khi vào trang chi tiết
+    this.cartService.refreshCount();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       const productId = +id;
@@ -76,49 +83,79 @@ export class ProductDetailComponent implements OnInit {
   setActiveTab(tab: string): void {
     this.activeTab = tab;
   }
-toggleFavorite(productId: number, event: Event) {
-  event.stopPropagation();
-  event.preventDefault();
 
-  if (this.isFavorite(productId)) {
-    this.favoriteService.removeFavorite(productId).subscribe(() => {
-      console.log('Removed from favorites:', productId);
-      this.favoriteService.removeSessionFavorite(productId); // cập nhật local
-      this.cdr.detectChanges();
-    });
-  } else {
-    this.favoriteService.addFavorite(productId).subscribe(() => {
-      console.log('Added to favorites:', productId);
-      this.favoriteService.addSessionFavorite(productId); // cập nhật local
-      this.cdr.detectChanges();
-    });
-  }
-}
+  /** 🔹 Yêu thích */
+  toggleFavorite(productId: number, event: Event) {
+    event.stopPropagation();
+    event.preventDefault();
 
-isFavorite(productId: number): boolean {
-  return this.favoriteService.getSessionFavorites().includes(productId);
-}
-
-
-  /** 🔹 Thêm vào giỏ hàng */
-  addToCart(p: Product): void {
-    console.log('🛒 Add to cart:', p, 'Quantity:', this.quantity);
-    // TODO: gọi CartService để thêm vào giỏ hàng
+    if (this.isFavorite(productId)) {
+      this.favoriteService.removeFavorite(productId).subscribe(() => {
+        this.favoriteService.removeSessionFavorite(productId);
+        this.cdr.detectChanges();
+      });
+    } else {
+      this.favoriteService.addFavorite(productId).subscribe(() => {
+        this.favoriteService.addSessionFavorite(productId);
+        this.cdr.detectChanges();
+      });
+    }
   }
 
-  /** 🔹 Tăng số lượng */
+  isFavorite(productId: number): boolean {
+    return this.favoriteService.getSessionFavorites().includes(productId);
+  }
+
+  /** 🔹 Thêm vào giỏ hàng (kèm hiệu ứng bay) */
+  addToCart(ev?: MouseEvent, fromImgEl?: HTMLImageElement): void {
+    const p = this.product();
+    if (!p?.id) return;
+
+    // Chặn điều hướng nếu button nằm trong thẻ <a>
+    ev?.preventDefault();
+    ev?.stopPropagation();
+
+    // Hiệu ứng bay vào giỏ (ưu tiên ảnh lớn)
+    try {
+      const srcEl = (ev?.currentTarget as HTMLElement) ?? undefined;
+      if (fromImgEl) {
+        flyToCart(fromImgEl);
+      } else if (srcEl) {
+        flyToCart(srcEl);
+      }
+    } catch {}
+
+    // Truyền META để giỏ hàng guest hiện đủ thông tin (name/price/image)
+    const meta = { name: p.name, price: p.price as any, imageUrl: p.imageUrl };
+
+    this.cartService.add(p.id, Math.max(1, this.quantity || 1), meta).subscribe({
+      next: () => {}, // count$ cập nhật trong service
+      error: (e) => console.error('Không thêm được vào giỏ:', e),
+    });
+  }
+
+  /** 🔹 Mua ngay: thêm vào giỏ (có meta) và chuyển thẳng /cart */
+  buyNow(): void {
+    const p = this.product();
+    if (!p?.id) return;
+
+    const meta = { name: p.name, price: p.price as any, imageUrl: p.imageUrl };
+
+    this.cartService.add(p.id, Math.max(1, this.quantity || 1), meta).subscribe({
+      next: () => this.router.navigate(['/cart']),
+      error: (e) => console.error('Mua ngay thất bại:', e),
+    });
+  }
+
+  /** 🔹 Tăng/giảm số lượng */
   increaseQuantity(): void {
-    const product = this.product();
-    if (product && this.quantity < product.stock) {
+    const p = this.product();
+    if (p && this.quantity < (p.stock ?? Number.MAX_SAFE_INTEGER)) {
       this.quantity++;
     }
   }
-
-  /** 🔹 Giảm số lượng */
   decreaseQuantity(): void {
-    if (this.quantity > 1) {
-      this.quantity--;
-    }
+    if (this.quantity > 1) this.quantity--;
   }
 
   /** 🔹 Tạo mảng star để render */

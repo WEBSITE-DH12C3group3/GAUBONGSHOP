@@ -13,12 +13,12 @@
     <!-- Gallery -->
     <div class="md:w-5/12 p-6">
       <div class="relative group rounded-lg overflow-hidden border">
-        <img [src]="'http://localhost:8080' + p.imageUrl" [alt]="p.name"
-          class="w-full h-96 object-contain transition-transform duration-300 group-hover:scale-105" />
+        <!-- ✅ gắn template ref để fly-to-cart dùng ảnh nguồn -->
+        <img #detailImg [src]="'http://localhost:8080' + p.imageUrl" [alt]="p.name"
+             class="w-full h-96 object-contain transition-transform duration-300 group-hover:scale-105" />
         <span *ngIf="p.discountPercent && p.discountPercent > 0" class="line-through text-gray-400">
           {{ p.price | number }}₫
         </span>
-
       </div>
 
       <!-- Thumbnail -->
@@ -43,10 +43,19 @@
 
       <!-- Price -->
       <div class="flex items-center space-x-3">
-        <span *ngIf="p.discountPercent && p.discountPercent > 0" class="line-through text-gray-400">
-          {{ p.price | number }}₫
-        </span>
-
+        <ng-container *ngIf="(p.discountPercent || 0) > 0; else noDiscount">
+          <span class="text-2xl font-bold text-red-600">
+            {{ calculateDiscountPrice(p.price, p.discountPercent || 0) | number }}₫
+          </span>
+          <span class="line-through text-gray-400">
+            {{ p.price | number }}₫
+          </span>
+        </ng-container>
+        <ng-template #noDiscount>
+          <span class="text-2xl font-bold text-red-600">
+            {{ p.price | number }}₫
+          </span>
+        </ng-template>
       </div>
 
       <!-- Meta -->
@@ -71,20 +80,29 @@
 
       <!-- Actions -->
       <div class="flex gap-4">
-        <button (click)="addToCart(p)"
+        <!-- ✅ thêm vào giỏ: bay từ ảnh detail -->
+        <button
+          (click)="addToCart($event, detailImg)"
           class="flex-1 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium shadow transition disabled:opacity-50"
           [disabled]="p.stock===0">
           <i class="fas fa-cart-plus mr-2"></i> Thêm vào giỏ
         </button>
-        <button class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium shadow transition"
+
+        <!-- ✅ mua ngay: add -> điều hướng /cart -->
+        <button
+          (click)="buyNow()"
+          class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium shadow transition"
           [disabled]="p.stock===0">
           Mua ngay
         </button>
+
         <!-- Favorite Button -->
         <button (click)="toggleFavorite(p.id, $event)"
-          class="w-12 h-12 rounded-full flex items-center justify-center shadow-md transition border" [ngClass]="isFavorite(p.id) 
+          class="w-12 h-12 rounded-full flex items-center justify-center shadow-md transition border"
+          [ngClass]="isFavorite(p.id) 
             ? 'bg-red-500 text-white border-red-500' 
-            : 'bg-white text-gray-600 border-gray-300'" title="Thêm vào yêu thích">
+            : 'bg-white text-gray-600 border-gray-300'"
+          title="Thêm vào yêu thích">
           <i class="fa-solid fa-heart"></i>
         </button>
       </div>
@@ -115,7 +133,6 @@
         <table *ngIf="p.attributes && p.attributes.length > 0; else noAttr" class="w-full border divide-y text-sm">
           <tr *ngFor="let a of p.attributes" class="hover:bg-gray-50">
             <th class="p-3 text-gray-600 text-left w-1/3">{{ a.attributeName }}</th>
-            <!-- <th>{{a.attributeName}}</th> -->
             <td>{{ a.value }}</td>
           </tr>
         </table>
@@ -160,7 +177,6 @@
           <div *ngIf="(rp.discountPercent ?? 0) > 0" class="text-gray-400 line-through text-sm">
             {{ rp.price | number }}₫
           </div>
-
         </div>
       </div>
     </div>

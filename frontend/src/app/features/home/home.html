@@ -61,65 +61,65 @@
       </a>
     </div>
 
-<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-  <div *ngFor="let p of newProducts"
-    class="bg-white rounded-xl shadow-md hover:shadow-xl overflow-hidden group transition-all duration-300 product-card relative">
-    
-    <!-- Ảnh sản phẩm có link đến chi tiết -->
-    <a [routerLink]="['/product', p.id]" class="block relative overflow-hidden">
-      <img [src]="'http://localhost:8080' + p.imageUrl" [alt]="p.name"
-        class="w-full h-40 md:h-48 object-cover group-hover:scale-105 transition duration-500" />
-      
-      <!-- Nhãn Mới -->
-      <span class="absolute top-2 left-2 bg-pink-500 text-white text-xs px-2 py-1 rounded-full shadow">
-        Mới
-      </span>
-    </a>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+      <div *ngFor="let p of newProducts"
+        class="bg-white rounded-xl shadow-md hover:shadow-xl overflow-hidden group transition-all duration-300 product-card relative">
 
-    <!-- Nút yêu thích (tách riêng, không nằm trong <a>) -->
-    <div class="absolute top-2 right-2 z-10">
-      <button 
-        (click)="toggleFavorite(p.id, $event); $event.stopPropagation(); $event.preventDefault();"
-        class="w-8 h-8 flex items-center justify-center rounded-full shadow border transition"
-        [ngClass]="isFavorite(p.id) 
-          ? 'bg-pink-500 text-white border-pink-500' 
-          : 'bg-white text-gray-600 border-gray-300'">
-        <i class="fa-solid fa-heart"></i>
-      </button>
-    </div>
+        <!-- Ảnh sản phẩm có link đến chi tiết -->
+        <a [routerLink]="['/product', p.id]" class="block relative overflow-hidden">
+          <img #imgNew [src]="'http://localhost:8080' + p.imageUrl" [alt]="p.name"
+            class="w-full h-40 md:h-48 object-cover group-hover:scale-105 transition duration-500" />
 
-    <!-- Nội dung sản phẩm -->
-    <div class="p-3 md:p-4">
-      <a [routerLink]="['/product', p.id]"
-        class="font-semibold text-gray-800 mb-2 line-clamp-2 text-sm md:text-base block hover:text-pink-600 transition">
-        {{ p.name }}
-      </a>
+          <!-- Nhãn Mới -->
+          <span class="absolute top-2 left-2 bg-pink-500 text-white text-xs px-2 py-1 rounded-full shadow">
+            Mới
+          </span>
+        </a>
 
-      <div class="flex items-center mb-2">
-        <div class="flex text-yellow-400 mr-2 text-xs md:text-sm">
-          <i class="fas fa-star"></i>
-          <i class="fas fa-star"></i>
-          <i class="fas fa-star"></i>
-          <i class="fas fa-star"></i>
-          <i class="fas fa-star-half-alt"></i>
+        <!-- Nút yêu thích (tách riêng, không nằm trong <a>) -->
+        <div class="absolute top-2 right-2 z-10">
+          <button
+            (click)="toggleFavorite(p.id, $event); $event.stopPropagation(); $event.preventDefault();"
+            class="w-8 h-8 flex items-center justify-center rounded-full shadow border transition"
+            [ngClass]="isFavorite(p.id)
+              ? 'bg-pink-500 text-white border-pink-500'
+              : 'bg-white text-gray-600 border-gray-300'">
+            <i class="fa-solid fa-heart"></i>
+          </button>
         </div>
-        <span class="text-xs md:text-sm text-gray-500">(128)</span>
+
+        <!-- Nội dung sản phẩm -->
+        <div class="p-3 md:p-4">
+          <a [routerLink]="['/product', p.id]"
+            class="font-semibold text-gray-800 mb-2 line-clamp-2 text-sm md:text-base block hover:text-pink-600 transition">
+            {{ p.name }}
+          </a>
+
+          <div class="flex items-center mb-2">
+            <div class="flex text-yellow-400 mr-2 text-xs md:text-sm">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star-half-alt"></i>
+            </div>
+            <span class="text-xs md:text-sm text-gray-500">(128)</span>
+          </div>
+
+          <p class="text-pink-600 text-base md:text-lg font-bold mb-3 md:mb-4">
+            {{ p.price | currency: 'VND':'symbol':'1.0-0' }}
+          </p>
+
+          <!-- Nút giỏ hàng -->
+          <button
+            (click)="addToCart(p, $event, imgNew)"
+            class="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 px-3 md:px-4 rounded-lg transition font-medium flex items-center justify-center text-sm md:text-base">
+            <i class="fas fa-shopping-cart mr-2"></i>
+            Thêm vào giỏ
+          </button>
+        </div>
       </div>
-
-      <p class="text-pink-600 text-base md:text-lg font-bold mb-3 md:mb-4">
-        {{ p.price | currency: 'VND':'symbol':'1.0-0' }}
-      </p>
-
-      <!-- Nút giỏ hàng -->
-      <button
-        class="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 px-3 md:px-4 rounded-lg transition font-medium flex items-center justify-center text-sm md:text-base">
-        <i class="fas fa-shopping-cart mr-2"></i>
-        Thêm vào giỏ
-      </button>
     </div>
-  </div>
-</div>
-
   </section>
 
   <!-- Danh mục + sản phẩm -->
@@ -135,9 +135,10 @@
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
         <div *ngFor="let p of cat.products"
           class="bg-white rounded-xl shadow-md hover:shadow-lg overflow-hidden transition-all duration-300 product-card">
+
           <!-- Ảnh sản phẩm -->
           <a [routerLink]="['/product', p.id]" class="block relative overflow-hidden">
-            <img [src]="'http://localhost:8080' + p.imageUrl" [alt]="p.name"
+            <img #imgCat [src]="'http://localhost:8080' + p.imageUrl" [alt]="p.name"
               class="w-full h-40 md:h-48 object-cover group-hover:scale-105 transition duration-500" />
           </a>
 
@@ -162,17 +163,21 @@
             <p class="text-pink-600 text-base md:text-lg font-bold mb-3 md:mb-4">
               {{ p.price | currency: 'VND':'symbol':'1.0-0' }}
             </p>
+
             <!-- Nút yêu thích ở góc trên bên phải của thẻ sản phẩm -->
             <div class="absolute top-2 right-2 z-10">
-              <button (click)="toggleFavorite(p.id, $event)"
-                class="w-8 h-8 flex items-center justify-center rounded-full shadow border transition" [ngClass]="isFavorite(p.id) 
-      ? 'bg-pink-500 text-white border-pink-500' 
-      : 'bg-white text-gray-600 border-gray-300'">
+              <button (click)="toggleFavorite(p.id, $event); $event.stopPropagation(); $event.preventDefault();"
+                class="w-8 h-8 flex items-center justify-center rounded-full shadow border transition"
+                [ngClass]="isFavorite(p.id)
+                  ? 'bg-pink-500 text-white border-pink-500'
+                  : 'bg-white text-gray-600 border-gray-300'">
                 <i class="fa-solid fa-heart"></i>
               </button>
             </div>
 
+            <!-- Nút giỏ hàng -->
             <button
+              (click)="addToCart(p, $event, imgCat)"
               class="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 px-3 md:px-4 rounded-lg transition font-medium flex items-center justify-center text-sm md:text-base">
               <i class="fas fa-shopping-cart mr-2"></i>
               Thêm vào giỏ

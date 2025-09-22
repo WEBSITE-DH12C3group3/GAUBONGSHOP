@@ -16,6 +16,7 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth.service';
 import { ChatClientService } from '../../shared/services/chat-client.service';
 import { ChatSocketService } from '../../shared/services/chat-socket.service';
+import { CartService } from '../../shared/services/cart.service';
 
 @Component({
   selector: 'app-user-header',
@@ -32,7 +33,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   dropdownOpen = false;
 
   // Chat badge
-  showChat = false;   // chỉ hiện khi đăng nhập (browser)
+  showChat = false;
   unreadTotal = 0;
   private sessionId?: number;
 
@@ -45,16 +46,34 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private router: Router,
     private chatApi: ChatClientService,
     private socket: ChatSocketService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private cartService: CartService
   ) {}
 
   ngOnInit(): void {
-    if (!this.isBrowser) return; // ⛔️ Bỏ qua toàn bộ logic browser khi SSR
+    if (!this.isBrowser) return;
 
+    // ===== Merge guest cart nếu đã đăng nhập =====
+    if (this.isLoggedIn()) {
+      this.cartService.mergeLocalToServer().subscribe({
+        complete: () => this.cartService.refreshCount()
+      });
+    } else {
+      // guest: đồng bộ badge từ local
+      this.cartService.refreshCount();
+    }
+
+    // Subscribe badge
+    this.cartService.count$.subscribe(v => {
+      this.cartCount = v || 0;
+      this.cdr.markForCheck();
+    });
+
+    // Chat only when logged in
     this.showChat = this.isLoggedIn();
     if (this.showChat) {
       const token = this.getToken();
-      this.socket.init(() => ({ Authorization: token })); // luôn trả string
+      this.socket.init(() => ({ Authorization: token }));
 
       this.chatApi.openWithAdmin().subscribe((s) => {
         this.sessionId = s.id;
@@ -111,7 +130,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   // ===== Chat =====
   openChat() {
     if (!this.isBrowser || !this.sessionId) return;
-    this.unreadTotal = 0; // UX: clear ngay, BE markRead trong trang /chat
+    this.unreadTotal = 0;
     this.cdr.markForCheck();
     this.router.navigate(['/chat']);
   }
@@ -143,16 +162,25 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private getToken(): string {
     const raw = this.rawToken();
     return /^Bearer\s/i.test(raw) ? raw : raw ? `Bearer ${raw}` : '';
-    // luôn trả string để hợp chữ ký init()
   }
 
   private onStorage = (e: StorageEvent) => {
     if (e.key === 'token' || e.key === 'access_token' || e.key === 'jwt') {
       const now = this.isLoggedIn();
+      if (now) {
+        // vừa đăng nhập ở tab khác → merge
+        this.cartService.mergeLocalToServer().subscribe({
+          complete: () => this.cartService.refreshCount()
+        });
+      }
       if (now !== this.showChat) {
         this.showChat = now;
         this.cdr.markForCheck();
       }
+    }
+    if (e.key === 'guest_cart_v1') {
+      // guest cart đổi → cập nhật badge
+      this.cartService.refreshCount();
     }
   };
 }
