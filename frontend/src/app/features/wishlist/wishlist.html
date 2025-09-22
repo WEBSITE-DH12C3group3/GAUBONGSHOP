@@ -1,53 +1,51 @@
-<div class="container mx-auto px-6 py-8">
-  <h2 class="text-2xl font-bold text-gray-800 mb-6">Danh sách yêu thích</h2>
+<section class="container mx-auto px-4 py-8">
+  <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center">
+    Danh sách yêu thích
+  </h2>
 
-  <!-- Loading -->
-  <div *ngIf="isLoading" class="text-center py-8">
-    <i class="fa-solid fa-spinner fa-spin text-pink-600 text-3xl"></i>
-    <p class="mt-2 text-gray-600">Đang tải danh sách yêu thích...</p>
+  <div *ngIf="isLoading" class="flex justify-center items-center h-40">
+    <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-pink-500"></div>
   </div>
 
-  <!-- Empty state -->
-  <div *ngIf="!isLoading && favorites.length === 0" class="text-center py-12">
-    <i class="fa-regular fa-heart text-5xl text-gray-300 mb-4"></i>
-    <p class="text-gray-600">Chưa có sản phẩm nào trong danh sách yêu thích.</p>
-    <a routerLink="/products"
-       class="mt-4 inline-block px-6 py-2 bg-pink-600 text-white rounded-lg shadow hover:bg-pink-700 transition">
-      Xem sản phẩm
-    </a>
+  <div *ngIf="!isLoading && favorites.length === 0" class="text-center text-gray-600">
+    Chưa có sản phẩm yêu thích nào.
   </div>
 
-  <!-- Favorites list -->
   <div *ngIf="!isLoading && favorites.length > 0"
-       class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-    <div *ngFor="let product of favorites"
-         class="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden relative">
+       class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+    
+    <div *ngFor="let p of favorites"
+         class="bg-white rounded-xl shadow-md hover:shadow-lg overflow-hidden transition-all duration-300 product-card">
 
-      <!-- Product image -->
-      <a [routerLink]="['/product', product.id]">
-        <img [src]="product.imageUrl || 'assets/images/no-image.png'"
-             [alt]="product.name"
-             class="w-full h-56 object-cover">
+      <!-- Ảnh sản phẩm -->
+      <a [routerLink]="['/product', p.id]" class="block relative overflow-hidden">
+        <img [src]="'http://localhost:8080' + p.imageUrl" [alt]="p.name"
+             class="w-full h-40 md:h-48 object-cover group-hover:scale-105 transition duration-500" />
+
+        <!-- ✅ Icon yêu thích góc trên phải -->
+        <button (click)="removeFavorite(p.id)"
+          class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full shadow-md transition bg-red-500 text-white">
+          <i class="fa-solid fa-heart"></i>
+        </button>
       </a>
 
-      <!-- Product info -->
-      <div class="p-4">
-        <a [routerLink]="['/product', product.id]" class="block">
-          <h3 class="text-lg font-semibold text-gray-800 hover:text-pink-600 transition">
-            {{ product.name }}
-          </h3>
+      <!-- Thông tin sản phẩm -->
+      <div class="p-3 md:p-4">
+        <a [routerLink]="['/product', p.id]"
+           class="font-semibold text-gray-800 mb-2 line-clamp-2 text-sm md:text-base block hover:text-pink-600 transition">
+          {{ p.name }}
         </a>
-        <p class="text-pink-600 font-bold mt-2">
-          {{ product.price | currency:'VND':'symbol':'1.0-0' }}
-        </p>
-      </div>
 
-      <!-- Remove button -->
-      <button (click)="removeFavorite(product.id)"
-              class="absolute top-3 right-3 text-red-500 hover:text-red-700 transition"
-              title="Xóa khỏi yêu thích">
-        <i class="fa-solid fa-xmark text-xl"></i>
-      </button>
+        <p class="text-pink-600 text-base md:text-lg font-bold mb-3 md:mb-4">
+          {{ p.price | currency:'VND':'symbol':'1.0-0' }}
+        </p>
+
+        <button
+          class="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 px-3 md:px-4 rounded-lg transition font-medium flex items-center justify-center text-sm md:text-base">
+          <i class="fas fa-shopping-cart mr-2"></i>
+          Thêm vào giỏ
+        </button>
+      </div>
     </div>
   </div>
-</div>
+</section>

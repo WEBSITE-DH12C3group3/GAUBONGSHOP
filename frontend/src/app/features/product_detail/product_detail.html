@@ -14,7 +14,7 @@
     <div class="md:w-5/12 p-6">
       <div class="relative group rounded-lg overflow-hidden border">
         <img [src]="'http://localhost:8080' + p.imageUrl" [alt]="p.name"
-             class="w-full h-96 object-contain transition-transform duration-300 group-hover:scale-105" />
+          class="w-full h-96 object-contain transition-transform duration-300 group-hover:scale-105" />
         <span *ngIf="p.discountPercent && p.discountPercent > 0" class="line-through text-gray-400">
           {{ p.price | number }}₫
         </span>
@@ -61,8 +61,7 @@
         <span class="font-medium">Số lượng:</span>
         <div class="flex items-center border rounded-lg">
           <button (click)="decreaseQuantity()" class="px-3 py-1 bg-gray-100 hover:bg-gray-200">-</button>
-          <input type="number" [value]="quantity" readonly
-                 class="w-12 text-center border-x font-medium" />
+          <input type="number" [value]="quantity" readonly class="w-12 text-center border-x font-medium" />
           <button (click)="increaseQuantity()" class="px-3 py-1 bg-gray-100 hover:bg-gray-200">+</button>
         </div>
         <span [class.text-green-600]="p.stock>0" [class.text-red-500]="p.stock===0">
@@ -73,13 +72,20 @@
       <!-- Actions -->
       <div class="flex gap-4">
         <button (click)="addToCart(p)"
-                class="flex-1 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium shadow transition disabled:opacity-50"
-                [disabled]="p.stock===0">
+          class="flex-1 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium shadow transition disabled:opacity-50"
+          [disabled]="p.stock===0">
           <i class="fas fa-cart-plus mr-2"></i> Thêm vào giỏ
         </button>
         <button class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium shadow transition"
-                [disabled]="p.stock===0">
+          [disabled]="p.stock===0">
           Mua ngay
+        </button>
+        <!-- Favorite Button -->
+        <button (click)="toggleFavorite(p.id, $event)"
+          class="w-12 h-12 rounded-full flex items-center justify-center shadow-md transition border" [ngClass]="isFavorite(p.id) 
+            ? 'bg-red-500 text-white border-red-500' 
+            : 'bg-white text-gray-600 border-gray-300'" title="Thêm vào yêu thích">
+          <i class="fa-solid fa-heart"></i>
         </button>
       </div>
     </div>
@@ -89,11 +95,11 @@
   <div class="bg-white rounded-lg shadow mt-8">
     <div class="flex border-b">
       <button (click)="setActiveTab('desc')" [class.text-blue-600]="activeTab==='desc'"
-              class="flex-1 py-3 text-center font-medium hover:bg-gray-50">Mô tả</button>
+        class="flex-1 py-3 text-center font-medium hover:bg-gray-50">Mô tả</button>
       <button (click)="setActiveTab('attr')" [class.text-blue-600]="activeTab==='attr'"
-              class="flex-1 py-3 text-center font-medium hover:bg-gray-50">Thông số</button>
+        class="flex-1 py-3 text-center font-medium hover:bg-gray-50">Thông số</button>
       <button (click)="setActiveTab('review')" [class.text-blue-600]="activeTab==='review'"
-              class="flex-1 py-3 text-center font-medium hover:bg-gray-50">
+        class="flex-1 py-3 text-center font-medium hover:bg-gray-50">
         Đánh giá ({{ p.totalReviews || 0 }})
       </button>
     </div>
@@ -106,12 +112,11 @@
 
       <!-- Attributes -->
       <div *ngIf="activeTab==='attr'">
-        <table *ngIf="p.attributes && p.attributes.length > 0; else noAttr"
-               class="w-full border divide-y text-sm">
+        <table *ngIf="p.attributes && p.attributes.length > 0; else noAttr" class="w-full border divide-y text-sm">
           <tr *ngFor="let a of p.attributes" class="hover:bg-gray-50">
             <th class="p-3 text-gray-600 text-left w-1/3">{{ a.attributeName }}</th>
-             <!-- <th>{{a.attributeName}}</th> -->
-              <td>{{ a.value }}</td>
+            <!-- <th>{{a.attributeName}}</th> -->
+            <td>{{ a.value }}</td>
           </tr>
         </table>
         <ng-template #noAttr>
@@ -145,17 +150,16 @@
     <h2 class="text-lg font-semibold mb-4">Sản phẩm liên quan</h2>
     <div class="grid md:grid-cols-4 sm:grid-cols-2 gap-6">
       <div *ngFor="let rp of related" [routerLink]="['/products', rp.id]"
-           class="bg-white rounded-lg shadow hover:shadow-lg cursor-pointer transition transform hover:-translate-y-1">
-        <img [src]="'http://localhost:8080' + rp.imageUrl" [alt]="rp.name"
-             class="w-full h-48 object-contain p-3" />
+        class="bg-white rounded-lg shadow hover:shadow-lg cursor-pointer transition transform hover:-translate-y-1">
+        <img [src]="'http://localhost:8080' + rp.imageUrl" [alt]="rp.name" class="w-full h-48 object-contain p-3" />
         <div class="p-3">
           <h3 class="text-sm font-medium line-clamp-2">{{ rp.name }}</h3>
           <div class="text-red-500 font-semibold">
             {{ calculateDiscountPrice(rp.price, rp.discountPercent || 0) | number }}₫
           </div>
-            <div *ngIf="(rp.discountPercent ?? 0) > 0" class="text-gray-400 line-through text-sm">
-              {{ rp.price | number }}₫
-            </div>
+          <div *ngIf="(rp.discountPercent ?? 0) > 0" class="text-gray-400 line-through text-sm">
+            {{ rp.price | number }}₫
+          </div>
 
         </div>
       </div>

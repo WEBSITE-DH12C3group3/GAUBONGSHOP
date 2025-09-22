@@ -3,14 +3,16 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Product, ProductResponse } from '../../models/product.model';
-
+import { FavoriteService } from './favorite.service';
+import { SessionFavoriteService } from './session-favorite.service';
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
   private readonly apiUrl = `${environment.apiUrl}/products`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,    private sessionFavorite: SessionFavoriteService
+) { }
 
   /**
    * 🔹 Lấy danh sách sản phẩm (có phân trang, filter, search)
@@ -110,6 +112,20 @@ export class ProductService {
 // product.service.ts
 getProductsByIds(ids: number[]): Observable<Product[]> {
   return this.http.get<Product[]>(`http://localhost:8080/api/products/by-ids?ids=${ids.join(',')}`);
+}
+// Lấy danh sách favorites trong session
+getSessionFavorites(): number[] {
+  return this.sessionFavorite.getSessionFavorites();
+}
+
+// Thêm vào favorites session
+addSessionFavorite(productId: number) {
+  this.sessionFavorite.addSessionFavorite(productId);
+}
+
+// Xóa khỏi favorites session
+removeSessionFavorite(productId: number) {
+  this.sessionFavorite.removeSessionFavorite(productId);
 }
 
 

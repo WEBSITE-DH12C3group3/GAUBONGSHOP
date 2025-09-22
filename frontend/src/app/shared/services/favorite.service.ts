@@ -78,4 +78,18 @@ export class FavoriteService {
       Authorization: `Bearer ${this.auth.getToken() || ''}`
     });
   }
+  // Lấy danh sách favorites trong session
+getSessionFavorites(): number[] {
+  return this.sessionFavorite.getSessionFavorites();
+}
+
+// Thêm vào favorites session
+addSessionFavorite(productId: number) {
+  this.sessionFavorite.addSessionFavorite(productId);
+}
+
+// Xóa khỏi favorites session
+removeSessionFavorite(productId: number) {
+  this.sessionFavorite.removeSessionFavorite(productId);
+}
 }

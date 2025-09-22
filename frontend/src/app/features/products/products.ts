@@ -3,11 +3,11 @@ import { Component, OnInit, ChangeDetectorRef, DestroyRef } from '@angular/core'
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { FavoriteService } from '../../shared/services/favorite.service';
 
 import { ProductService } from '../../shared/services/product.service';
 import { CategoryService } from '../../shared/services/category.service';
 import { environment } from '../../../environments/environment';
-
 type Product = {
   id: number;
   name: string;
@@ -83,7 +83,8 @@ export class ProductsComponent implements OnInit {
     private productService: ProductService,
     private categoryService: CategoryService,
     private cdr: ChangeDetectorRef,
-    private destroyRef: DestroyRef
+    private destroyRef: DestroyRef,
+    private favoriteService: FavoriteService
   ) {}
 
   // ========== Lifecycle ==========
@@ -150,6 +151,36 @@ export class ProductsComponent implements OnInit {
       },
     });
   }
+  // ========= Favorites ==========
+toggleFavorite(productId: number, event: Event) {
+  event.stopPropagation();
+  event.preventDefault();
+
+  if (this.isFavorite(productId)) {
+    this.favoriteService.removeFavorite(productId).subscribe(() => {
+      console.log('Removed from favorites:', productId);
+      this.favoriteService.removeSessionFavorite(productId);
+
+      this.cdr.detectChanges(); // 👈 ép Angular render lại
+    });
+  } else {
+    this.favoriteService.addFavorite(productId).subscribe(() => {
+      console.log('Added to favorites:', productId);
+      this.favoriteService.addSessionFavorite(productId);
+
+      this.cdr.detectChanges(); // 👈 ép Angular render lại
+    });
+  }
+}
+
+
+
+isFavorite(productId: number): boolean {
+  return this.favoriteService.getSessionFavorites().includes(productId);
+}
+
+
+
 
   // ========== Filters / Sort / Paging ==========
   /** Tính toán lại list theo filter & sort; reset trang nếu vừa đổi filter */
@@ -344,5 +375,7 @@ export class ProductsComponent implements OnInit {
     ds['fallback'] = '1';                 // đánh dấu để tránh lặp vô hạn
     img.src = this.fallbackImg;           // ảnh thay thế
   }
+
+  
 
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule, DecimalPipe, DatePipe, SlicePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -6,6 +6,7 @@ import { ProductService } from '../../shared/services/product.service';
 import { Comment } from '../../models/comment.model';
 import { Product } from '../../models/product.model';
 import { ReviewService } from '../../shared/services/review.service'; // nếu bạn tách riêng review API
+import { FavoriteService } from '../../shared/services/favorite.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -30,8 +31,12 @@ export class ProductDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private productService: ProductService,
+    private favoriteService: FavoriteService,
+    private cdr: ChangeDetectorRef,
+
     private reviewService: ReviewService // hoặc dùng HttpClient trực tiếp nếu chưa có service
-  ) {}
+
+  ) { }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -71,6 +76,29 @@ export class ProductDetailComponent implements OnInit {
   setActiveTab(tab: string): void {
     this.activeTab = tab;
   }
+toggleFavorite(productId: number, event: Event) {
+  event.stopPropagation();
+  event.preventDefault();
+
+  if (this.isFavorite(productId)) {
+    this.favoriteService.removeFavorite(productId).subscribe(() => {
+      console.log('Removed from favorites:', productId);
+      this.favoriteService.removeSessionFavorite(productId); // cập nhật local
+      this.cdr.detectChanges();
+    });
+  } else {
+    this.favoriteService.addFavorite(productId).subscribe(() => {
+      console.log('Added to favorites:', productId);
+      this.favoriteService.addSessionFavorite(productId); // cập nhật local
+      this.cdr.detectChanges();
+    });
+  }
+}
+
+isFavorite(productId: number): boolean {
+  return this.favoriteService.getSessionFavorites().includes(productId);
+}
+
 
   /** 🔹 Thêm vào giỏ hàng */
   addToCart(p: Product): void {
