@@ -1,0 +1,29 @@
+<div *ngIf="visible" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+  <div class="bg-white rounded-lg shadow-lg w-96 p-6 relative">
+    <!-- Nút đóng -->
+    <button (click)="close()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✕</button>
+    <h2 class="text-lg font-bold mb-4">👤 Hồ sơ Admin</h2>
+
+    <div *ngIf="profile">
+      <p><strong>Email:</strong> {{ profile.user.email }}</p>
+      <p><strong>Tên đăng nhập:</strong> {{ profile.user.username }}</p>
+      <p><strong>Số điện thoại:</strong> {{ profile.user.phone }}</p>
+
+      <h3 class="mt-4 font-semibold">Vai trò</h3>
+      <ul>
+        <li *ngFor="let r of profile.roles">{{ r.name }}</li>
+      </ul>
+
+      <h3 class="mt-4 font-semibold">Quyền hạn</h3>
+     <div class="flex flex-wrap gap-2">
+  <span *ngFor="let p of profile?.permissions"
+        class="px-2 py-1 bg-pink-100 text-pink-700 rounded text-xs"
+        [title]="p.name">
+    {{ p.description }}
+  </span>
+</div>
+
+
+    </div>
+  </div>
+</div>

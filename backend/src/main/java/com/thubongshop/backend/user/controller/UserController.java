@@ -15,7 +15,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import com.thubongshop.backend.role.Role;
 
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,8 +69,7 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-            );
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String token = jwtUtil.generateToken(userDetails);
@@ -119,11 +117,52 @@ public class UserController {
     }
 
     // ----------------------------
+    // Hồ sơ đầy đủ (user + roles + permissions)
+    // ----------------------------
+    @GetMapping("/me/profile")
+    public ResponseEntity<?> getCurrentUserProfile(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Chưa đăng nhập"));
+        }
+
+        User user = userService.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
+        Long roleId = user.getRoles().stream()
+                .findFirst()
+                .map(Role::getId)
+                .orElse(null);
+
+        // 👉 lấy permission có cả description
+        // 👉 lấy permission có cả description
+        // 👉 lấy permission có cả description
+        List<Map<String, Object>> permissions = (roleId == null)
+                ? List.of()
+                : rolePermRepo.findPermissionsOfRoles(List.of(roleId))
+                        .stream()
+                        .map(p -> {
+                            Map<String, Object> m = new HashMap<>();
+                            m.put("id", p.getId());
+                            m.put("name", p.getName());
+                            m.put("description", p.getDescription());
+                            return m;
+                        })
+                        .toList();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("user", new UserDTO(user));
+        response.put("roles", user.getRoles());
+        response.put("permissions", permissions);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ----------------------------
     // Cập nhật hồ sơ
     // ----------------------------
     @PutMapping("/update")
     public ResponseEntity<?> updateProfile(@AuthenticationPrincipal UserDetails userDetails,
-                                           @RequestBody UpdateProfileRequest request) {
+            @RequestBody UpdateProfileRequest request) {
         if (userDetails == null) {
             return ResponseEntity.status(401).body(Map.of("error", "Chưa đăng nhập"));
         }
@@ -138,7 +177,7 @@ public class UserController {
 
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@AuthenticationPrincipal UserDetails userDetails,
-                                            @RequestBody ChangePasswordRequest request) {
+            @RequestBody ChangePasswordRequest request) {
         try {
             userService.changePassword(userDetails.getUsername(),
                     request.getCurrentPassword(),

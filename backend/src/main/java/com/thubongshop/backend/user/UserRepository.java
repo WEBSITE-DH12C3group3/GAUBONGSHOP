@@ -96,4 +96,20 @@ public interface UserRepository extends JpaRepository<User, Long> {
       @Param("toAt") LocalDateTime toAt,
       Pageable pageable
     );
+    @EntityGraph(attributePaths = {
+    "userRoles.role",
+    "userRoles.role.rolePermissions",
+    "userRoles.role.rolePermissions.permission"
+})
+@Query("SELECT u FROM User u WHERE u.id = :id")
+Optional<User> findWithRolesAndPermissionsById(@Param("id") Long id);
+
+@EntityGraph(attributePaths = {
+    "userRoles.role",
+    "userRoles.role.rolePermissions",
+    "userRoles.role.rolePermissions.permission"
+})
+@Query("SELECT u FROM User u WHERE lower(u.email) = lower(:email)")
+Optional<User> findWithRolesAndPermissionsByEmail(@Param("email") String email);
+
 }

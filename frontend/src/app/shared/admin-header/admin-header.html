@@ -7,7 +7,7 @@
   <!-- Middle: Search -->
   <div class="flex-1 mx-6 hidden md:block">
     <input type="text" placeholder="Tìm kiếm..."
-           class="w-full max-w-md rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:ring-2 focus:ring-pink-400 focus:outline-none"/>
+      class="w-full max-w-md rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:ring-2 focus:ring-pink-400 focus:outline-none" />
   </div>
 
   <!-- Right: Actions -->
@@ -21,16 +21,26 @@
     <!-- Avatar dropdown -->
     <div class="relative group">
       <div class="flex items-center space-x-2 cursor-pointer">
-        <img src="https://i.pravatar.cc/40" alt="avatar"
-             class="w-9 h-9 rounded-full border">
+        <img src="https://i.pravatar.cc/40" alt="avatar" class="w-9 h-9 rounded-full border">
         <span class="font-medium text-gray-700">Admin</span>
       </div>
       <!-- Dropdown -->
+      <!-- Dropdown -->
       <div class="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md hidden group-hover:block">
-        <a href="#" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-100">Hồ sơ</a>
+        <a (click)="openProfile()" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 cursor-pointer">
+          Hồ sơ
+        </a>
+
         <a href="#" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-100">Cài đặt</a>
         <a routerLink="/login" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Đăng xuất</a>
       </div>
+
+      <!-- Modal -->
+     <app-admin-profile-modal
+  [visible]="showProfile"
+  [profile]="profileData"
+  (closed)="showProfile = false">
+</app-admin-profile-modal>
     </div>
   </div>
 </header>

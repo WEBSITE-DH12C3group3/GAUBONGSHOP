@@ -58,6 +58,7 @@ import { WishlistComponent } from './features/wishlist/wishlist.component';
 // mânger cusyomer
 import { CustomersAdminComponent } from './admin/customers-admin/customers-admin';
 
+
 export const routes: Routes = [
   // ===== Customer layout =====
   {
