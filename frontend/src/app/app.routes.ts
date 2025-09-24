@@ -15,6 +15,7 @@ import { ProductsComponent } from './features/products/products';
 import { ProductDetailComponent } from './features/product_detail/product_detail';
 import { ClientChatPage } from './features/chat/client-chat';
 import { ForgotPasswordComponent } from './features/forgot-password/forgot-password';
+import { CheckoutPageComponent  } from './features/checkout/checkout-page';
 
 // Admin
 import { Dashboard } from './admin/dashboard/dashboard';
@@ -77,12 +78,19 @@ export const routes: Routes = [
       { path: '', component: HomeComponent },
       { path: 'wishlist', component: WishlistComponent },
 
-      // ===== Cart + Orders (customer)
+      // ===== Cart + chekcout + Orders (customer)
       {
         path: 'cart',
         loadComponent: () =>
           import('./features/cart/cart').then(m => m.CartComponent), // ✅ sửa đúng export name
       },
+
+      {
+        path: 'checkout',
+        loadComponent: () =>
+          import('./features/checkout/checkout-page').then(m => m.CheckoutPageComponent),
+      },
+
       {
         path: 'orders',
         loadComponent: () =>
