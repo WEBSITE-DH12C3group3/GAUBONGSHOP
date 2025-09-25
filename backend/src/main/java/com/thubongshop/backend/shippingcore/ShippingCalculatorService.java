@@ -8,6 +8,7 @@ import com.thubongshop.backend.shippingcore.dto.ShippingQuoteRequest;
 import com.thubongshop.backend.shippingvoucher.ShipVoucher;
 import com.thubongshop.backend.shippingvoucher.ShipVoucherService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,23 +22,31 @@ public class ShippingCalculatorService {
 
   private final ShippingRateRepo shippingRateRepo;
   private final ShipVoucherService voucherService;
+  private final DistanceService distanceService;
 
-  /**
-   * fee = baseFee + feePerKg * weightKg
-   * - Nếu orderSubtotal >= freeThreshold ⇒ miễn phí
-   * - Áp voucher (không cho âm)
-   * Lưu ý: DTO hiện tại KHÔNG chứa distance/lat-lng ⇒ không tính theo km.
-   */
+  @Value("${shipping.perKm:0}")
+  private BigDecimal perKm; // VND/km
+
+  @Value("${shop.origin.lat:0}")
+  private double shopLat;
+  @Value("${shop.origin.lng:0}")
+  private double shopLng;
+
   public ShippingQuote quote(ShippingQuoteRequest req) {
-    if (req == null) throw new BusinessException("INVALID_REQUEST", "Thiếu dữ liệu tính phí.");
+    if (req == null) throw new BusinessException("INVALID", "Thiếu dữ liệu báo giá");
 
     BigDecimal orderSubtotal = nvl(req.orderSubtotal());
-    BigDecimal weightKg      = maxZero(nvl(req.weightKg()));
-    if (weightKg.compareTo(BigDecimal.ZERO) < 0) {
-      throw new BusinessException("INVALID_WEIGHT", "Trọng lượng không hợp lệ.");
+    BigDecimal weightKg      = nvl(req.weightKg());
+
+    // ===== Tính khoảng cách (nếu chưa có) =====
+    Double distanceKm = req.distanceKm();
+    if (distanceKm == null && req.address() != null
+        && req.address().lat() != null && req.address().lng() != null) {
+      distanceKm = distanceService.haversineKm(
+          shopLat, shopLng, req.address().lat(), req.address().lng());
     }
 
-    // Lấy rate đang active (ưu tiên carrier theo alphabet để deterministic)
+    // Lấy rate đang active
     ShippingRate rate = pickActiveRate();
 
     // Tính phí trước giảm
@@ -49,39 +58,32 @@ public class ShippingCalculatorService {
       BigDecimal base  = nvl(rate.getBaseFee());
       BigDecimal perKg = nvl(rate.getFeePerKg());
       feeBeforeDiscount = base.add(perKg.multiply(weightKg));
+      if (perKm != null && perKm.compareTo(BigDecimal.ZERO) > 0 && distanceKm != null) {
+        feeBeforeDiscount = feeBeforeDiscount.add(
+            perKm.multiply(BigDecimal.valueOf(distanceKm)));
+      }
     }
-    feeBeforeDiscount = money(feeBeforeDiscount);
 
-    // Áp voucher (nếu có)
+    // ===== Áp voucher (đÃ sửa tên hàm & tham số) =====
     BigDecimal discount = BigDecimal.ZERO;
-    String appliedVoucher = null;
-
-    if (hasText(req.voucherCode())) {
-      ShipVoucher v = voucherService.getActiveOrThrow(req.voucherCode().trim());
-      discount = nvl(voucherService.calcShippingDiscount(v, feeBeforeDiscount, orderSubtotal));
-      if (discount.compareTo(feeBeforeDiscount) > 0) discount = feeBeforeDiscount;
-      appliedVoucher = v.getCode();
+    if (req.voucherCode() != null && !req.voucherCode().isBlank()) {
+      ShipVoucher v = voucherService.getActiveOrThrow(req.voucherCode());
+      discount = voucherService.calcShippingDiscount(
+          v, feeBeforeDiscount, orderSubtotal);
     }
-    discount = money(discount);
 
-    // Phí cuối
-    BigDecimal finalFee = feeBeforeDiscount.subtract(discount);
-    if (finalFee.compareTo(BigDecimal.ZERO) < 0) finalFee = BigDecimal.ZERO;
-    finalFee = money(finalFee);
+    BigDecimal finalFee = maxZero(feeBeforeDiscount.subtract(discount));
 
-    // Giữ nguyên constructor 7 tham số bạn đang dùng
     return new ShippingQuote(
-        rate.getCarrier(),
+        nvlStr(rate.getCarrier()),
         money(nvl(rate.getBaseFee())),
         money(nvl(rate.getFeePerKg())),
-        feeBeforeDiscount,
-        discount,
-        finalFee,
-        appliedVoucher
+        money(feeBeforeDiscount),
+        money(discount),
+        money(finalFee),
+        (req.voucherCode() != null && !req.voucherCode().isBlank()) ? req.voucherCode() : null
     );
   }
-
-  // -------------------- helpers --------------------
 
   private ShippingRate pickActiveRate() {
     List<ShippingRate> actives = shippingRateRepo.findByActiveTrue();
@@ -97,6 +99,5 @@ public class ShippingCalculatorService {
   private static BigDecimal nvl(BigDecimal v) { return v != null ? v : BigDecimal.ZERO; }
   private static BigDecimal maxZero(BigDecimal v) { return v.compareTo(BigDecimal.ZERO) < 0 ? BigDecimal.ZERO : v; }
   private static BigDecimal money(BigDecimal v) { return nvl(v).setScale(0, RoundingMode.HALF_UP); }
-  private static boolean hasText(String s) { return s != null && !s.trim().isEmpty(); }
   private static String nvlStr(String s) { return s != null ? s : ""; }
 }

@@ -8,26 +8,15 @@
         <h2 class="text-lg font-semibold">Địa chỉ nhận hàng</h2>
         <div class="flex items-center gap-3">
           <div *ngIf="distanceKmPreview!=null" class="text-sm text-gray-600">
-            Khoảng cách ước tính: <b>{{distanceKmPreview}} km</b>
+            Khoảng cách ước tính: <b>{{ distanceKmPreview }} km</b>
           </div>
           <button type="button" (click)="openMapPicker()" class="px-3 py-1 rounded-xl border">
             Chọn trên bản đồ
           </button>
-
-          <!-- Map picker inline (nếu muốn hiện ngay trong card) -->
-          <app-address-map-picker
-            *ngIf="showMap"
-            [visible]="showMap"
-            [initialLat]="addressForm.value.lat ?? origin?.lat ?? 21.027763"
-            [initialLng]="addressForm.value.lng ?? origin?.lng ?? 105.83416"
-            [approxAddress]="addressForm.value.addressLine"
-            (picked)="onMapPicked($event)"
-            (cancelled)="onMapCancel()">
-          </app-address-map-picker>
         </div>
       </div>
 
-      <form [formGroup]="addressForm" class="grid grid-cols-1 md:grid-cols-2 gap-3" novalidate>
+      <form [formGroup]="addressForm" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3" novalidate>
         <!-- Người nhận -->
         <div>
           <label class="block text-sm mb-1">Người nhận</label>
@@ -67,7 +56,7 @@
             [class.border-rose-500]="addressForm.get('provinceCode')?.touched && addressForm.get('provinceCode')?.invalid"
             aria-required="true"
             [attr.aria-invalid]="addressForm.get('provinceCode')?.invalid || null">
-            <option value="" disabled selected>-- Chọn tỉnh/thành --</option>
+            <option value="" disabled>-- Chọn tỉnh/thành --</option>
             <option *ngIf="loadingProv" disabled>Đang tải...</option>
             <ng-container *ngIf="!loadingProv">
               <option *ngFor="let p of provinces" [value]="p.code">{{ p.name }}</option>
@@ -87,7 +76,7 @@
             [class.border-rose-500]="addressForm.get('districtCode')?.touched && addressForm.get('districtCode')?.invalid"
             aria-required="true"
             [attr.aria-invalid]="addressForm.get('districtCode')?.invalid || null">
-            <option value="" disabled selected>-- Chọn quận/huyện --</option>
+            <option value="" disabled>-- Chọn quận/huyện --</option>
             <option *ngIf="loadingDist" disabled>Đang tải...</option>
             <ng-container *ngIf="!loadingDist">
               <option *ngFor="let d of districts" [value]="d.code">{{ d.name }}</option>
@@ -107,7 +96,7 @@
             [class.border-rose-500]="addressForm.get('wardCode')?.touched && addressForm.get('wardCode')?.invalid"
             aria-required="true"
             [attr.aria-invalid]="addressForm.get('wardCode')?.invalid || null">
-            <option value="" disabled selected>-- Chọn phường/xã --</option>
+            <option value="" disabled>-- Chọn phường/xã --</option>
             <option *ngIf="loadingWard" disabled>Đang tải...</option>
             <ng-container *ngIf="!loadingWard">
               <option *ngFor="let w of wards" [value]="w.code">{{ w.name }}</option>
@@ -120,13 +109,16 @@
         <!-- Địa chỉ chi tiết -->
         <div>
           <label class="block text-sm mb-1">Địa chỉ chi tiết</label>
-          <input
-            formControlName="addressLine"
-            class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
-            [class.border-rose-500]="addressForm.get('addressLine')?.touched && addressForm.get('addressLine')?.invalid"
-            placeholder="Số nhà, đường...">
+          <app-address-suggest-input
+            [value]="addressForm.value.addressLine || ''"
+            (valueChange)="addressForm.patchValue({ addressLine: $event })"
+            [province]="provinceName"
+            [district]="districtName"
+            (pickItem)="onSuggestPicked($event)"
+            placeholder="Số nhà, đường, toà nhà...">
+          </app-address-suggest-input>
           <p *ngIf="addressForm.get('addressLine')?.touched && addressForm.get('addressLine')?.invalid"
-             class="text-xs text-rose-600 mt-1">Vui lòng nhập địa chỉ chi tiết.</p>
+            class="text-xs text-rose-600 mt-1">Vui lòng nhập địa chỉ chi tiết.</p>
         </div>
 
         <!-- Toạ độ -->
@@ -145,6 +137,19 @@
       </form>
     </div>
 
+
+    <div class="mt-3">
+      <app-address-book-select
+        (chooseAddress)="onChooseAddress($event)">
+      </app-address-book-select>
+
+      <button type="button" class="mt-2 px-3 py-1 rounded-xl border" (click)="saveAddress()">
+        Lưu địa chỉ này vào sổ địa chỉ
+      </button>
+    </div>
+
+
+
     <!-- 2) Vận chuyển -->
     <div class="bg-white rounded-2xl shadow p-5">
       <div class="flex items-center justify-between mb-3">
@@ -152,15 +157,11 @@
 
         <!-- Nhóm control của shipping -->
         <div class="flex items-center gap-3" [formGroup]="shippingForm">
-          <label class="inline-flex items-center gap-2 text-sm">
-            <input type="checkbox" formControlName="cod">
-            Thanh toán COD
-          </label>
           <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-500">Khối lượng (g):</span>
+            <span class="text-sm text-gray-500">Khối lượng (kg):</span>
             <input type="number"
                    class="w-28 border rounded-xl px-3 py-1 outline-none focus:ring-2 focus:ring-pink-600"
-                   formControlName="weightGram" min="10">
+                   formControlName="weightKg" min="0" step="0.1">
           </div>
           <button type="button" class="px-3 py-1 bg-gray-100 rounded-xl" (click)="getQuotes()">
             Lấy báo giá
@@ -175,8 +176,12 @@
       <div class="divide-y" *ngIf="quotes.length > 0">
         <div *ngFor="let q of quotes" class="py-3 flex items-center justify-between gap-3">
           <div class="min-w-0">
-            <div class="font-medium">{{ q.carrierName }} – {{ q.serviceLabel }}</div>
-            <div class="text-xs text-gray-500">ETA: {{ q.etaMin }}–{{ q.etaMax }} ngày</div>
+            <div class="font-medium">
+              {{ q.carrierName }} <span class="text-gray-500">– {{ q.serviceLabel }}</span>
+            </div>
+            <div class="text-xs text-gray-500" *ngIf="q.etaMin || q.etaMax">
+              ETA: {{ q.etaMin || '?' }}–{{ q.etaMax || '?' }} ngày
+            </div>
             <div *ngIf="q.voucherApplied" class="text-xs text-green-600 mt-0.5">
               Đã áp voucher {{ q.voucherApplied }}
               (trước: {{ q.feeBeforeVoucher || 0 | currency:'VND':'symbol':'1.0-0' }})
@@ -199,7 +204,7 @@
       </div>
 
       <div *ngIf="!loadingQuotes && quotes.length===0" class="text-gray-500 text-sm">
-        Chưa có báo giá. Hãy điền địa chỉ đầy đủ và bấm “Lấy báo giá”.
+        Chưa có báo giá. Hãy điền địa chỉ đầy đủ (bao gồm toạ độ) và bấm “Lấy báo giá”.
       </div>
     </div>
 
@@ -221,7 +226,7 @@
         </button>
       </div>
       <p class="text-xs text-gray-500 mt-2">
-        Mã chỉ áp dụng với một số hãng/dịch vụ & điều kiện nhất định.
+        Mã chỉ áp dụng với một số điều kiện nhất định (giá trị đơn, khu vực, hãng vận chuyển...).
       </p>
     </div>
   </div>
@@ -262,20 +267,24 @@
           <input type="radio" value="COD" formControlName="method">
           COD - Thanh toán khi nhận hàng
         </label>
-        <label class="flex items-center gap-2">
-          <input type="radio" value="e_wallet" formControlName="method">
-          Ví điện tử (Momo/ZaloPay)
+
+        <label class="flex items-center gap-2 opacity-60">
+          <input type="radio" value="e_wallet" formControlName="method" [disabled]="true">
+          Ví điện tử (Momo/ZaloPay) — sắp mở
         </label>
-        <label class="flex items-center gap-2">
-          <input type="radio" value="bank_transfer" formControlName="method">
-          Chuyển khoản ngân hàng
+
+        <label class="flex items-center gap-2 opacity-60">
+          <input type="radio" value="bank_transfer" formControlName="method" [disabled]="true">
+          Chuyển khoản ngân hàng — sắp mở
         </label>
-        <label class="flex items-center gap-2">
-          <input type="radio" value="credit_card" formControlName="method">
-          Thẻ tín dụng/ghi nợ
+
+        <label class="flex items-center gap-2 opacity-60">
+          <input type="radio" value="credit_card" formControlName="method" [disabled]="true">
+          Thẻ tín dụng/ghi nợ — sắp mở
         </label>
       </form>
     </div>
+
 
     <!-- Ghi chú + Đặt hàng -->
     <div class="bg-white rounded-2xl shadow p-5" [formGroup]="noteForm">
@@ -284,7 +293,7 @@
         formControlName="note"
         rows="3"
         class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
-        placeholder="Yêu cầu giao hàng, ghi chú..."></textarea>
+        placeholder="Yêu cầu giao hàng, giờ nhận, lưu ý bảo quản..."></textarea>
 
       <button
         type="button"
@@ -298,11 +307,12 @@
     </div>
   </div>
 
-  <!-- Modal map picker (kiểu overlay toàn màn) -->
+  <!-- Modal map picker toàn màn (nếu bạn muốn modal riêng, có thể dùng khối này thay vì inline) -->
   <div *ngIf="showMap" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl shadow-lg w-[90vw] max-w-4xl p-4">
       <h3 class="text-lg font-semibold mb-3">Chọn vị trí giao hàng</h3>
       <app-address-map-picker
+        [visible]="showMap"
         [initialLat]="addressForm.value.lat || origin?.lat || 21.027763"
         [initialLng]="addressForm.value.lng || origin?.lng || 105.834160"
         [approxAddress]="addressForm.value.addressLine"
@@ -311,4 +321,6 @@
       </app-address-map-picker>
     </div>
   </div>
+
+  
 </section>
