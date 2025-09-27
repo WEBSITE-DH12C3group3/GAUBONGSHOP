@@ -1,0 +1,26 @@
+[
+  {
+    "intents": ["đổi hàng", "đổi trả", "trả hàng", "refund"],
+    "answer": "Shop cho phép đổi trả trong 7 ngày nếu sản phẩm còn nguyên tem/mác, chưa qua sử dụng. Vui lòng cung cấp mã đơn để mình hỗ trợ."
+  },
+  {
+    "intents": ["vận chuyển", "ship", "phí ship", "bao lâu nhận"],
+    "answer": "Thời gian giao: nội thành 1-2 ngày, tỉnh 2-4 ngày. Phí ship hiển thị ở bước thanh toán theo địa chỉ của bạn."
+  },
+  {
+    "intents": ["bảo hành", "bảo hành gấu", "bảo hành sản phẩm"],
+    "answer": "Gấu bông được bảo hành đường chỉ trong 30 ngày. Bạn giữ hoá đơn/mã đơn để được hỗ trợ nhanh."
+  },
+  {
+    "intents": ["khuyến mãi", "voucher", "mã giảm", "sale"],
+    "answer": "Mã giảm cập nhật mỗi tuần trên banner trang chủ. Nhập mã ở bước checkout để áp dụng."
+  },
+  {
+    "intents": ["giờ mở cửa", "liên hệ", "hotline", "địa chỉ"],
+    "answer": "Shop mở cửa 08:00–21:00 mỗi ngày. Hotline: 09xx xxx xxx. Địa chỉ: 123 Trần Phú, Q.5, TP.HCM."
+  },
+    {
+    "intents": ["phí ship", "vận chuyển", "bao lâu nhận"],
+    "answer": "Nội thành 1–2 ngày, tỉnh 2–4 ngày. Phí ship hiển thị ở bước thanh toán."
+  }
+]

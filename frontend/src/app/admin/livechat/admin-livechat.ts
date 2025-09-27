@@ -1,12 +1,17 @@
 import {
   Component,
   OnInit,
+  OnDestroy,
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   ViewChild,
   ElementRef,
-  Inject,LOCALE_ID
+  Inject,
+  LOCALE_ID,
+  inject,
+  PLATFORM_ID,
 } from '@angular/core';
-import { CommonModule, formatDate } from '@angular/common';
+import { CommonModule, formatDate, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { LivechatAdminService } from '../../shared/services/livechat-admin.service';
@@ -18,8 +23,11 @@ import { ChatSessionResponse, MessageDTO } from '../../models/chat.model';
   imports: [CommonModule, FormsModule],
   templateUrl: './admin-livechat.html',
   styleUrls: ['./admin-livechat.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AdminLivechatPage implements OnInit {
+export class AdminLivechatPage implements OnInit, OnDestroy {
+  private platformId = inject(PLATFORM_ID);
+
   sessions: ChatSessionResponse[] = [];
   selected?: ChatSessionResponse;
   messages: MessageDTO[] = [];
@@ -29,87 +37,99 @@ export class AdminLivechatPage implements OnInit {
   @ViewChild('scrollHost', { static: false })
   private scrollHost?: ElementRef<HTMLDivElement>;
 
-  // Cố định timezone để tính ngày theo VN (tránh lệch do SSR/khác múi giờ)
   private readonly TZ = 'Asia/Ho_Chi_Minh';
 
   constructor(
-    private svc: LivechatAdminService,
-    private cdr: ChangeDetectorRef,
-    @Inject(LOCALE_ID) private locale: string
+    private readonly svc: LivechatAdminService,
+    private readonly cdr: ChangeDetectorRef,
+    @Inject(LOCALE_ID) private readonly locale: string
   ) {}
 
   ngOnInit(): void {
-    // Khởi tạo socket kênh admin + auth header
-    this.svc.initSocket(() => ({
-      Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
-    }));
+    // 1) Khởi tạo socket admin + Authorization (chỉ ở browser)
+    if (isPlatformBrowser(this.platformId)) {
+      this.svc.initSocket((): Record<string, string> => {
+        const raw =
+          localStorage.getItem('token') ||
+          localStorage.getItem('access_token') ||
+          localStorage.getItem('jwt') ||
+          '';
+        const Authorization = raw ? (/^Bearer\s/i.test(raw) ? raw : `Bearer ${raw}`) : '';
+        // LUÔN trả object (kể cả rỗng) để không lỗi TS
+        return Authorization ? { Authorization } : {};
+      });
+    }
 
-    // Theo dõi danh sách session
+    // 2) Theo dõi danh sách phiên
     this.svc.sessions$.subscribe((list) => {
-      this.sessions = list;
+      this.sessions = list || [];
       if (this.selected) {
-        // giữ lại item đã chọn nếu còn trong danh sách
         this.selected = this.sessions.find((x) => x.id === this.selected!.id);
       }
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     });
 
-    // Tải lần đầu
+    // 3) Tải lần đầu
     this.svc.reload();
   }
 
-  /** Chọn 1 cuộc hội thoại */
   select(s: ChatSessionResponse) {
+    if (!s) return;
     this.selected = s;
-    this.svc.setActive(s.id); // mark read ở backend
     this.loading = true;
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
 
-    this.svc.messages(s.id).subscribe((res) => {
-      this.messages = res.content ?? res.items ?? [];
-      this.loading = false;
-      this.cdr.detectChanges();
-      setTimeout(() => this.scrollBottom(), 0);
+    this.svc.setActive(s.id);
+
+    this.svc.messages(s.id).subscribe({
+      next: (items) => {
+        this.messages = items || [];
+        this.loading = false;
+        this.cdr.markForCheck();
+        setTimeout(() => this.scrollBottom(), 0);
+      },
+      error: () => {
+        this.loading = false;
+        this.cdr.markForCheck();
+      },
     });
   }
 
-  /** Gửi tin nhắn */
   send() {
-    if (!this.selected || !this.input.trim()) return;
-    const c = this.input.trim();
-    this.input = '';
-    this.cdr.detectChanges(); // clear input ngay
+    if (!this.selected) return;
+    const text = (this.input || '').trim();
+    if (!text) return;
 
-    this.svc.send(this.selected.id, c).subscribe((m) => {
-      this.messages.push(m);
-      this.cdr.detectChanges();
-      this.scrollBottom();
+    this.input = '';
+    this.cdr.markForCheck();
+
+    this.svc.send(this.selected.id, text).subscribe({
+      next: (m) => {
+        this.messages.push(m);
+        this.cdr.markForCheck();
+        this.scrollBottom();
+      },
+      error: (e) => console.error('[admin-livechat] send failed:', e),
     });
   }
 
-  // ===== trackBy cho list để render mượt =====
   trackSession = (_: number, s: ChatSessionResponse) => s.id;
   trackMessage = (_: number, m: MessageDTO) => m.id;
 
-  // ===== UI: KHÁCH (participant1) TRÁI - trắng; ADMIN PHẢI - hồng =====
   rowClass(m: MessageDTO, sel: ChatSessionResponse) {
     return m.senderId === sel.participant1Id ? 'flex justify-start' : 'flex justify-end';
   }
   bubbleClass(m: MessageDTO, sel: ChatSessionResponse) {
     return m.senderId === sel.participant1Id
-      ? 'bg-white rounded-bl-sm' // khách: trái, nền trắng
-      : 'bg-pink-600 text-white rounded-br-sm'; // admin: phải, nền hồng
+      ? 'bg-white rounded-bl-sm'
+      : 'bg-pink-600 text-white rounded-br-sm';
   }
 
-  // ===== Divider theo ngày — chuẩn timezone VN =====
-  /** So sánh 2 thời điểm có cùng ngày theo TZ cố định */
   private sameDayTZ(a: string | Date, b: string | Date): boolean {
     const fa = formatDate(a, 'yyyy-MM-dd', this.locale, this.TZ);
     const fb = formatDate(b, 'yyyy-MM-dd', this.locale, this.TZ);
     return fa === fb;
   }
-
-  /** Có hiển thị divider ở vị trí i không */
   showDayDivider(i: number): boolean {
     if (i === 0) return true;
     const prev = this.messages[i - 1]?.createdAt as any;
@@ -117,22 +137,24 @@ export class AdminLivechatPage implements OnInit {
     if (!prev || !curr) return false;
     return !this.sameDayTZ(prev, curr);
   }
-
-  /** Nhãn ngày ở vị trí i: Hôm nay/Hôm qua/dd/MM/yyyy */
   dayLabel(i: number): string {
     const d = this.messages[i]?.createdAt as any;
     const now = new Date();
     const yesterday = new Date();
     yesterday.setDate(now.getDate() - 1);
-
     if (this.sameDayTZ(d, now)) return 'Hôm nay';
     if (this.sameDayTZ(d, yesterday)) return 'Hôm qua';
     return formatDate(d, 'dd/MM/yyyy', this.locale, this.TZ);
   }
 
-  // ===== Scroll xuống cuối khung chat =====
   private scrollBottom() {
     const el = this.scrollHost?.nativeElement;
     if (el) el.scrollTop = el.scrollHeight;
+  }
+
+  ngOnDestroy(): void {
+    try {
+      (this.svc as any)?.dispose?.();
+    } catch {}
   }
 }

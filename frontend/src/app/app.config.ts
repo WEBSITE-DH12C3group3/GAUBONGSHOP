@@ -1,3 +1,4 @@
+// src/app/app.config.ts
 import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
@@ -25,26 +26,32 @@ import { Router } from '@angular/router';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 
-// ---------- Auth Interceptor ----------
+/** ===================== AUTH INTERCEPTOR ===================== **/
 export const authInterceptorFn: HttpInterceptorFn = (req, next) => {
   const platformId = inject(PLATFORM_ID);
 
-  // Bỏ qua preflight
+  // 1) Bỏ qua preflight/đầu dò
   const method = (req.method || 'GET').toUpperCase();
-  if (method === 'OPTIONS') return next(req);
+  if (method === 'OPTIONS' || method === 'HEAD') {
+    return next(req);
+  }
 
-  // Nhận diện API absolute/relative
+  // 2) Nhận diện API absolute/relative
   const apiBase = (environment.apiUrl || '').replace(/\/+$/, ''); // trim trailing slash
   const url = req.url || '';
 
-  const isAbsoluteApi = apiBase && url.startsWith(apiBase + '/');
-  const isRelativeApi = url.startsWith('/api/');
-  if (!isAbsoluteApi && !isRelativeApi) return next(req);
+  // URL tuyệt đối là API nếu bằng hẳn apiBase hoặc bắt đầu bằng apiBase + '/'
+  const isAbsoluteApi = !!apiBase && (url === apiBase || url.startsWith(apiBase + '/'));
+  // URL tương đối là API nếu bắt đầu bằng /api hoặc đúng '/api'
+  const isRelativeApi = url === '/api' || url.startsWith('/api/');
+  if (!isAbsoluteApi && !isRelativeApi) {
+    return next(req);
+  }
 
-  // Lấy path tương đối để soi rule
-  const path = isAbsoluteApi ? url.substring(apiBase.length) : url; // vd: /api/...
+  // 3) Path tương đối để áp rule
+  const path = isAbsoluteApi ? url.substring(apiBase.length) : url; // ví dụ: /api/xxx
 
-  // PUBLIC cụ thể (login/register/guest, file tĩnh…)
+  // 4) Allow-list endpoint PUBLIC
   const isExplicitPublic =
     (method === 'POST' && (
       path.startsWith('/api/users/login') ||
@@ -56,7 +63,6 @@ export const authInterceptorFn: HttpInterceptorFn = (req, next) => {
       path.startsWith('/brandimg/')
     ));
 
-  // PUBLIC GET (catalog)
   const isPublicGet =
     method === 'GET' && (
       path.startsWith('/api/products')   ||
@@ -67,74 +73,111 @@ export const authInterceptorFn: HttpInterceptorFn = (req, next) => {
     );
 
   if (isExplicitPublic || isPublicGet) {
-    // thêm header nhẹ để backend phân biệt XHR (tuỳ bạn)
-    return next(req.clone({ setHeaders: { 'X-Requested-With': 'XMLHttpRequest' }}));
+    return next(req.clone({
+      setHeaders: { 'X-Requested-With': 'XMLHttpRequest' }
+    }));
   }
 
-  // PRIVATE: gắn token (chỉ trên browser)
+  // 5) PRIVATE: gắn token (chỉ khi chạy trên browser)
   let token: string | null = null;
   if (isPlatformBrowser(platformId)) {
-    token =
-      localStorage.getItem('token') ||
-      localStorage.getItem('access_token') ||
-      localStorage.getItem('jwt') ||
-      sessionStorage.getItem('token') ||
-      sessionStorage.getItem('access_token') ||
-      null;
+    try {
+      token =
+        localStorage.getItem('token') ||
+        localStorage.getItem('access_token') ||
+        localStorage.getItem('jwt') ||
+        sessionStorage.getItem('token') ||
+        sessionStorage.getItem('access_token') ||
+        null;
+    } catch {
+      token = null;
+    }
   }
   if (token && !/^Bearer\s/i.test(token)) token = `Bearer ${token}`;
 
-  const headers: Record<string,string> = {
+  const headers: Record<string, string> = {
     'X-Requested-With': 'XMLHttpRequest',
     ...(token ? { Authorization: token } : {})
   };
 
-  // Nếu backend dùng cookie/session: bật withCredentials
-  // const useCookie = !!(environment as any).authWithCredentials;
+  // Lưu ý: KHÔNG set Content-Type để không phá multipart/FormData
+  const authReq = req.clone({
+    setHeaders: headers
+    // Nếu backend dùng cookie session:
+    // withCredentials: (environment as any).authWithCredentials === true
+  });
 
-  return next(req.clone({
-    setHeaders: headers,
-    // withCredentials: useCookie === true
-  }));
+  return next(authReq);
 };
 
-// ---------- Error Interceptor ----------
+/** ===================== ERROR INTERCEPTOR ===================== **/
 export const errorInterceptorFn: HttpInterceptorFn = (req, next) => {
   const platformId = inject(PLATFORM_ID);
   const router = inject(Router);
+
+  // Tự nhận diện đây có phải là endpoint auth không (để tránh loop)
+  const apiBase = (environment.apiUrl || '').replace(/\/+$/, '');
+  const url = req.url || '';
+  const isAbsoluteApi = !!apiBase && (url === apiBase || url.startsWith(apiBase + '/'));
+  const isRelativeApi = url === '/api' || url.startsWith('/api/');
+  const path = isAbsoluteApi ? url.substring(apiBase.length) : (isRelativeApi ? url : '');
+  const isAuthPath =
+    path.startsWith('/api/users/login') ||
+    path.startsWith('/api/users/register');
 
   return next(req).pipe(
     catchError((err: HttpErrorResponse) => {
       if (isPlatformBrowser(platformId)) {
         if (err.status === 401) {
           // Token hết hạn / chưa đăng nhập
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          // Điều hướng SPA (mượt hơn window.location.href)
-          router.navigateByUrl('/login');
-        } else if (err.status === 403) {
-          // Chỉ redirect khi đụng API admin
-          if (req.url.includes('/api/admin/')) {
+          try {
             localStorage.removeItem('token');
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('jwt');
             localStorage.removeItem('user');
-            router.navigateByUrl('/login');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('access_token');
+          } catch {}
+
+          if (!isAuthPath) {
+            const returnUrl = location.pathname + location.search;
+            router.navigate(['/login'], { queryParams: { returnUrl } });
+          }
+        } else if (err.status === 403) {
+          // Với API admin thì đẩy về login; còn public 403 để UI tự xử
+          const hitAdminApi = path.startsWith('/api/admin/');
+          if (hitAdminApi && !isAuthPath) {
+            try {
+              localStorage.removeItem('token');
+              localStorage.removeItem('access_token');
+              localStorage.removeItem('jwt');
+              localStorage.removeItem('user');
+              sessionStorage.removeItem('token');
+              sessionStorage.removeItem('access_token');
+            } catch {}
+            const returnUrl = location.pathname + location.search;
+            router.navigate(['/login'], { queryParams: { returnUrl } });
           } else {
-            // Public 403: để component tự xử lý
-            console.warn('[403] Forbidden on public API:', req.url);
+            console.warn('[403] Forbidden:', req.url);
           }
         }
-        // Các lỗi khác (400, 409, 500...) để component tự xử lý UI/Toast
+        // Các lỗi khác: để component/service hiển thị message phù hợp
       }
       return throwError(() => err);
     })
   );
 };
 
-// ---------- App Config ----------
+export const debugLogInterceptorFn: HttpInterceptorFn = (req, next) => {
+  // Log sau khi authInterceptor đã chạy: gói next() bằng tap
+  return next(req).pipe();
+};
+
+/** ===================== APP CONFIG ===================== **/
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideZonelessChangeDetection(),
+    provideZonelessChangeDetection(), // Bạn đang chủ động markForCheck() sau socket events → OK
     provideRouter(
       routes,
       withRouterConfig({ onSameUrlNavigation: 'reload' })
@@ -142,7 +185,24 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withEventReplay()),
     provideHttpClient(
       withFetch(),
-      withInterceptors([authInterceptorFn, errorInterceptorFn])
+      withInterceptors([
+        authInterceptorFn,         // gắn Authorization
+        (req, next) => {
+          // in ra lần nữa, ở đây log thẳng request đã được clone
+          const hasAuth = req.headers.has('Authorization');
+          const auth = req.headers.get('Authorization');
+          if (req.url.includes('/api/client/chat/sessions/with-admin')) {
+            console.info('[DEBUG] outgoing', req.method, req.url, {
+              hasAuth,
+              // In độ dài cho an toàn (tránh lộ token full)
+              authLen: auth?.length ?? 0,
+              authPrefix: auth?.slice(0, 14) // "Bearer xxxx..."
+            });
+          }
+          return next(req);
+        },
+        errorInterceptorFn
+      ])
     ),
   ]
 };

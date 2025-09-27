@@ -1,249 +1,103 @@
-/* Header chính */
-.header {
-  background: linear-gradient(90deg, #ff416c, #ff4b2b);
-  color: white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+/* Reusable icon button */
+.btn-icon { @apply w-10 h-10 grid place-items-center rounded-xl text-gray-700 hover:text-pink-600 hover:bg-pink-50 transition; }
+.link { @apply hover:text-pink-600 transition; }
+.nav-mobile { @apply block px-3 py-2 rounded-lg hover:bg-pink-50 hover:text-pink-600 transition; }
+.chip { @apply inline-flex items-center justify-center px-3 py-2 rounded-lg bg-gray-50 hover:bg-pink-50 hover:text-pink-600 border border-gray-100 text-sm transition; }
+.btn-primary { @apply w-full h-10 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white font-medium hover:opacity-95 active:scale-[.99] transition; }
+.btn-secondary { @apply w-full h-10 rounded-xl border border-gray-200 text-gray-700 hover:border-pink-300 hover:bg-pink-50 transition; }
+.btn-danger { @apply w-full h-10 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition; }
+
+/* Badges (cart, chat) */
+.badge { @apply absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1.5 rounded-full bg-pink-600 text-white text-[11px] font-bold grid place-items-center shadow; }
+
+/* Dropdown panel */
+.dropdown-panel { @apply absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg opacity-0 invisible translate-y-2 transition; }
+.dropdown-panel.open { @apply opacity-100 visible translate-y-0; }
+.dropdown-item { @apply block w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 transition; }
+
+/* ===== Desktop mega (pill) ===== */
+.pill-btn {
+  @apply inline-flex items-center px-4 py-2 rounded-full bg-white text-gray-700 border border-gray-200
+         shadow-sm hover:shadow-[0_6px_18px_rgba(244,114,182,0.18)]
+         hover:text-pink-600 hover:border-pink-200 transition select-none;
+}
+.nav-group { @apply h-12 flex items-center; }
+.mega-panel {
+  @apply absolute left-0 top-full mt-2 w-[720px] p-4 rounded-2xl bg-white border border-gray-100 shadow-xl
+         opacity-0 invisible -translate-y-2 transition;
+}
+.group:hover .mega-panel,
+.group:focus-within .mega-panel { @apply opacity-100 visible translate-y-0; }
+.mega-title { @apply text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2; }
+.mega-chips { @apply flex flex-wrap gap-2.5; }
+.chip-pill {
+  @apply inline-flex items-center px-3 py-2 rounded-full bg-gray-50 text-gray-700 border border-gray-200
+         hover:bg-white hover:text-pink-600 hover:border-pink-200
+         hover:shadow-[0_6px_16px_rgba(244,114,182,0.18)] hover:-translate-y-0.5 transition;
 }
 
-.container {
-  max-width: 1200px;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.6rem 1.2rem;
-}
+/* Animations (mobile drawer) */
+@keyframes fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes slideIn { from { transform: translateX(-100%) } to { transform: translateX(0) } }
+.animate-fade { animation: fade .2s ease-out; }
+.animate-slideIn { animation: slideIn .25s ease-out; }
 
-/* Logo */
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: bold;
-  font-size: 1.3rem;
-}
-.logo img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-}
-
-/* Search */
-.search-box {
-  flex: 1;
-  max-width: 450px;
-  display: flex;
-  background: white;
-  border-radius: 25px;
-  overflow: hidden;
-  margin: 0 1rem;
-}
-.search-box input {
-  flex: 1;
-  border: none;
-  outline: none;
-  padding: 0.5rem 0.8rem;
-  font-size: 0.9rem;
-  color: #333;
-}
-.search-box button {
-  border: none;
-  background: #ff416c;
-  color: white;
-  padding: 0.5rem 0.8rem;
-  cursor: pointer;
-  transition: background .2s ease;
-}
-.search-box button:hover {
-  background: #ff1744;
-}
-
-/* Icons */
-.icons {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-.icon {
-  font-size: 1.3rem;
-  cursor: pointer;
-  position: relative;
-  transition: color .2s ease;
-}
-.icon:hover {
-  color: #ffe082;
-}
-
-/* Giỏ hàng (tương thích cả id và data-attr) */
-#cartIcon,
-[data-cart-target] {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-#cartIcon .badge,
-[data-cart-target] .badge {
-  position: absolute;
-  top: -6px;
-  right: -10px;
-  background: #ffe082;
-  color: #000;
-  border-radius: 50%;
-  padding: 2px 6px;
-  font-size: 0.7rem;
-  font-weight: bold;
-  line-height: 1;
-  min-width: 18px;
-  text-align: center;
-  box-shadow: 0 1px 2px rgba(0,0,0,.2);
-}
-
-/* Dropdown Account */
-.icon.dropdown {
-  position: relative;
-}
-
-.icon.dropdown .dropdown-menu {
-  display: none;
-  position: absolute;
-  right: 0; /* canh bên phải icon */
-  top: 120%;
-  background: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  border-radius: 6px;
-  overflow: hidden;
-  animation: fadeIn 0.2s ease-in-out;
-  min-width: 180px;
-  flex-direction: column;
-  z-index: 1000;
-}
-
-.icon.dropdown .dropdown-menu a {
-  padding: 0.7rem 1rem;
-  display: block;
-  color: #333;
-  text-decoration: none;
-  font-size: 0.9rem;
-  transition: background 0.2s ease, padding-left 0.2s ease, color .2s ease;
-}
-.icon.dropdown .dropdown-menu a:hover {
-  background: #ffeef2;
-  padding-left: 1.3rem;
-  color: #ff416c;
-}
-
-/* Nếu bạn vẫn dùng mở dropdown bằng hover (song song với *ngIf) */
-.icon.dropdown:hover .dropdown-menu {
-  display: flex;
-}
-
-.icon.dropdown .dropdown-menu hr {
-  margin: 0.3rem 0;
-  border: none;
-  border-top: 1px solid #eee;
-}
-
-/* Navbar dưới */
-.navbar {
-  background: #fff;
-  border-bottom: 1px solid #eee;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  position: sticky;
-  top: 65px; /* đặt ngay dưới header trên */
-  z-index: 999;
-}
-.navbar .container {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  padding: 0.8rem 1.5rem;
-}
-
-/* Item cơ bản */
-.menu-item {
-  position: relative;
-  font-weight: 500;
-  color: #333;
-  text-decoration: none;
-  cursor: pointer;
-  transition: color 0.3s ease, transform 0.2s ease;
-}
-.menu-item:hover {
-  color: #ff416c;
-  transform: translateY(-2px);
-}
-
-/* Dropdown menu (navbar) */
-.dropdown span {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-.dropdown-menu {
-  display: none;
-  position: absolute;
-  top: 110%;
-  left: 0;
-  background: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  border-radius: 6px;
-  overflow: hidden;
-  animation: fadeIn 0.2s ease-in-out;
-  min-width: 180px;
-  flex-direction: column;
-  z-index: 1000;
-}
-.dropdown-menu a {
-  padding: 0.7rem 1rem;
-  display: block;
-  color: #333;
-  text-decoration: none;
-  transition: background 0.2s ease, padding-left 0.2s ease, color .2s ease;
-}
-.dropdown-menu a:hover {
-  background: #ffeef2;
-  padding-left: 1.3rem;
-  color: #ff416c;
-}
-
-/* Hiện dropdown khi hover */
-.dropdown:hover .dropdown-menu {
-  display: flex;
-}
-
-/* ================= Animations ================= */
-
-/* FadeIn (hợp nhất, tránh trùng tên) */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Cart pulse dùng cho hiệu ứng “bay vào giỏ” chạm đích */
+/* Cart pulse utility (hookable) */
 .cart-pulse { animation: cartPulse .3s ease-out; }
-@keyframes cartPulse {
-  0% { transform: scale(1) }
-  50% { transform: scale(1.15) }
-  100% { transform: scale(1) }
+@keyframes cartPulse { 0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)} }
+
+/* Small icon utilities (optional if using icon libs) */
+.i-fa-solid-truck-fast::before { content:"\f48b"; font: var(--fa-font-solid); }
+
+/* ===== Topbar premium style ===== */
+.topbar {
+  @apply w-full border-b border-rose-100/60;
+  /* gradient nhẹ, không chói */
+  background: linear-gradient(90deg, #fff7f9 0%, #fff 30%, #fff 70%, #fff7f9 100%);
+}
+/* hạt sáng lướt qua nền */
+.topbar__glow {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(1200px 60px at -20% 50%, rgba(255,182,193,.12), transparent 60%),
+    radial-gradient(1200px 60px at 120% 50%, rgba(255,182,193,.12), transparent 60%);
+  animation: topbarGlow 7s ease-in-out infinite;
+  mix-blend-mode: multiply;
+}
+/* pattern ảnh chạy ngang (tuỳ chọn) */
+.topbar__pattern {
+  position: absolute; inset: 0; opacity: .08;
+  background-image: url('../../../assets/hero/download.jpg'); /* đổi theo ảnh của bạn */
+  background-repeat: repeat;
+  background-size: 520px auto;
+  animation: topbarMove 24s linear infinite;
+  pointer-events: none;
+}
+/* Link tinh tế */
+.topbar__link { @apply relative text-gray-700 hover:text-rose-600 transition; }
+.topbar__link::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: -6px; height: 2px;
+  background: linear-gradient(90deg, rgba(244,114,182,0), rgba(244,114,182,.6), rgba(244,114,182,0));
+  transform: scaleX(0); transform-origin: center; transition: transform .25s ease;
+}
+.topbar__link:hover::after { transform: scaleX(1); }
+
+/* Keyframes (topbar) */
+@keyframes topbarGlow {
+  0% { background-position: 0% 50%, 100% 50%; opacity: .55; }
+  50% { background-position: 30% 50%, 70% 50%; opacity: .75; }
+  100% { background-position: 0% 50%, 100% 50%; opacity: .55; }
+}
+@keyframes topbarMove {
+  0% { background-position: 0 0; }
+  100% { background-position: 520px 0; }
 }
 
-/* Giảm chuyển động nếu người dùng chọn reduce motion */
-@media (prefers-reduced-motion: reduce) {
-  .cart-pulse,
-  .icon.dropdown .dropdown-menu,
-  .dropdown-menu {
-    animation: none !important;
-  }
-  .menu-item:hover { transform: none; }
+/* Dark mode (nếu có) */
+:root.dark .topbar {
+  background: linear-gradient(90deg, #2b0c14 0%, #1b0a0f 30%, #1b0a0f 70%, #2b0c14 100%);
+  border-color: rgba(244,114,182,0.15);
 }
-
-/* ================= Responsive tweaks ================= */
-@media (max-width: 768px) {
-  .container { padding: .6rem .8rem; }
-  .search-box { max-width: 100%; margin: 0 .5rem; }
-  .navbar { top: 60px; }
-}
+:root.dark .topbar__glow { mix-blend-mode: screen; opacity: .4; }
+:root.dark .topbar__link { @apply text-rose-100 hover:text-rose-300; }

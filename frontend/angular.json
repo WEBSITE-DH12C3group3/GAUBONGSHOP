@@ -18,8 +18,18 @@
             "assets": [
               {
                 "glob": "**/*",
+                "input": "src/assets",
+                "output": "assets"
+              },
+              {
+                "glob": "favicon.ico",
+                "input": "src",
+                "output": "/"
+              },
+              {
+                "glob": "**/*",
                 "input": "node_modules/leaflet/dist/images",
-                "output": "/assets/leaflet/"
+                "output": "assets/leaflet/"
               }
             ],
             "styles": [

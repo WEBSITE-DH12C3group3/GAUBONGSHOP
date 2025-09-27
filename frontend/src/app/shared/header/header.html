@@ -1,125 +1,328 @@
-<!-- Header -->
-<header class="bg-white shadow sticky top-0 z-50">
-  <div class="container mx-auto flex items-center justify-between py-3 px-6">
-    <!-- Logo -->
-    <div class="flex items-center space-x-2">
-      <!-- <img src="assets/images/logo.png" alt="Logo" class="h-10 w-10 object-contain" /> -->
-      <span class="text-xl font-bold text-pink-600 tracking-wide">GAUBONGSHOP</span>
+<header
+  class="sticky top-0 z-[100] w-full backdrop-blur bg-white/85 supports-[backdrop-filter]:bg-white/70 shadow-sm transition-transform duration-300 ease-out"
+  [class.-translate-y-full]="hiddenOnScroll"
+  (keydown.escape)="closeAll()"
+>
+  <!-- Topbar (new) -->
+  <div class="topbar relative hidden md:block">
+    <!-- lớp ánh sáng chuyển động (CSS-only) -->
+    <div class="topbar__glow pointer-events-none"></div>
+
+    <!-- lớp pattern ảnh chạy ngang (tùy chọn, cần file ảnh) -->
+    <!-- Không có ảnh vẫn ổn; thêm assets/patterns/topbar-plushies.png nếu muốn -->
+    <div class="topbar__pattern pointer-events-none"></div>
+
+    <div
+      class="max-w-7xl mx-auto h-10 px-4 lg:px-8 flex items-center justify-between text-[13.5px] lg:text-[14px] font-medium text-gray-700"
+    >
+      <div class="flex items-center gap-3 lg:gap-4">
+        <span class="inline-flex items-center gap-2 text-rose-600">
+          <i class="fa-solid fa-truck-fast"></i>
+          <span>Freeship đơn từ 500k</span>
+        </span>
+        <span class="opacity-30">•</span>
+        <span class="inline-flex items-center gap-2 text-rose-600">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span>Đổi trả trong 7 ngày</span>
+        </span>
+      </div>
+
+      <nav class="flex items-center gap-5">
+        <a routerLink="/about" class="topbar__link">Về GAUBONGSHOP</a>
+        <a routerLink="/contact" class="topbar__link">Liên hệ</a>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Main bar -->
+  <div class="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
+    <!-- Left: brand + mobile menu -->
+    <div class="flex items-center gap-3">
+      <button
+        type="button"
+        class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl hover:bg-pink-50 focus:outline-none focus:ring-2 focus:ring-pink-200"
+        aria-label="Mở menu"
+        (click)="toggleMobile()"
+      >
+        <i class="fa-solid fa-bars text-[18px] text-pink-600"></i>
+      </button>
+      <a routerLink="/" class="group inline-flex items-center gap-2">
+        <span
+          class="inline-grid place-items-center w-9 h-9 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 text-white shadow-md shadow-rose-200/60"
+        >
+          <i class="fa-solid fa-paw"></i>
+        </span>
+        <span
+          class="text-xl font-extrabold tracking-tight text-gray-900 group-hover:text-pink-600 transition"
+          >GAUBONGSHOP</span
+        >
+      </a>
     </div>
 
-    <!-- Search -->
-    <div class="flex-1 mx-6">
-      <div
-        class="flex bg-gray-100 rounded-lg overflow-hidden shadow-sm transition focus-within:ring-2 focus-within:ring-pink-400">
+    <!-- Center: search (hidden on mobile) -->
+    <div class="hidden md:block flex-1 mx-4">
+      <div class="relative">
         <input
-          type="search"
+          type="text"
           [formControl]="searchTerm"
           name="gaubong-search"
-          placeholder="Tìm kiếm sản phẩm..."
+          placeholder="Tìm kiếm gấu bông, phụ kiện..."
           autocomplete="off"
           readonly
           (focus)="removeReadonly($event)"
-          class="flex-1 px-4 py-2 bg-transparent outline-none text-gray-700"
+          (keydown.enter)="onSearch()"
+          class="w-full h-11 rounded-full pl-11 pr-12 border border-gray-200 focus:border-pink-300 focus:ring-4 focus:ring-pink-100 outline-none transition shadow-[0_1px_0_0_rgba(0,0,0,0.02)]"
+          aria-label="Tìm kiếm"
         />
-
-        <button (click)="onSearch()" class="px-4 text-pink-600 hover:text-pink-800 transition" aria-label="Tìm kiếm">
-          <i class="fa-solid fa-magnifying-glass"></i>
+        <i
+          class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+        ></i>
+        <button
+          (click)="onSearch()"
+          class="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 px-3 rounded-full text-sm font-medium bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:opacity-95 active:scale-[.98] transition"
+        >
+          Tìm
         </button>
       </div>
     </div>
 
-    <!-- Icons -->
-    <div class="flex items-center space-x-6">
-      <!-- Yêu thích -->
-      <a routerLink="/wishlist" class="relative text-gray-600 hover:text-pink-600 transition" aria-label="Yêu thích">
-        <i class="fa-solid fa-heart text-xl"></i>
+    <!-- Right: actions -->
+    <div class="flex items-center gap-2 md:gap-3">
+      <a routerLink="/wishlist" class="btn-icon" aria-label="Yêu thích">
+        <i class="fa-solid fa-heart"></i>
       </a>
 
-      <!-- Giỏ hàng (đã thêm id="cartIcon" để hiệu ứng bay tới) -->
-      <a
-        id="cartIcon"
-        routerLink="/cart"
-        class="relative text-gray-600 hover:text-pink-600 transition"
-        aria-label="Giỏ hàng"
-      >
-        <i class="fa-solid fa-cart-shopping text-xl"></i>
-        <span
-          *ngIf="(cartCount || 0) > 0"
-          class="absolute -top-2 -right-3 bg-pink-600 text-white text-xs font-bold rounded-full px-2 py-0.5 shadow"
-        >
-          {{ cartCount || 0 }}
-        </span>
+      <a routerLink="/cart" id="cartIcon" data-cart-target class="btn-icon relative" aria-label="Giỏ hàng">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span *ngIf="(cartCount || 0) > 0" class="badge">{{ cartCount || 0 }}</span>
       </a>
 
-      <!-- nút Messenger trong header -->
-      <button *ngIf="showChat" (click)="openChat()"
-        class="relative inline-flex items-center justify-center w-10 h-10 rounded-full hover:bg-pink-50"
-        aria-label="Mở chat">
-        <i class="fa-brands fa-facebook-messenger text-pink-600 text-xl"></i>
-        <span *ngIf="unreadTotal > 0"
-              class="absolute -top-1 -right-1 bg-pink-600 text-white text-[10px] leading-none px-1.5 py-0.5 rounded-full">
-          {{ unreadTotal }}
-        </span>
+      <button *ngIf="showChat" (click)="openChat()" class="btn-icon relative" aria-label="Tin nhắn">
+        <i class="fa-brands fa-facebook-messenger"></i>
+        <span *ngIf="unreadTotal > 0" class="badge -right-1 -top-1 text-[10px]">{{ unreadTotal }}</span>
       </button>
 
-      <!-- Tài khoản -->
-      <div class="relative">
-        <button (click)="toggleDropdown()" class="text-gray-600 hover:text-pink-600 transition" aria-haspopup="menu" aria-expanded="{{dropdownOpen}}">
-          <i class="fa-solid fa-user text-xl"></i>
+      <!-- Account -->
+      <div class="relative" data-account-wrapper (clickOutside)="dropdownOpen = false">
+        <button (click)="toggleDropdown()" class="btn-icon" aria-haspopup="menu" [attr.aria-expanded]="dropdownOpen">
+          <i class="fa-solid fa-user"></i>
         </button>
 
         <!-- Dropdown -->
-        <div *ngIf="dropdownOpen"
-             class="absolute right-0 mt-3 w-48 bg-white border border-gray-200 rounded-lg shadow-md transition duration-200">
-          <!-- Nếu chưa đăng nhập -->
-          <ng-container *ngIf="!auth.isLoggedIn(); else loggedIn">
-            <a routerLink="/login" class="block px-4 py-2 hover:bg-gray-50">
-              <i class="fa-solid fa-right-to-bracket mr-2"></i> Đăng nhập
-            </a>
-            <a routerLink="/register" class="block px-4 py-2 hover:bg-gray-50">
-              <i class="fa-solid fa-user-plus mr-2"></i> Đăng ký
-            </a>
+        <div class="dropdown-panel" [class.open]="dropdownOpen" role="menu" aria-label="Tài khoản">
+          <ng-container *ngIf="!auth?.isLoggedIn(); else loggedIn">
+            <a routerLink="/login" role="menuitem" class="dropdown-item"
+              ><i class="fa-solid fa-right-to-bracket mr-2"></i> Đăng nhập</a
+            >
+            <a routerLink="/register" role="menuitem" class="dropdown-item"
+              ><i class="fa-solid fa-user-plus mr-2"></i> Đăng ký</a
+            >
           </ng-container>
-
-          <!-- Nếu đã đăng nhập -->
           <ng-template #loggedIn>
-            <a routerLink="/profile" class="block px-4 py-2 hover:bg-gray-50">
-              <i class="fa-solid fa-id-card mr-2"></i> Hồ sơ
-            </a>
-            <a routerLink="/orders" class="block px-4 py-2 hover:bg-gray-50">
-              <i class="fa-solid fa-box mr-2"></i> Đơn hàng
-            </a>
-            <hr />
-            <a (click)="onLogout()" class="block px-4 py-2 text-red-600 hover:bg-red-50">
+            <a routerLink="/profile" role="menuitem" class="dropdown-item"
+              ><i class="fa-solid fa-id-card mr-2"></i> Hồ sơ</a
+            >
+            <a routerLink="/orders" role="menuitem" class="dropdown-item"
+              ><i class="fa-solid fa-box mr-2"></i> Đơn hàng</a
+            >
+            <hr class="my-1" />
+            <button (click)="onLogout()" role="menuitem" class="dropdown-item text-red-600 hover:bg-red-50">
               <i class="fa-solid fa-right-from-bracket mr-2"></i> Đăng xuất
-            </a>
+            </button>
           </ng-template>
         </div>
       </div>
-    </div> <!-- ✅ đóng div Icons -->
-  </div> <!-- ✅ đóng div container -->
+    </div>
+  </div>
 
-  <!-- Navbar -->
-  <nav class="bg-pink-600 text-white">
-    <div class="container mx-auto flex items-center space-x-6 px-6 py-2">
-      <!-- Danh mục -->
-      <div class="relative group">
-        <span class="cursor-pointer flex items-center font-medium hover:text-yellow-200 transition">
-          Danh mục <i class="fa-solid fa-angle-down ml-1"></i>
-        </span>
-        <div
-          class="absolute left-0 mt-2 w-48 bg-white text-gray-700 rounded-lg shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition">
-          <a routerLink="/products/teddy" class="block px-4 py-2 hover:bg-gray-50">Gấu Teddy</a>
-          <a routerLink="/products/thobong" class="block px-4 py-2 hover:bg-gray-50">Thỏ Bông</a>
-          <a routerLink="/products/hoabong" class="block px-4 py-2 hover:bg-gray-50">Hoa Bông</a>
-          <a routerLink="/products/phukienshop" class="block px-4 py-2 hover:bg-gray-50">Phụ Kiện</a>
+  <!-- Nav bar (desktop) -->
+  <nav class="hidden lg:block border-t border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 lg:px-8 h-12 flex items-center justify-between text-[15px] font-medium text-gray-700">
+
+      <!-- LEFT: Mega groups -->
+      <div class="flex items-center gap-2">
+
+        <!-- Danh mục -->
+        <div class="nav-group group relative">
+          <button class="pill-btn" aria-haspopup="true" aria-expanded="false">
+            <i class="fa-solid fa-grid-2 mr-2"></i> Danh mục
+            <i class="fa-solid fa-angle-down ml-2 text-xs"></i>
+          </button>
+
+          <div class="mega-panel" role="menu" aria-label="Danh mục">
+            <div class="grid grid-cols-3 gap-5">
+              <div>
+                <h4 class="mega-title">Gấu bông</h4>
+                <div class="mega-chips">
+                  <a routerLink="/products/teddy" class="chip-pill">Gấu Teddy</a>
+                  <a routerLink="/products/bear-classic" class="chip-pill">Gấu Classic</a>
+                  <a routerLink="/products/bear-giant" class="chip-pill">Gấu Cỡ Lớn</a>
+                  <a routerLink="/products/bear-couple" class="chip-pill">Cặp Đôi</a>
+                </div>
+              </div>
+              <div>
+                <h4 class="mega-title">Động vật</h4>
+                <div class="mega-chips">
+                  <a routerLink="/products/thobong" class="chip-pill">Thỏ Bông</a>
+                  <a routerLink="/products/meo" class="chip-pill">Mèo Bông</a>
+                  <a routerLink="/products/cho" class="chip-pill">Chó Bông</a>
+                  <a routerLink="/products/khung-long" class="chip-pill">Khủng Long</a>
+                </div>
+              </div>
+              <div>
+                <h4 class="mega-title">Phụ kiện</h4>
+                <div class="mega-chips">
+                  <a routerLink="/products/hoabong" class="chip-pill">Hoa Bông</a>
+                  <a routerLink="/products/phukienshop" class="chip-pill">Phụ kiện trang trí</a>
+                  <a routerLink="/products/vo-ao" class="chip-pill">Vỏ/Áo</a>
+                  <a routerLink="/products/nhan-boc" class="chip-pill">Nhồi bông</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thương hiệu -->
+        <div class="nav-group group relative">
+          <button class="pill-btn" aria-haspopup="true" aria-expanded="false">
+            <i class="fa-solid fa-tags mr-2"></i> Thương hiệu
+            <i class="fa-solid fa-angle-down ml-2 text-xs"></i>
+          </button>
+
+          <div class="mega-panel" role="menu" aria-label="Thương hiệu">
+            <div class="grid grid-cols-3 gap-5">
+              <div>
+                <h4 class="mega-title">Phổ biến</h4>
+                <div class="mega-chips">
+                  <a routerLink="/brands/gauvip" class="chip-pill">GấuVIP</a>
+                  <a routerLink="/brands/lovely" class="chip-pill">Lovely Plush</a>
+                  <a routerLink="/brands/softie" class="chip-pill">Softie</a>
+                  <a routerLink="/brands/cottony" class="chip-pill">Cottony</a>
+                </div>
+              </div>
+              <div>
+                <h4 class="mega-title">Theo dòng</h4>
+                <div class="mega-chips">
+                  <a routerLink="/brands/premium" class="chip-pill">Premium</a>
+                  <a routerLink="/brands/eco" class="chip-pill">Eco</a>
+                  <a routerLink="/brands/kids" class="chip-pill">Kids</a>
+                  <a routerLink="/brands/seasonal" class="chip-pill">Seasonal</a>
+                </div>
+              </div>
+              <div>
+                <h4 class="mega-title">Sưu tập</h4>
+                <div class="mega-chips">
+                  <a routerLink="/brands/limited" class="chip-pill">Limited</a>
+                  <a routerLink="/brands/collab" class="chip-pill">Collab</a>
+                  <a routerLink="/brands/signature" class="chip-pill">Signature</a>
+                  <a routerLink="/brands/bestseller" class="chip-pill">Best Seller</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chủ đề -->
+        <div class="nav-group group relative">
+          <button class="pill-btn" aria-haspopup="true" aria-expanded="false">
+            <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Chủ đề
+            <i class="fa-solid fa-angle-down ml-2 text-xs"></i>
+          </button>
+
+          <div class="mega-panel" role="menu" aria-label="Chủ đề">
+            <div class="grid grid-cols-3 gap-5">
+              <div>
+                <h4 class="mega-title">Dịp tặng</h4>
+                <div class="mega-chips">
+                  <a routerLink="/topics/sinh-nhat" class="chip-pill">Sinh nhật</a>
+                  <a routerLink="/topics/valentine" class="chip-pill">Valentine</a>
+                  <a routerLink="/topics/noel" class="chip-pill">Giáng sinh</a>
+                  <a routerLink="/topics/ky-niem" class="chip-pill">Kỷ niệm</a>
+                </div>
+              </div>
+              <div>
+                <h4 class="mega-title">Phong cách</h4>
+                <div class="mega-chips">
+                  <a routerLink="/topics/cute" class="chip-pill">Cute</a>
+                  <a routerLink="/topics/minimal" class="chip-pill">Minimal</a>
+                  <a routerLink="/topics/pastel" class="chip-pill">Pastel</a>
+                  <a routerLink="/topics/luxury" class="chip-pill">Luxury</a>
+                </div>
+              </div>
+              <div>
+                <h4 class="mega-title">Giá & kích thước</h4>
+                <div class="mega-chips">
+                  <a routerLink="/topics/under-199" class="chip-pill">Dưới 199k</a>
+                  <a routerLink="/topics/199-499" class="chip-pill">199k–499k</a>
+                  <a routerLink="/topics/over-499" class="chip-pill">Trên 499k</a>
+                  <a routerLink="/topics/size-xxl" class="chip-pill">Size XXL</a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Menu -->
-      <a class="hover:text-yellow-200 transition" routerLink="/home" routerLinkActive="font-bold">Trang chủ</a>
-      <a class="hover:text-yellow-200 transition" routerLink="/about" routerLinkActive="font-bold">Giới thiệu</a>
-      <a class="hover:text-yellow-200 transition" routerLink="/contact" routerLinkActive="font-bold">Liên hệ</a>
+      <!-- RIGHT: Links ngắn gọn -->
+      <div class="flex items-center gap-4">
+        <a routerLink="/home" routerLinkActive="text-pink-600" class="link">Trang chủ</a>
+        <a routerLink="/about" routerLinkActive="text-pink-600" class="link">Giới thiệu</a>
+        <a routerLink="/contact" routerLinkActive="text-pink-600" class="link">Liên hệ</a>
+      </div>
     </div>
   </nav>
 </header>
+
+<!-- Mobile drawer -->
+<div class="fixed inset-0 z-[120] lg:hidden" *ngIf="mobileOpen">
+  <div class="absolute inset-0 bg-black/40 animate-fade" (click)="toggleMobile()"></div>
+  <aside class="absolute left-0 top-0 h-full w-[84%] max-w-[340px] bg-white shadow-xl animate-slideIn p-4">
+    <div class="flex items-center justify-between h-12">
+      <span class="text-base font-semibold">Menu</span>
+      <button (click)="toggleMobile()" class="w-9 h-9 rounded-lg grid place-items-center hover:bg-gray-100" aria-label="Đóng">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="mt-2">
+      <div class="relative">
+        <input
+          type="text"
+          [formControl]="searchTerm"
+          placeholder="Tìm sản phẩm..."
+          (keydown.enter)="onSearch(); toggleMobile()"
+          class="w-full h-11 rounded-xl pl-10 pr-3 border border-gray-200 focus:border-pink-300 focus:ring-4 focus:ring-pink-100 outline-none transition"
+        />
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      </div>
+
+      <nav class="mt-4 space-y-1 text-[15px]">
+        <a routerLink="/home" (click)="toggleMobile()" class="nav-mobile">Trang chủ</a>
+        <a routerLink="/about" (click)="toggleMobile()" class="nav-mobile">Giới thiệu</a>
+        <a routerLink="/contact" (click)="toggleMobile()" class="nav-mobile">Liên hệ</a>
+      </nav>
+
+      <div class="mt-4">
+        <h4 class="text-xs font-semibold uppercase text-gray-500 tracking-wider">Danh mục</h4>
+        <div class="mt-2 grid grid-cols-2 gap-2">
+          <a routerLink="/products/teddy" (click)="toggleMobile()" class="chip">Gấu Teddy</a>
+          <a routerLink="/products/thobong" (click)="toggleMobile()" class="chip">Thỏ Bông</a>
+          <a routerLink="/products/hoabong" (click)="toggleMobile()" class="chip">Hoa Bông</a>
+          <a routerLink="/products/phukienshop" (click)="toggleMobile()" class="chip">Phụ Kiện</a>
+        </div>
+      </div>
+
+      <div class="mt-6 border-t pt-4">
+        <div *ngIf="!auth?.isLoggedIn(); else mobileLogged" class="grid gap-2">
+          <a routerLink="/login" (click)="toggleMobile()" class="btn-primary">Đăng nhập</a>
+          <a routerLink="/register" (click)="toggleMobile()" class="btn-secondary">Tạo tài khoản</a>
+        </div>
+        <ng-template #mobileLogged>
+          <a routerLink="/profile" (click)="toggleMobile()" class="btn-secondary">Hồ sơ</a>
+          <a routerLink="/orders" (click)="toggleMobile()" class="btn-secondary">Đơn hàng</a>
+          <button (click)="onLogout(); toggleMobile()" class="btn-danger">Đăng xuất</button>
+        </ng-template>
+      </div>
+    </div>
+  </aside>
+</div>

@@ -4,28 +4,59 @@ import { environment } from '../../../environments/environment';
 import { ChatSessionResponse, MessageDTO } from '../../models/chat.model';
 import { Observable } from 'rxjs';
 
+export interface Page<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;       // current page (0-based)
+  size: number;         // page size
+}
+
 @Injectable({ providedIn: 'root' })
 export class ChatClientService {
-  private base = `${environment.apiUrl}/client/chat`;
+  private readonly base = `${environment.apiUrl}/client/chat`;
+
   constructor(private http: HttpClient) {}
 
+  /** Mở/tạo session với admin và trả về DTO của chính session đó */
   openWithAdmin(): Observable<ChatSessionResponse> {
-    return this.http.post<ChatSessionResponse>(`${this.base}/sessions/with-admin`, {});
+    // ✅ BE: GET /api/client/chat/sessions/with-admin
+    return this.http.get<ChatSessionResponse>(`${this.base}/sessions/with-admin`);
   }
 
-  mySessions(page=0, size=20) {
-    return this.http.get<any>(`${this.base}/sessions`, { params: { page, size }});
+  /** Danh sách các phiên chat của user (Page<ChatSessionResponse>) */
+  mySessions(page = 0, size = 20): Observable<Page<ChatSessionResponse>> {
+    return this.http.get<Page<ChatSessionResponse>>(
+      `${this.base}/sessions`,
+      { params: { page, size } as any }
+    );
   }
 
-  messages(sessionId: number, page=0, size=50) {
-    return this.http.get<any>(`${this.base}/sessions/${sessionId}/messages`, { params: { page, size }});
+  /** Tin nhắn của một phiên — FE mong đợi ARRAY */
+  messages(sessionId: number, page = 0, size = 50): Observable<MessageDTO[]> {
+    // ✅ BE trả Page<MessageDTO> → controller đã .getContent() để trả mảng
+    return this.http.get<MessageDTO[]>(
+      `${this.base}/sessions/${sessionId}/messages`,
+      { params: { page, size } as any }
+    );
   }
 
-  send(sessionId: number, content: string): Observable<MessageDTO> {
+  /** Gửi tin nhắn (body: { text, sessionId }) */
+  send(sessionId: number, text: string): Observable<MessageDTO> {
+    // ✅ BE: POST /api/client/chat/messages
+    return this.http.post<MessageDTO>(`${this.base}/messages`, { text, sessionId });
+  }
+
+  /** Đánh dấu đã đọc toàn bộ tin trong phiên */
+  markRead(sessionId: number): Observable<void> {
+    // ✅ BE: POST /api/client/chat/sessions/{id}/read
+    return this.http.post<void>(`${this.base}/sessions/${sessionId}/read`, {});
+  }
+
+  /* ----------------- (Tuỳ chọn) Legacy endpoints để tương thích cũ ----------------- */
+
+  /** Legacy: nếu còn nơi gọi POST /sessions/{id}/messages { content } */
+  sendLegacy(sessionId: number, content: string): Observable<MessageDTO> {
     return this.http.post<MessageDTO>(`${this.base}/sessions/${sessionId}/messages`, { content });
-  }
-
-  markRead(sessionId: number) {
-    return this.http.patch(`${this.base}/sessions/${sessionId}/read`, {});
   }
 }

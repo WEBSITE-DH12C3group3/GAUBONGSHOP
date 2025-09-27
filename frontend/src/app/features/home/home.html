@@ -1,119 +1,236 @@
-<section class="container mx-auto px-4 py-8" *ngIf="!isLoading">
-  <!-- Hero Banner Section -->
-  <div class="relative rounded-2xl overflow-hidden mb-12 h-64 md:h-80 bg-gradient-to-r from-pink-500 to-pink-700">
-    <div class="absolute inset-0 flex items-center justify-center text-center px-8">
-      <div class="text-white max-w-2xl">
-        <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">Khám phá thế giới mua sắm</h1>
-        <p class="text-lg md:text-xl mb-8">Hàng ngàn sản phẩm chất lượng với giá tốt nhất</p>
-        <a routerLink="/products">
+<section class="max-w-7xl mx-auto px-4 lg:px-8 py-8" *ngIf="!isLoading">
+  <!-- HERO: Carousel -->
+  <section
+    class="relative rounded-2xl overflow-hidden mb-12 h-64 md:h-80 lg:h-[420px] bg-neutral-100 ring-1 ring-gray-100"
+    (mouseenter)="pauseAutoplay()"
+    (mouseleave)="resumeAutoplay()"
+    (touchstart)="onTouchStart($event)"
+    (touchmove)="onTouchMove($event)"
+    (touchend)="onTouchEnd()"
+    aria-roledescription="carousel"
+    aria-label="Hero promotions"
+  >
+    <!-- Slides viewport -->
+    <div class="absolute inset-0 overflow-hidden">
+      <div
+        class="h-full flex transition-transform duration-700 ease-out will-change-transform"
+        [style.transform]="'translateX(-' + (currentIndex * 100) + '%)'"
+        role="group"
+      >
+        <!-- Slide -->
+        <div
+          class="min-w-full h-full relative"
+          *ngFor="let img of heroImages; let i = index"
+          [attr.aria-label]="'Slide ' + (i + 1) + ' of ' + heroImages.length"
+        >
+          <img
+            [src]="img.src"
+            [alt]="img.alt || 'Hero banner slide ' + (i + 1)"
+            class="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
+            draggable="false"
+          />
+          <!-- Overlay gradient -->
+          <div class="absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-transparent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overlay content -->
+    <div class="absolute inset-0 flex items-center justify-center text-center px-6">
+      <div class="text-white max-w-2xl drop-shadow-[0_2px_10px_rgba(0,0,0,.35)]">
+        <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-3">
+          Khám phá thế giới mua sắm
+        </h1>
+        <p class="text-base md:text-lg lg:text-xl mb-6 opacity-95">
+          Hàng ngàn sản phẩm chất lượng với giá tốt nhất
+        </p>
+        <a routerLink="/products" class="inline-block">
           <button
-            class="bg-white text-pink-600 px-6 py-2 md:px-8 md:py-3 rounded-full font-bold text-base md:text-lg hover:bg-gray-100 transition">
+            class="bg-white text-pink-600 px-6 py-2 md:px-8 md:py-3 rounded-full font-bold text-base md:text-lg hover:bg-gray-100 active:scale-[.98] transition"
+            aria-label="Mua ngay"
+          >
             Mua ngay
           </button>
         </a>
       </div>
     </div>
-  </div>
 
-  <!-- Danh mục nổi bật -->
-  <section class="mb-16" *ngIf="featuredCategories.length > 0">
-    <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center">Danh mục nổi bật</h2>
+    <!-- Arrows -->
+    <button class="hero-nav hero-nav--left" (click)="prev()" aria-label="Previous slide">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <button class="hero-nav hero-nav--right" (click)="next()" aria-label="Next slide">
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-      <div *ngFor="let cat of featuredCategories; let i = index"
-        class="rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-4 md:p-6 flex flex-col items-center text-center category-card"
-        [ngClass]="getCategoryColor(i)">
-        <div
-          class="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center bg-white bg-opacity-30 rounded-full mb-3 md:mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-            stroke="currentColor" class="w-8 h-8 md:w-10 md:h-10" [ngClass]="getCategoryIconColor(i)">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M3.375 7.5l8.25-4.5 8.25 4.5m-16.5 0l8.25 4.5m-8.25-4.5v9l8.25 4.5m8.25-13.5l-8.25 4.5m8.25-4.5v9l-8.25 4.5" />
-          </svg>
-        </div>
-        <h3 class="text-base md:text-lg font-semibold text-gray-800 mb-2">{{ cat.name }}</h3>
-        <p class="text-gray-600 text-xs md:text-sm mb-3 md:mb-4 line-clamp-2">
-          {{ cat.description || 'Danh mục sản phẩm đặc biệt' }}
-        </p>
-        <a [routerLink]="['/products']" [queryParams]="{ category: cat.id }"
-          class="mt-auto font-medium flex items-center text-sm md:text-base" [ngClass]="getCategoryTextColor(i)">
-          Xem thêm
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </a>
-      </div>
+    <!-- Dots -->
+    <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2">
+      <button
+        *ngFor="let _ of heroImages; let i = index"
+        class="hero-dot"
+        [class.hero-dot--active]="i === currentIndex"
+        (click)="goTo(i)"
+        [attr.aria-label]="'Go to slide ' + (i + 1)"
+        [attr.aria-current]="i === currentIndex ? 'true' : 'false'"
+      ></button>
     </div>
   </section>
 
-  <!-- Sản phẩm mới -->
+<section class="mb-16 relative" *ngIf="featuredCategories.length > 0">
+<!-- Lớp hiệu ứng toàn vùng: cánh hoa rơi -->
+<div class="fx fx--petals pointer-events-none" aria-hidden="true">
+  <!--       x      size  delay  dur   rot -->
+  <span style="--x:4%;   --size:12px; --delay:.0s; --dur:9s;  --rot:12deg"></span>
+  <span style="--x:9%;   --size:14px; --delay:.6s; --dur:11s; --rot:-8deg"></span>
+  <span style="--x:14%;  --size:12px; --delay:1.2s;--dur:10s; --rot:22deg"></span>
+  <span style="--x:19%;  --size:16px; --delay:.2s; --dur:12s; --rot:-15deg"></span>
+  <span style="--x:24%;  --size:13px; --delay:1.1s;--dur:9.5s;--rot:8deg"></span>
+  <span style="--x:29%;  --size:12px; --delay:.8s; --dur:13s; --rot:-6deg"></span>
+  <span style="--x:34%;  --size:15px; --delay:1.6s;--dur:10.5s;--rot:20deg"></span>
+  <span style="--x:39%;  --size:11px; --delay:.3s; --dur:12.5s;--rot:-12deg"></span>
+  <span style="--x:44%;  --size:13px; --delay:.1s; --dur:9.2s; --rot:5deg"></span>
+  <span style="--x:49%;  --size:12px; --delay:.7s; --dur:10.8s;--rot:-18deg"></span>
+  <span style="--x:54%;  --size:14px; --delay:1.4s;--dur:12.2s;--rot:10deg"></span>
+  <span style="--x:59%;  --size:12px; --delay:.5s; --dur:9.8s; --rot:-4deg"></span>
+  <span style="--x:64%;  --size:16px; --delay:1.0s;--dur:11.6s;--rot:15deg"></span>
+  <span style="--x:69%;  --size:12px; --delay:.2s; --dur:13.2s;--rot:-9deg"></span>
+  <span style="--x:74%;  --size:13px; --delay:.9s; --dur:10.2s;--rot:6deg"></span>
+  <span style="--x:79%;  --size:12px; --delay:1.3s;--dur:12.8s;--rot:-14deg"></span>
+  <span style="--x:84%;  --size:15px; --delay:.4s; --dur:9.6s; --rot:3deg"></span>
+  <span style="--x:89%;  --size:11px; --delay:1.1s;--dur:11.4s;--rot:-20deg"></span>
+  <span style="--x:94%;  --size:12px; --delay:.25s;--dur:12.6s;--rot:18deg"></span>
+  <span style="--x:12%;  --size:10px; --delay:1.5s;--dur:8.8s; --rot:-7deg"></span>
+  <span style="--x:27%;  --size:12px; --delay:.45s;--dur:10.4s;--rot:11deg"></span>
+  <span style="--x:58%;  --size:13px; --delay:1.25s;--dur:12.1s;--rot:-5deg"></span>
+  <span style="--x:77%;  --size:12px; --delay:.95s;--dur:9.9s; --rot:9deg"></span>
+</div>
+
+  <div class="fx fx--bubbles pointer-events-none" aria-hidden="true">
+    <i></i><i></i><i></i><i></i><i></i>
+  </div>
+
+  <div class="flex items-center justify-between mb-6 relative z-10">
+    <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900">
+      Danh mục nổi bật
+    </h2>
+    <a routerLink="/products" class="hidden md:inline-flex items-center text-pink-600 hover:text-pink-700 font-medium">
+      Xem tất cả
+      <i class="fa-solid fa-chevron-right ml-2 text-xs"></i>
+    </a>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6 relative z-10">
+    <article
+      *ngFor="let cat of featuredCategories; let i = index"
+      class="catx group relative overflow-hidden rounded-2xl p-4 md:p-5 text-center"
+      [ngClass]="getCategoryColor(i)"
+      tabindex="0"
+      aria-label="{{ cat.name }}"
+    >
+      <!-- viền gradient mềm -->
+      <span class="catx__border"></span>
+      <!-- shine sweep -->
+      <span class="catx__shine"></span>
+      <!-- glow mềm -->
+      <span class="catx__glow catx__glow--tr"></span>
+      <span class="catx__glow catx__glow--bl"></span>
+      <!-- bong bóng trong card -->
+      <em class="catx__bubble catx__bubble--1"></em>
+      <em class="catx__bubble catx__bubble--2"></em>
+      <em class="catx__bubble catx__bubble--3"></em>
+      <em class="catx__bubble catx__bubble--4"></em>
+      <em class="catx__bubble catx__bubble--5"></em>
+      <em class="catx__bubble catx__bubble--6"></em>
+      <em class="catx__bubble catx__bubble--7"></em>
+
+      <!-- Icon -->
+      <div class="catx__icon">
+        <iconify-icon
+          [attr.icon]="getCategoryIcon(i)"
+          class="catx__iconSvg text-3xl">
+        </iconify-icon>
+      </div>
+
+      <!-- Title & desc -->
+      <h3 class="catx__title line-clamp-2">
+        {{ cat.name }}
+      </h3>
+      <p class="catx__desc line-clamp-2">
+        {{ cat.description || 'Danh mục sản phẩm đặc biệt' }}
+      </p>
+
+      <!-- CTA -->
+      <a
+        [routerLink]="['/products']"
+        [queryParams]="{ category: cat.id }"
+        class="catx__cta inline-flex items-center justify-center px-3 py-2 rounded-full font-medium text-sm"
+      >
+        Khám phá
+        <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+      </a>
+    </article>
+  </div>
+</section>
+
+
+
+  <!-- NEW PRODUCTS -->
   <section class="mb-16" *ngIf="newProducts.length > 0">
     <div class="flex justify-between items-center mb-6 md:mb-8">
-      <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Sản phẩm mới nhất</h2>
+      <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900">Sản phẩm mới nhất</h2>
       <a [routerLink]="['/products']" [queryParams]="{ sort: 'newest' }"
-        class="text-pink-600 hover:text-pink-700 font-medium flex items-center text-sm md:text-base">
+         class="inline-flex items-center text-pink-600 hover:text-pink-700 font-medium">
         Xem tất cả
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
+        <i class="fa-solid fa-chevron-right ml-2 text-xs"></i>
       </a>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-6">
       <div *ngFor="let p of newProducts"
-        class="bg-white rounded-xl shadow-md hover:shadow-xl overflow-hidden group transition-all duration-300 product-card relative">
+           class="product-card bg-white rounded-2xl overflow-hidden relative group">
+        <!-- Fav -->
+        <button
+          (click)="toggleFavorite(p.id, $event); $event.stopPropagation(); $event.preventDefault();"
+          class="absolute top-2 right-2 z-10 w-9 h-9 grid place-items-center rounded-full bg-white/90 text-gray-700 shadow ring-1 ring-black/5 hover:bg-white hover:text-pink-600 transition"
+          aria-label="Yêu thích"
+        >
+          <i class="fa-solid fa-heart"></i>
+        </button>
 
-        <!-- Ảnh sản phẩm có link đến chi tiết -->
+        <!-- Image -->
         <a [routerLink]="['/product', p.id]" class="block relative overflow-hidden">
-          <img #imgNew [src]="'http://localhost:8080' + p.imageUrl" [alt]="p.name"
-            class="w-full h-40 md:h-48 object-cover group-hover:scale-105 transition duration-500" />
-
-          <!-- Nhãn Mới -->
-          <span class="absolute top-2 left-2 bg-pink-500 text-white text-xs px-2 py-1 rounded-full shadow">
-            Mới
-          </span>
+          <img
+            #imgNew
+            [src]="'http://localhost:8080' + p.imageUrl"
+            [alt]="p.name"
+            class="w-full h-40 md:h-48 object-cover transition duration-500 group-hover:scale-105"
+          />
+          <span class="badge-new">Mới</span>
         </a>
 
-        <!-- Nút yêu thích (tách riêng, không nằm trong <a>) -->
-        <div class="absolute top-2 right-2 z-10">
-          <button
-            (click)="toggleFavorite(p.id, $event); $event.stopPropagation(); $event.preventDefault();"
-            class="w-8 h-8 flex items-center justify-center rounded-full shadow border transition"
-            [ngClass]="isFavorite(p.id)
-              ? 'bg-pink-500 text-white border-pink-500'
-              : 'bg-white text-gray-600 border-gray-300'">
-            <i class="fa-solid fa-heart"></i>
-          </button>
-        </div>
-
-        <!-- Nội dung sản phẩm -->
+        <!-- Content -->
         <div class="p-3 md:p-4">
           <a [routerLink]="['/product', p.id]"
-            class="font-semibold text-gray-800 mb-2 line-clamp-2 text-sm md:text-base block hover:text-pink-600 transition">
+             class="font-semibold text-gray-900 mb-1 line-clamp-2 text-sm md:text-base block hover:text-pink-600 transition">
             {{ p.name }}
           </a>
 
-          <div class="flex items-center mb-2">
-            <div class="flex text-yellow-400 mr-2 text-xs md:text-sm">
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star"></i>
-              <i class="fas fa-star-half-alt"></i>
-            </div>
-            <span class="text-xs md:text-sm text-gray-500">(128)</span>
+          <div class="flex items-center mb-2 text-xs md:text-sm text-yellow-400">
+            <i class="fas fa-star mr-0.5"></i><i class="fas fa-star mr-0.5"></i>
+            <i class="fas fa-star mr-0.5"></i><i class="fas fa-star mr-0.5"></i>
+            <i class="fas fa-star-half-alt"></i>
+            <span class="text-gray-500 ml-2">(128)</span>
           </div>
 
           <p class="text-pink-600 text-base md:text-lg font-bold mb-3 md:mb-4">
             {{ p.price | currency: 'VND':'symbol':'1.0-0' }}
           </p>
 
-          <!-- Nút giỏ hàng -->
           <button
             (click)="addToCart(p, $event, imgNew)"
-            class="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 px-3 md:px-4 rounded-lg transition font-medium flex items-center justify-center text-sm md:text-base">
+            class="btn-addcart">
             <i class="fas fa-shopping-cart mr-2"></i>
             Thêm vào giỏ
           </button>
@@ -122,85 +239,80 @@
     </div>
   </section>
 
-  <!-- Danh mục + sản phẩm -->
-  <section *ngFor="let cat of categoriesWithProducts; let categoryIndex = index" class="mb-12 md:mb-16">
-    <div class="rounded-t-xl p-6 mb-6" [ngClass]="getCategoryHeaderColor(categoryIndex)">
-      <h2 class="text-2xl md:text-3xl font-bold text-center w-full"
-        [ngClass]="getCategoryHeaderTextColor(categoryIndex)">
+  <!-- CATEGORIES + PRODUCTS -->
+  <section *ngFor="let cat of categoriesWithProducts; let categoryIndex = index" class="mb-14 md:mb-16">
+    <!-- Section header -->
+    <div class="rounded-2xl p-6 mb-6 relative overflow-hidden" [ngClass]="getCategoryHeaderColor(categoryIndex)">
+      <div class="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/30 blur-2xl"></div>
+      <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-center"
+          [ngClass]="getCategoryHeaderTextColor(categoryIndex)">
         {{ cat.name }}
       </h2>
     </div>
 
-    <div class="relative">
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-        <div *ngFor="let p of cat.products"
-          class="bg-white rounded-xl shadow-md hover:shadow-lg overflow-hidden transition-all duration-300 product-card">
+    <!-- Product grid -->
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-6">
+      <div *ngFor="let p of cat.products"
+           class="product-card bg-white rounded-2xl overflow-hidden relative group border border-gray-100">
+        <!-- Fav -->
+        <button
+          (click)="toggleFavorite(p.id, $event); $event.stopPropagation(); $event.preventDefault();"
+          class="absolute top-2 right-2 z-10 w-9 h-9 grid place-items-center rounded-full bg-white/90 text-gray-700 shadow ring-1 ring-black/5 hover:bg-white hover:text-pink-600 transition"
+          aria-label="Yêu thích"
+        >
+          <i class="fa-solid fa-heart"></i>
+        </button>
 
-          <!-- Ảnh sản phẩm -->
-          <a [routerLink]="['/product', p.id]" class="block relative overflow-hidden">
-            <img #imgCat [src]="'http://localhost:8080' + p.imageUrl" [alt]="p.name"
-              class="w-full h-40 md:h-48 object-cover group-hover:scale-105 transition duration-500" />
+        <!-- Image -->
+        <a [routerLink]="['/product', p.id]" class="block relative overflow-hidden">
+          <img
+            #imgCat
+            [src]="'http://localhost:8080' + p.imageUrl"
+            [alt]="p.name"
+            class="w-full h-40 md:h-48 object-cover transition duration-500 group-hover:scale-105"
+          />
+        </a>
+
+        <!-- Content -->
+        <div class="p-3 md:p-4">
+          <a [routerLink]="['/product', p.id]"
+             class="font-semibold text-gray-900 mb-1 line-clamp-2 text-sm md:text-base block hover:text-pink-600 transition">
+            {{ p.name }}
           </a>
 
-          <div class="p-3 md:p-4">
-            <!-- Tên sản phẩm -->
-            <a [routerLink]="['/product', p.id]"
-              class="font-semibold text-gray-800 mb-2 line-clamp-2 text-sm md:text-base block hover:text-pink-600 transition">
-              {{ p.name }}
-            </a>
-
-            <div class="flex items-center mb-2">
-              <div class="flex text-yellow-400 mr-2 text-xs md:text-sm">
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star"></i>
-                <i class="fas fa-star-half-alt"></i>
-              </div>
-              <span class="text-xs md:text-sm text-gray-500">(64)</span>
-            </div>
-
-            <p class="text-pink-600 text-base md:text-lg font-bold mb-3 md:mb-4">
-              {{ p.price | currency: 'VND':'symbol':'1.0-0' }}
-            </p>
-
-            <!-- Nút yêu thích ở góc trên bên phải của thẻ sản phẩm -->
-            <div class="absolute top-2 right-2 z-10">
-              <button (click)="toggleFavorite(p.id, $event); $event.stopPropagation(); $event.preventDefault();"
-                class="w-8 h-8 flex items-center justify-center rounded-full shadow border transition"
-                [ngClass]="isFavorite(p.id)
-                  ? 'bg-pink-500 text-white border-pink-500'
-                  : 'bg-white text-gray-600 border-gray-300'">
-                <i class="fa-solid fa-heart"></i>
-              </button>
-            </div>
-
-            <!-- Nút giỏ hàng -->
-            <button
-              (click)="addToCart(p, $event, imgCat)"
-              class="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 px-3 md:px-4 rounded-lg transition font-medium flex items-center justify-center text-sm md:text-base">
-              <i class="fas fa-shopping-cart mr-2"></i>
-              Thêm vào giỏ
-            </button>
+          <div class="flex items-center mb-2 text-xs md:text-sm text-yellow-400">
+            <i class="fas fa-star mr-0.5"></i><i class="fas fa-star mr-0.5"></i>
+            <i class="fas fa-star mr-0.5"></i><i class="fas fa-star mr-0.5"></i>
+            <i class="fas fa-star-half-alt"></i>
+            <span class="text-gray-500 ml-2">(64)</span>
           </div>
+
+          <p class="text-pink-600 text-base md:text-lg font-bold mb-3 md:mb-4">
+            {{ p.price | currency: 'VND':'symbol':'1.0-0' }}
+          </p>
+
+          <button
+            (click)="addToCart(p, $event, imgCat)"
+            class="btn-addcart btn-addcart--dark">
+            <i class="fas fa-shopping-cart mr-2"></i>
+            Thêm vào giỏ
+          </button>
         </div>
       </div>
     </div>
 
+    <!-- View more -->
     <div class="text-center mt-6 md:mt-8">
       <a [routerLink]="['/products']" [queryParams]="{ category: cat.id }"
-        class="inline-flex items-center text-pink-600 hover:text-pink-700 font-semibold text-base md:text-lg">
+         class="inline-flex items-center px-4 h-10 rounded-full bg-white text-pink-600 hover:ring-2 hover:ring-pink-200 font-semibold">
         Xem thêm {{ cat.name }}
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
+        <i class="fa-solid fa-chevron-right ml-2 text-xs"></i>
       </a>
     </div>
   </section>
 </section>
 
-<!-- Loading State -->
-<div *ngIf="isLoading" class="min-h-screen flex items-center justify-center">
-  <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-pink-500"></div>
+<!-- Loading -->
+<div *ngIf="isLoading" class="min-h-[50vh] md:min-h-[60vh] flex items-center justify-center">
+  <div class="animate-spin rounded-full h-14 w-14 border-4 border-pink-200 border-t-pink-600"></div>
 </div>

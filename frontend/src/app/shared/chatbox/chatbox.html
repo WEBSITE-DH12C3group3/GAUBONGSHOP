@@ -1,0 +1,65 @@
+<!-- Nút nổi -->
+<button
+  type="button"
+  (click)="toggle()"
+  class="fixed bottom-6 right-6 rounded-full shadow-lg px-4 py-3 bg-pink-600 text-white font-semibold focus:outline-none focus:ring-2 focus:ring-pink-300"
+  aria-label="Mở/đóng hộp chat"
+  title="Chat với shop"
+>
+  {{ open ? 'Đóng chat' : 'Chat với shop' }}
+</button>
+
+<!-- Hộp chat -->
+<div *ngIf="open" class="fixed bottom-20 right-6 w-80 bg-white shadow-2xl rounded-2xl overflow-hidden">
+  <div class="bg-pink-600 text-white px-4 py-2 font-semibold flex items-center justify-between">
+    <span>Hỗ trợ khách hàng</span>
+    <button
+      type="button"
+      (click)="toggle()"
+      class="text-white/90 hover:text-white focus:outline-none"
+      aria-label="Đóng"
+      title="Đóng"
+    >✕</button>
+  </div>
+
+  <div id="chatbox-body" class="h-80 overflow-y-auto p-3 space-y-2">
+    <ng-container *ngFor="let m of msgs">
+      <div [class]="m.role === 'user' ? 'text-right' : 'text-left'">
+        <div class="inline-block px-3 py-2 rounded-xl"
+             [ngClass]="m.role === 'user' ? 'bg-pink-100' : 'bg-gray-100'">
+          <div class="whitespace-pre-line">{{ m.text }}</div>
+
+          <!-- Hiển thị meta an toàn với strict template -->
+          <div *ngIf="m.meta as meta" class="text-[11px] text-gray-500 mt-1">
+            <ng-container *ngIf="meta.source">
+              nguồn: {{ meta.source }}
+            </ng-container>
+            <ng-container *ngIf="meta.confidence != null">
+              · {{ ((meta.confidence ?? 0) * 100) | number:'1.0-0' }}%
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <div *ngIf="sending" class="text-left">
+      <div class="inline-block px-3 py-2 rounded-xl bg-gray-100 animate-pulse">...</div>
+    </div>
+  </div>
+
+  <div class="border-t p-2 flex gap-2">
+    <input
+      [formControl]="input"
+      (keyup.enter)="send()"
+      class="flex-1 border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-pink-200"
+      placeholder="Nhập câu hỏi..."
+      aria-label="Ô nhập câu hỏi"
+    />
+    <button
+      type="button"
+      (click)="send()"
+      [disabled]="sending || input.invalid"
+      class="bg-pink-600 text-white rounded-lg px-3 py-2 disabled:opacity-60"
+    >Gửi</button>
+  </div>
+</div>

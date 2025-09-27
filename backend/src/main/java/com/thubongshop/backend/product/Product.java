@@ -28,6 +28,4 @@ public class Product {
 
     @Column(name = "created_at", updatable = false, insertable = false)
     private LocalDateTime createdAt;
-
-
 }

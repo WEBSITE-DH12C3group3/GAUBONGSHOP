@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -14,11 +14,15 @@ import { CartService } from '../../shared/services/cart.service';
 import { Category } from '../../models/category.model';
 import { Product } from '../../models/product.model';
 
+import { isPlatformBrowser } from '@angular/common';
+import { inject, PLATFORM_ID } from '@angular/core';
+
 @Component({
   selector: 'app-home',
   standalone: true,
   imports: [CommonModule, CurrencyPipe, HeaderComponent, FooterComponent, RouterModule],
   templateUrl: './home.html',
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   styleUrls: ['./home.css']
 })
 export class HomeComponent implements OnInit {
@@ -46,7 +50,12 @@ export class HomeComponent implements OnInit {
     this.loadCategoriesWithProducts();
     this.loadNewProducts();
     this.loadFavorites();
+    if (this.isBrowser) this.startAutoplay();
   }
+  ngOnDestroy() {
+    this.stopAutoplay();
+  }
+
 
   /** Danh mục nổi bật */
   loadFeaturedCategories() {
@@ -289,5 +298,84 @@ export class HomeComponent implements OnInit {
   }
   getCategoryHeaderTextColor(index: number): string {
     return this.categoryHeaderColors[index % this.categoryHeaderColors.length].text;
+  }
+  /** Gợi ý: chọn icon theo index; tốt nhất là theo cat.slug để cố định */
+  getCategoryIcon(index: number): string {
+    const icons = [
+      'ph:flower-duotone',  // Gấu Teddy
+      'lucide:rabbit',          // Thỏ bông
+      'ph:flower-lotus-duotone',// Hoa bông
+      'tabler:sparkles',        // Phụ kiện / nổi bật
+      'ph:gift-duotone',        // Quà tặng
+      'ph:confetti-duotone'     // Seasonal
+    ];
+    return icons[index % icons.length];
+  }
+
+    currentIndex = 0;
+    heroImages = [
+      { src: 'assets/hero/bar2.jpg', alt: 'BST gấu Teddy mới' },
+      { src: 'assets/hero/hero2.png', alt: 'Khuyến mãi phụ kiện' },
+      { src: 'assets/hero/bar3.jpg', alt: 'Quà tặng dễ thương' },
+      { src: 'assets/hero/bar4.jpg', alt: 'Combo siêu tiết kiệm' },
+      { src: 'assets/hero/bar5.jpg', alt: 'Sản phẩm bán chạy' },
+      { src: 'assets/hero/bar6.jpg', alt: 'Ưu đãi cuối tuần' },
+    ];
+
+
+  private autoplayMs = 500;
+  private autoplayTimer?: ReturnType<typeof setInterval>;
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
+
+  /** Gọi trong ngOnInit */
+  startAutoplay() {
+    if (!this.isBrowser) return;
+    this.stopAutoplay();
+    this.autoplayTimer = setInterval(() => this.next(), this.autoplayMs);
+  }
+
+  /** Gọi trong ngOnDestroy */
+  stopAutoplay() {
+    if (this.autoplayTimer) {
+      clearInterval(this.autoplayTimer);
+      this.autoplayTimer = undefined;
+    }
+  }
+
+  pauseAutoplay() { this.stopAutoplay(); }
+  resumeAutoplay() { this.startAutoplay(); }
+
+  next() {
+    this.currentIndex = (this.currentIndex + 1) % this.heroImages.length;
+  }
+  prev() {
+    this.currentIndex =
+      (this.currentIndex - 1 + this.heroImages.length) % this.heroImages.length;
+  }
+  goTo(i: number) {
+    if (i >= 0 && i < this.heroImages.length) this.currentIndex = i;
+  }
+
+  /* ===== Swipe support (mobile) ===== */
+  private touchStartX = 0;
+  private touchDeltaX = 0;
+
+  onTouchStart(ev: TouchEvent) {
+    if (!ev.touches?.length) return;
+    this.touchStartX = ev.touches[0].clientX;
+    this.touchDeltaX = 0;
+    this.pauseAutoplay();
+  }
+  onTouchMove(ev: TouchEvent) {
+    if (!ev.touches?.length) return;
+    this.touchDeltaX = ev.touches[0].clientX - this.touchStartX;
+  }
+  onTouchEnd() {
+    const threshold = 40; // vuốt tối thiểu
+    if (Math.abs(this.touchDeltaX) > threshold) {
+      if (this.touchDeltaX < 0) this.next(); else this.prev();
+    }
+    this.resumeAutoplay();
   }
 }
