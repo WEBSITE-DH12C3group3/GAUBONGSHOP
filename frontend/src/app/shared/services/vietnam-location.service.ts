@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { catchError, map, shareReplay, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
@@ -10,8 +10,8 @@ export interface Ward { code: string | number; name: string; districtCode?: stri
 
 @Injectable({ providedIn: 'root' })
 export class VietnamLocationService {
-  private readonly v1 = environment.vnApi.provincesBaseV1;
-  private readonly vnapp = environment.vnApi.vnappmobBase;
+  private readonly v1 = environment.vnApi.provincesBaseV1;   // ví dụ: https://provinces.open-api.vn/api
+  private readonly vnapp = environment.vnApi.vnappmobBase;   // ví dụ: https://vapi.vnappmob.com/api
 
   constructor(private http: HttpClient) {}
 
@@ -19,10 +19,10 @@ export class VietnamLocationService {
   getProvinces(): Observable<Province[]> {
     // Ưu tiên nguồn provinces.open-api.vn (v1)
     return this.http.get<any[]>(`${this.v1}/p/`).pipe(
-      map(list => list.map(p => ({ code: p.code, name: p.name }) as Province)),
+      map(list => (list ?? []).map(p => ({ code: p.code, name: p.name }) as Province)),
       shareReplay(1),
       catchError(() =>
-        // Fallback sang VNAppMob
+        // Fallback VNAppMob
         this.http.get<any>(`${this.vnapp}/province`).pipe(
           map(res => (res?.results ?? []).map((p: any) => ({
             code: p.province_id, name: p.province_name
@@ -35,16 +35,17 @@ export class VietnamLocationService {
 
   /** ---------- DISTRICTS BY PROVINCE ---------- */
   getDistrictsByProvince(provinceCode: string | number): Observable<District[]> {
+    const code = String(provinceCode);
     // provinces.open-api.vn v1: /p/{code}?depth=2 => districts trong object
-    return this.http.get<any>(`${this.v1}/p/${provinceCode}?depth=2`).pipe(
+    return this.http.get<any>(`${this.v1}/p/${code}?depth=2`).pipe(
       map(p => (p?.districts ?? []).map((d: any) => ({
-        code: d.code, name: d.name, provinceCode: p.code
+        code: d.code, name: d.name, provinceCode: p?.code ?? code
       }) as District)),
       catchError(() =>
         // VNAppMob: /province/district/{province_id}
-        this.http.get<any>(`${this.vnapp}/province/district/${provinceCode}`).pipe(
+        this.http.get<any>(`${this.vnapp}/province/district/${code}`).pipe(
           map(res => (res?.results ?? []).map((d: any) => ({
-            code: d.district_id, name: d.district_name, provinceCode
+            code: d.district_id, name: d.district_name, provinceCode: code
           }) as District))
         )
       ),
@@ -54,16 +55,17 @@ export class VietnamLocationService {
 
   /** ---------- WARDS BY DISTRICT ---------- */
   getWardsByDistrict(districtCode: string | number): Observable<Ward[]> {
+    const code = String(districtCode);
     // provinces.open-api.vn v1: /d/{code}?depth=2 => wards trong object
-    return this.http.get<any>(`${this.v1}/d/${districtCode}?depth=2`).pipe(
+    return this.http.get<any>(`${this.v1}/d/${code}?depth=2`).pipe(
       map(d => (d?.wards ?? []).map((w: any) => ({
-        code: w.code, name: w.name, districtCode: d.code
+        code: w.code, name: w.name, districtCode: d?.code ?? code
       }) as Ward)),
       catchError(() =>
         // VNAppMob: /province/ward/{district_id}
-        this.http.get<any>(`${this.vnapp}/province/ward/${districtCode}`).pipe(
+        this.http.get<any>(`${this.vnapp}/province/ward/${code}`).pipe(
           map(res => (res?.results ?? []).map((w: any) => ({
-            code: w.ward_id, name: w.ward_name, districtCode
+            code: w.ward_id, name: w.ward_name, districtCode: code
           }) as Ward))
         )
       ),
@@ -71,14 +73,26 @@ export class VietnamLocationService {
     );
   }
 
-  /** (tuỳ chọn) Tìm tên hiển thị theo code để build địa chỉ đầy đủ */
+  /** ---------- WRAPPERS để khớp với component ---------- */
+  // Component đang gọi 'getDistricts' & 'getWards' qua callVnLoc
+  getDistricts(provinceCode: string | number) {
+    return this.getDistrictsByProvince(provinceCode);
+  }
+  getWards(districtCode: string | number) {
+    return this.getWardsByDistrict(districtCode);
+  }
+
+  /** (tuỳ chọn) Lấy tên hiển thị theo code */
   getProvinceName(code: string | number) {
-    return this.getProvinces().pipe(map(list => list.find(x => `${x.code}` === `${code}`)?.name || ''));
+    const c = String(code);
+    return this.getProvinces().pipe(map(list => list.find(x => String(x.code) === c)?.name || ''));
   }
   getDistrictName(pcode: string | number, dcode: string | number) {
-    return this.getDistrictsByProvince(pcode).pipe(map(list => list.find(x => `${x.code}` === `${dcode}`)?.name || ''));
+    const pc = String(pcode), dc = String(dcode);
+    return this.getDistrictsByProvince(pc).pipe(map(list => list.find(x => String(x.code) === dc)?.name || ''));
   }
   getWardName(dcode: string | number, wcode: string | number) {
-    return this.getWardsByDistrict(dcode).pipe(map(list => list.find(x => `${x.code}` === `${wcode}`)?.name || ''));
+    const dc = String(dcode), wc = String(wcode);
+    return this.getWardsByDistrict(dc).pipe(map(list => list.find(x => String(x.code) === wc)?.name || ''));
   }
 }

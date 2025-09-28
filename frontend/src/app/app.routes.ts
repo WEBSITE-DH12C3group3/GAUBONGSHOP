@@ -16,6 +16,7 @@ import { ProductDetailComponent } from './features/product_detail/product_detail
 import { ClientChatPage } from './features/chat/client-chat';
 import { ForgotPasswordComponent } from './features/forgot-password/forgot-password';
 import { CheckoutPageComponent  } from './features/checkout/checkout-page';
+import { OrderSuccessPageComponent } from './features/checkout/order-success-page';
 
 // Admin
 import { Dashboard } from './admin/dashboard/dashboard';
@@ -78,6 +79,7 @@ export const routes: Routes = [
       { path: '', component: HomeComponent },
       { path: 'wishlist', component: WishlistComponent },
       { path: 'chat', canActivate: [authGuard], component: ClientChatPage },
+      { path: 'order-success', component: OrderSuccessPageComponent },
       // ===== Cart + chekcout + Orders (customer)
       {
         path: 'cart',

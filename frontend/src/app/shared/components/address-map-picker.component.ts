@@ -3,8 +3,8 @@ import {
   AfterViewInit, OnDestroy, OnChanges, SimpleChanges,
   ViewChild, ElementRef, NgZone, HostListener
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import * as L from 'leaflet';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { inject, PLATFORM_ID } from '@angular/core';
 
 @Component({
   selector: 'app-address-map-picker',
@@ -72,52 +72,66 @@ export class AddressMapPickerComponent implements AfterViewInit, OnDestroy, OnCh
   /** Bắn ra khi user huỷ */
   @Output() cancelled = new EventEmitter<void>();
 
-  map?: L.Map;
-  marker?: L.Marker;
+  // Không khai báo kiểu của Leaflet ở top-level để tránh SSR lỗi.
+  private L!: typeof import('leaflet');
+  private map?: any;
+  private marker?: any;
+
   lat?: number;
   lng?: number;
 
   private resizeTimer?: any;
 
+  // SSR guard
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
+
   constructor(private zone: NgZone) {}
 
   // Khởi tạo map sau khi DOM sẵn sàng
-  ngAfterViewInit(): void {
+  async ngAfterViewInit(): Promise<void> {
+    // Chỉ chạy trên browser (tránh lỗi window is not defined khi SSR)
+    if (!this.isBrowser) return;
+
+    // Dynamic import Leaflet tại runtime (trên browser)
+    const mod = await import('leaflet');
+    this.L = mod;
+
     this.lat = this.initialLat;
     this.lng = this.initialLng;
 
     // Sửa đường dẫn icon mặc định để không bị icon 404 khi build
     // @ts-ignore
-    delete (L.Icon.Default.prototype as any)._getIconUrl;
-    L.Icon.Default.mergeOptions({
+    delete (this.L.Icon.Default.prototype as any)._getIconUrl;
+    this.L.Icon.Default.mergeOptions({
       iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
       iconUrl:       'assets/leaflet/marker-icon.png',
       shadowUrl:     'assets/leaflet/marker-shadow.png'
     });
 
     // Tạo map
-    this.map = L.map(this.mapEl.nativeElement, { zoomControl: true })
+    this.map = this.L.map(this.mapEl.nativeElement, { zoomControl: true })
       .setView([this.initialLat, this.initialLng], this.zoom);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    this.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap'
     }).addTo(this.map);
 
     // Marker kéo thả
-    this.marker = L.marker([this.initialLat, this.initialLng], { draggable: true }).addTo(this.map);
+    this.marker = this.L.marker([this.initialLat, this.initialLng], { draggable: true }).addTo(this.map);
 
     this.marker.on('dragend', () => {
-      const ll = (this.marker as L.Marker).getLatLng();
+      const ll = this.marker.getLatLng();
       this.lat = ll.lat;
       this.lng = ll.lng;
     });
 
-    this.map.on('click', (e: L.LeafletMouseEvent) => {
+    this.map.on('click', (e: any) => {
       const { lat, lng } = e.latlng;
       this.lat = lat;
       this.lng = lng;
-      (this.marker as L.Marker).setLatLng(e.latlng);
+      this.marker.setLatLng(e.latlng);
     });
 
     // Khi tạo xong, invalidatesize 1 nhịp để tránh lệch tiles (đặc biệt khi map nằm trong modal)
@@ -178,8 +192,8 @@ export class AddressMapPickerComponent implements AfterViewInit, OnDestroy, OnCh
 
   ngOnDestroy(): void {
     try {
-      this.map?.off();
-      this.map?.remove();
+      this.map?.off?.();
+      this.map?.remove?.();
     } finally {
       this.map = undefined;
       this.marker = undefined;

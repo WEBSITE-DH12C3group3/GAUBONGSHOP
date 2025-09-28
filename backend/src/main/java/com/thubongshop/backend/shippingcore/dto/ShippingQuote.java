@@ -3,11 +3,11 @@ package com.thubongshop.backend.shippingcore.dto;
 import java.math.BigDecimal;
 
 public record ShippingQuote(
-  String carrier,
-  BigDecimal baseFee,
-  BigDecimal feePerKg,
-  BigDecimal feeBeforeDiscount,
-  BigDecimal discount,
-  BigDecimal finalFee,
-  String appliedVoucher
+    BigDecimal distanceKm,
+    BigDecimal feeBeforeVoucher,
+    BigDecimal feeAfterVoucher,
+    Integer etaDaysMin,
+    Integer etaDaysMax,
+    String carrier,
+    String service
 ) {}

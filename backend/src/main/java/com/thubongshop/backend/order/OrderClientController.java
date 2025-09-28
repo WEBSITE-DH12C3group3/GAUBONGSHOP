@@ -3,15 +3,16 @@ package com.thubongshop.backend.order;
 import com.thubongshop.backend.order.dto.ApplyVoucherPreviewRequest;
 import com.thubongshop.backend.order.dto.CreateOrderRequest;
 import com.thubongshop.backend.order.dto.OrderResponse;
-import com.thubongshop.backend.security.UserPrincipal;             // ✅ lấy user từ token
+import com.thubongshop.backend.security.UserPrincipal;
 import com.thubongshop.backend.shippingcore.ShippingCalculatorService;
+import com.thubongshop.backend.shippingcore.dto.ShippingQuote;
 import com.thubongshop.backend.shippingcore.dto.ShippingQuoteRequest;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal; // ✅
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -25,10 +26,12 @@ public class OrderClientController {
   private final ShippingCalculatorService shippingCalc;
 
   // ========== CREATE ORDER ==========
+  // Body: CreateOrderRequest (đã có destLat/destLng)
   @PostMapping
   public ResponseEntity<OrderResponse> create(
       @AuthenticationPrincipal UserPrincipal me,
-      @Valid @RequestBody CreateOrderRequest req) {
+      @Valid @RequestBody CreateOrderRequest req
+  ) {
     return ResponseEntity.ok(orderService.createOrder(req, me.getId()));
   }
 
@@ -37,8 +40,8 @@ public class OrderClientController {
   public Page<OrderResponse> myOrders(
       @AuthenticationPrincipal UserPrincipal me,
       @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size) {
-
+      @RequestParam(defaultValue = "10") int size
+  ) {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
     return orderService.findMyOrders(me.getId(), pageable);
   }
@@ -47,7 +50,8 @@ public class OrderClientController {
   @GetMapping("/{id}")
   public ResponseEntity<OrderResponse> getOne(
       @PathVariable Integer id,
-      @AuthenticationPrincipal UserPrincipal me) {
+      @AuthenticationPrincipal UserPrincipal me
+  ) {
     return ResponseEntity.ok(orderService.getById(id, me.getId()));
   }
 
@@ -55,7 +59,8 @@ public class OrderClientController {
   @PostMapping("/{id}/pay")
   public ResponseEntity<OrderResponse> markPaid(
       @PathVariable Integer id,
-      @AuthenticationPrincipal UserPrincipal me) {
+      @AuthenticationPrincipal UserPrincipal me
+  ) {
     return ResponseEntity.ok(orderService.markPaid(id, me.getId()));
   }
 
@@ -63,41 +68,59 @@ public class OrderClientController {
   @PostMapping("/{id}/cancel")
   public ResponseEntity<OrderResponse> cancel(
       @PathVariable Integer id,
-      @AuthenticationPrincipal UserPrincipal me) {
+      @AuthenticationPrincipal UserPrincipal me
+  ) {
     return ResponseEntity.ok(orderService.cancel(id, me.getId()));
   }
 
   // ========== PREVIEW SHIPPING (không tạo đơn) ==========
+  // Body: ApplyVoucherPreviewRequest (đã chuyển sang dùng destLat/destLng)
   @PostMapping("/preview-shipping")
   public ResponseEntity<ShippingPreviewResponse> previewShipping(
-      @Valid @RequestBody ApplyVoucherPreviewRequest req) {
-
-    var quote = shippingCalc.quote(
+      @Valid @RequestBody ApplyVoucherPreviewRequest req
+  ) {
+    ShippingQuote quote = shippingCalc.quote(
         new ShippingQuoteRequest(
-            req.orderSubtotal(),                 // BigDecimal
-            req.weightKg(),                      // BigDecimal
-            req.province(),                      // String (địa phương/tỉnh)
-            req.voucherCode(),                   // String (mã freeship)
-            null, null, null
+            req.orderSubtotal(),         // BigDecimal
+            req.weightKg(),              // BigDecimal
+            req.destLat(),               // BigDecimal
+            req.destLng(),               // BigDecimal
+            req.voucherCode(),           // String (optional)
+            req.carrierCode(),           // String (optional, null = INTERNAL)
+            req.serviceCode()            // String (optional, null = STD)
         )
     );
 
+    BigDecimal feeBefore = nz(quote.feeBeforeVoucher());
+    BigDecimal feeAfter  = nz(quote.feeAfterVoucher());
+    BigDecimal discount  = feeBefore.subtract(feeAfter).max(BigDecimal.ZERO);
+
     var body = new ShippingPreviewResponse(
         quote.carrier(),
-        quote.feeBeforeDiscount(),
-        quote.discount(),
-        quote.finalFee(),
-        quote.appliedVoucher()
+        quote.service(),
+        quote.distanceKm(),
+        feeBefore,
+        discount,
+        feeAfter,
+        quote.etaDaysMin(),
+        quote.etaDaysMax()
     );
     return ResponseEntity.ok(body);
   }
 
-  // DTO trả về cho preview
+  // ===== DTO trả về cho preview (dùng để hiển thị) =====
   public record ShippingPreviewResponse(
       String carrier,
+      String service,
+      BigDecimal distanceKm,
       BigDecimal feeBeforeDiscount,
       BigDecimal discount,
       BigDecimal finalFee,
-      String appliedVoucher
+      Integer etaDaysMin,
+      Integer etaDaysMax
   ) {}
+
+  private static BigDecimal nz(BigDecimal v) {
+    return v == null ? BigDecimal.ZERO : v;
+  }
 }

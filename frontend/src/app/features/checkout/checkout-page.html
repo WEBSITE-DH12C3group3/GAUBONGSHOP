@@ -1,66 +1,48 @@
 <section class="container mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-  <!-- Cột trái: địa chỉ + vận chuyển + voucher -->
+  <!-- Cột trái -->
   <div class="lg:col-span-2 space-y-6">
 
     <!-- 1) Địa chỉ nhận hàng -->
     <div class="bg-white rounded-2xl shadow p-5">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-lg font-semibold">Địa chỉ nhận hàng</h2>
-        <div class="flex items-center gap-3">
-          <div *ngIf="distanceKmPreview!=null" class="text-sm text-gray-600">
-            Khoảng cách ước tính: <b>{{ distanceKmPreview }} km</b>
-          </div>
-          <button type="button" (click)="openMapPicker()" class="px-3 py-1 rounded-xl border">
-            Chọn trên bản đồ
-          </button>
-        </div>
+        <button type="button" (click)="openMapPicker()" class="px-3 py-1 rounded-xl border">
+          Chọn trên bản đồ
+        </button>
       </div>
 
       <form [formGroup]="addressForm" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3" novalidate>
         <!-- Người nhận -->
         <div>
           <label class="block text-sm mb-1">Người nhận</label>
-          <input
-            formControlName="receiverName"
-            class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
-            [class.border-rose-500]="addressForm.get('receiverName')?.touched && addressForm.get('receiverName')?.invalid"
-            placeholder="VD: Nguyễn Văn A"
-            aria-required="true"
-            [attr.aria-invalid]="addressForm.get('receiverName')?.invalid || null">
+          <input formControlName="receiverName" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
+                 [class.border-rose-500]="addressForm.get('receiverName')?.touched && addressForm.get('receiverName')?.invalid"
+                 placeholder="VD: Nguyễn Văn A">
           <p *ngIf="addressForm.get('receiverName')?.touched && addressForm.get('receiverName')?.invalid"
              class="text-xs text-rose-600 mt-1">Vui lòng nhập tên người nhận.</p>
         </div>
 
-        <!-- Số điện thoại -->
+        <!-- Phone -->
         <div>
           <label class="block text-sm mb-1">Số điện thoại</label>
-          <input
-            formControlName="phone"
-            class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
-            [class.border-rose-500]="addressForm.get('phone')?.touched && addressForm.get('phone')?.invalid"
-            placeholder="VD: 0912345678"
-            aria-required="true"
-            [attr.aria-invalid]="addressForm.get('phone')?.invalid || null">
+          <input formControlName="phone" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
+                 [class.border-rose-500]="addressForm.get('phone')?.touched && addressForm.get('phone')?.invalid"
+                 placeholder="VD: 0912345678">
           <p *ngIf="addressForm.get('phone')?.touched && addressForm.get('phone')?.errors?.['required']"
              class="text-xs text-rose-600 mt-1">Vui lòng nhập số điện thoại.</p>
           <p *ngIf="addressForm.get('phone')?.touched && addressForm.get('phone')?.errors?.['pattern']"
-             class="text-xs text-rose-600 mt-1">Số điện thoại không hợp lệ (bắt đầu bằng 0, 10–11 số).</p>
+             class="text-xs text-rose-600 mt-1">Số điện thoại không hợp lệ.</p>
         </div>
 
         <!-- Province -->
         <div>
           <label class="block text-sm mb-1">Tỉnh/Thành</label>
-          <select
-            formControlName="provinceCode"
-            class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
-            [class.border-rose-500]="addressForm.get('provinceCode')?.touched && addressForm.get('provinceCode')?.invalid"
-            aria-required="true"
-            [attr.aria-invalid]="addressForm.get('provinceCode')?.invalid || null">
+          <select formControlName="provinceCode" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
+                  [class.border-rose-500]="addressForm.get('provinceCode')?.touched && addressForm.get('provinceCode')?.invalid">
             <option value="" disabled>-- Chọn tỉnh/thành --</option>
             <option *ngIf="loadingProv" disabled>Đang tải...</option>
-            <ng-container *ngIf="!loadingProv">
-              <option *ngFor="let p of provinces" [value]="p.code">{{ p.name }}</option>
-            </ng-container>
+            <!-- LUÔN render list, ép value về string -->
+            <option *ngFor="let p of provinces; trackBy: trackByCode" [value]="p.code + ''">{{ p.name }}</option>
           </select>
           <p *ngIf="addressForm.get('provinceCode')?.touched && addressForm.get('provinceCode')?.invalid"
              class="text-xs text-rose-600 mt-1">Vui lòng chọn Tỉnh/Thành.</p>
@@ -69,18 +51,13 @@
         <!-- District -->
         <div>
           <label class="block text-sm mb-1">Quận/Huyện</label>
-          <select
-            formControlName="districtCode"
-            class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
-            [disabled]="!addressForm.value.provinceCode"
-            [class.border-rose-500]="addressForm.get('districtCode')?.touched && addressForm.get('districtCode')?.invalid"
-            aria-required="true"
-            [attr.aria-invalid]="addressForm.get('districtCode')?.invalid || null">
+          <select formControlName="districtCode" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
+                  [disabled]="!addressForm.value.provinceCode"
+                  [class.border-rose-500]="addressForm.get('districtCode')?.touched && addressForm.get('districtCode')?.invalid">
             <option value="" disabled>-- Chọn quận/huyện --</option>
             <option *ngIf="loadingDist" disabled>Đang tải...</option>
-            <ng-container *ngIf="!loadingDist">
-              <option *ngFor="let d of districts" [value]="d.code">{{ d.name }}</option>
-            </ng-container>
+            <!-- LUÔN render list, ép value về string -->
+            <option *ngFor="let d of districts; trackBy: trackByCode" [value]="d.code + ''">{{ d.name }}</option>
           </select>
           <p *ngIf="addressForm.get('districtCode')?.touched && addressForm.get('districtCode')?.invalid"
              class="text-xs text-rose-600 mt-1">Vui lòng chọn Quận/Huyện.</p>
@@ -89,24 +66,19 @@
         <!-- Ward -->
         <div>
           <label class="block text-sm mb-1">Phường/Xã</label>
-          <select
-            formControlName="wardCode"
-            class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
-            [disabled]="!addressForm.value.districtCode"
-            [class.border-rose-500]="addressForm.get('wardCode')?.touched && addressForm.get('wardCode')?.invalid"
-            aria-required="true"
-            [attr.aria-invalid]="addressForm.get('wardCode')?.invalid || null">
+          <select formControlName="wardCode" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
+                  [disabled]="!addressForm.value.districtCode"
+                  [class.border-rose-500]="addressForm.get('wardCode')?.touched && addressForm.get('wardCode')?.invalid">
             <option value="" disabled>-- Chọn phường/xã --</option>
             <option *ngIf="loadingWard" disabled>Đang tải...</option>
-            <ng-container *ngIf="!loadingWard">
-              <option *ngFor="let w of wards" [value]="w.code">{{ w.name }}</option>
-            </ng-container>
+            <!-- BỎ ng-container; ép value về string -->
+            <option *ngFor="let w of wards; trackBy: trackByCode" [value]="w.code + ''">{{ w.name }}</option>
           </select>
           <p *ngIf="addressForm.get('wardCode')?.touched && addressForm.get('wardCode')?.invalid"
              class="text-xs text-rose-600 mt-1">Vui lòng chọn Phường/Xã.</p>
         </div>
 
-        <!-- Địa chỉ chi tiết -->
+        <!-- Địa chỉ chi tiết (có suggest) -->
         <div>
           <label class="block text-sm mb-1">Địa chỉ chi tiết</label>
           <app-address-suggest-input
@@ -118,7 +90,7 @@
             placeholder="Số nhà, đường, toà nhà...">
           </app-address-suggest-input>
           <p *ngIf="addressForm.get('addressLine')?.touched && addressForm.get('addressLine')?.invalid"
-            class="text-xs text-rose-600 mt-1">Vui lòng nhập địa chỉ chi tiết.</p>
+             class="text-xs text-rose-600 mt-1">Vui lòng nhập địa chỉ chi tiết.</p>
         </div>
 
         <!-- Toạ độ -->
@@ -137,101 +109,51 @@
       </form>
     </div>
 
-
     <div class="mt-3">
-      <app-address-book-select
-        (chooseAddress)="onChooseAddress($event)">
-      </app-address-book-select>
-
-      <button type="button" class="mt-2 px-3 py-1 rounded-xl border" (click)="saveAddress()">
-        Lưu địa chỉ này vào sổ địa chỉ
-      </button>
+      <app-address-book-select (chooseAddress)="onChooseAddress($event)"></app-address-book-select>
+      <button type="button" class="mt-2 px-3 py-1 rounded-xl border" (click)="saveAddress()">Lưu địa chỉ này</button>
     </div>
 
-
-
-    <!-- 2) Vận chuyển -->
+    <!-- 2) Vận chuyển (preview 1 kết quả) -->
     <div class="bg-white rounded-2xl shadow p-5">
       <div class="flex items-center justify-between mb-3">
         <h2 class="text-lg font-semibold">Vận chuyển</h2>
-
-        <!-- Nhóm control của shipping -->
         <div class="flex items-center gap-3" [formGroup]="shippingForm">
-          <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-500">Khối lượng (kg):</span>
-            <input type="number"
-                   class="w-28 border rounded-xl px-3 py-1 outline-none focus:ring-2 focus:ring-pink-600"
-                   formControlName="weightKg" min="0" step="0.1">
-          </div>
-          <button type="button" class="px-3 py-1 bg-gray-100 rounded-xl" (click)="getQuotes()">
-            Lấy báo giá
-          </button>
+          <input class="border rounded-xl px-3 py-2" placeholder="Mã freeship…" formControlName="voucherCode">
+          <button type="button" class="px-3 py-1 bg-gray-100 rounded-xl" (click)="tryPreview()">Tính phí</button>
         </div>
       </div>
 
-      <div *ngIf="loadingQuotes" class="text-gray-600">Đang tính phí...</div>
+      <div *ngIf="loadingPreview" class="text-gray-600">Đang tính phí...</div>
       <div *ngIf="errMsg" class="text-rose-600 text-sm mb-2">{{ errMsg }}</div>
 
-      <!-- Danh sách quote -->
-      <div class="divide-y" *ngIf="quotes.length > 0">
-        <div *ngFor="let q of quotes" class="py-3 flex items-center justify-between gap-3">
+      <ng-container *ngIf="!loadingPreview">
+        <div *ngIf="preview; else noQuote" class="flex items-center justify-between py-2 border-top">
           <div class="min-w-0">
             <div class="font-medium">
-              {{ q.carrierName }} <span class="text-gray-500">– {{ q.serviceLabel }}</span>
+              {{ preview?.carrier || 'INTERNAL' }}
+              <span class="text-gray-500">— {{ preview?.service || 'Tiêu chuẩn' }}</span>
             </div>
-            <div class="text-xs text-gray-500" *ngIf="q.etaMin || q.etaMax">
-              ETA: {{ q.etaMin || '?' }}–{{ q.etaMax || '?' }} ngày
+            <div class="text-xs text-gray-500" *ngIf="preview?.distanceKm!=null">
+              Khoảng cách: {{ preview?.distanceKm | number:'1.0-2' }} km
             </div>
-            <div *ngIf="q.voucherApplied" class="text-xs text-green-600 mt-0.5">
-              Đã áp voucher {{ q.voucherApplied }}
-              (trước: {{ q.feeBeforeVoucher || 0 | currency:'VND':'symbol':'1.0-0' }})
+            <div class="text-xs text-green-600 mt-0.5" *ngIf="preview?.discount">
+              Đã giảm: {{ preview?.discount | currency:'VND':'symbol':'1.0-0' }}
+              (trước: {{ preview?.feeBeforeDiscount | currency:'VND':'symbol':'1.0-0' }})
             </div>
           </div>
-          <div class="flex items-center gap-3">
-            <div class="text-pink-600 font-bold">
-              {{ q.fee | currency:'VND':'symbol':'1.0-0' }}
-            </div>
-            <button
-              type="button"
-              class="px-3 py-1 rounded-xl border"
-              [class.bg-pink-600]="selectedQuote===q"
-              [class.text-white]="selectedQuote===q"
-              (click)="selectQuote(q)">
-              {{ selectedQuote===q ? 'Đang chọn' : 'Chọn' }}
-            </button>
+          <div class="text-pink-600 font-bold">
+            {{ preview?.finalFee || 0 | currency:'VND':'symbol':'1.0-0' }}
           </div>
         </div>
-      </div>
-
-      <div *ngIf="!loadingQuotes && quotes.length===0" class="text-gray-500 text-sm">
-        Chưa có báo giá. Hãy điền địa chỉ đầy đủ (bao gồm toạ độ) và bấm “Lấy báo giá”.
-      </div>
-    </div>
-
-    <!-- 3) Voucher vận chuyển -->
-    <div class="bg-white rounded-2xl shadow p-5">
-      <h2 class="text-lg font-semibold mb-3">Mã vận chuyển</h2>
-      <div class="flex items-center gap-3">
-        <input
-          [(ngModel)]="voucherCode"
-          name="voucher"
-          class="border rounded-xl px-3 py-2 flex-1 outline-none focus:ring-2 focus:ring-pink-600"
-          placeholder="Nhập mã freeship...">
-        <button
-          type="button"
-          class="px-4 py-2 rounded-xl border"
-          [disabled]="!selectedQuote || !voucherCode || voucherApplying"
-          (click)="applyVoucher()">
-          {{ voucherApplying ? 'Đang áp...' : 'Áp mã' }}
-        </button>
-      </div>
-      <p class="text-xs text-gray-500 mt-2">
-        Mã chỉ áp dụng với một số điều kiện nhất định (giá trị đơn, khu vực, hãng vận chuyển...).
-      </p>
+        <ng-template #noQuote>
+          <div class="text-gray-500 text-sm">Chưa có báo giá. Hãy chọn vị trí giao và bấm “Tính phí”.</div>
+        </ng-template>
+      </ng-container>
     </div>
   </div>
 
-  <!-- Cột phải: tóm tắt + thanh toán + đặt hàng -->
+  <!-- Cột phải -->
   <div class="space-y-6">
     <!-- Tóm tắt -->
     <div class="bg-white rounded-2xl shadow p-5">
@@ -246,14 +168,14 @@
         <div class="flex justify-between">
           <span>Phí vận chuyển</span>
           <span class="font-semibold">
-            {{ (selectedQuote?.fee ?? 0) | currency:'VND':'symbol':'1.0-0' }}
+            {{ (preview?.finalFee ?? 0) | currency:'VND':'symbol':'1.0-0' }}
           </span>
         </div>
         <hr>
         <div class="flex justify-between text-base">
           <span class="font-medium">Tổng thanh toán</span>
           <span class="text-pink-600 font-bold">
-            {{ totalToPay() | currency:'VND':'symbol':'1.0-0' }}
+            {{ (cart?.selectedAmount ?? cart?.totalAmount ?? 0) + (preview?.finalFee ?? 0) | currency:'VND':'symbol':'1.0-0' }}
           </span>
         </div>
       </div>
@@ -264,42 +186,20 @@
       <h2 class="text-lg font-semibold mb-3">Thanh toán</h2>
       <form [formGroup]="paymentForm" class="space-y-2">
         <label class="flex items-center gap-2">
-          <input type="radio" value="COD" formControlName="method">
-          COD - Thanh toán khi nhận hàng
-        </label>
-
-        <label class="flex items-center gap-2 opacity-60">
-          <input type="radio" value="e_wallet" formControlName="method" [disabled]="true">
-          Ví điện tử (Momo/ZaloPay) — sắp mở
-        </label>
-
-        <label class="flex items-center gap-2 opacity-60">
-          <input type="radio" value="bank_transfer" formControlName="method" [disabled]="true">
-          Chuyển khoản ngân hàng — sắp mở
-        </label>
-
-        <label class="flex items-center gap-2 opacity-60">
-          <input type="radio" value="credit_card" formControlName="method" [disabled]="true">
-          Thẻ tín dụng/ghi nợ — sắp mở
+          <input type="radio" value="COD" formControlName="method"> COD - Thanh toán khi nhận hàng
         </label>
       </form>
     </div>
 
-
     <!-- Ghi chú + Đặt hàng -->
     <div class="bg-white rounded-2xl shadow p-5" [formGroup]="noteForm">
       <h2 class="text-lg font-semibold mb-3">Ghi chú</h2>
-      <textarea
-        formControlName="note"
-        rows="3"
-        class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
-        placeholder="Yêu cầu giao hàng, giờ nhận, lưu ý bảo quản..."></textarea>
+      <textarea formControlName="note" rows="3" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
+                placeholder="Yêu cầu giao hàng, giờ nhận, lưu ý..."></textarea>
 
-      <button
-        type="button"
-        class="mt-4 w-full bg-pink-600 hover:bg-pink-700 text-white py-3 rounded-xl font-semibold"
-        [disabled]="placing || !selectedQuote || !isAddressValid()"
-        (click)="placeOrder()">
+      <button type="button" class="mt-4 w-full bg-pink-600 hover:bg-pink-700 text-white py-3 rounded-xl font-semibold"
+              [disabled]="placing || !preview || !isAddressValid()"
+              (click)="placeOrder()">
         {{ placing ? 'Đang đặt hàng...' : 'Đặt hàng' }}
       </button>
 
@@ -307,7 +207,7 @@
     </div>
   </div>
 
-  <!-- Modal map picker toàn màn (nếu bạn muốn modal riêng, có thể dùng khối này thay vì inline) -->
+  <!-- Modal Map Picker -->
   <div *ngIf="showMap" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl shadow-lg w-[90vw] max-w-4xl p-4">
       <h3 class="text-lg font-semibold mb-3">Chọn vị trí giao hàng</h3>
@@ -321,6 +221,4 @@
       </app-address-map-picker>
     </div>
   </div>
-
-  
 </section>

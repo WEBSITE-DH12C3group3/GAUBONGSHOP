@@ -4,68 +4,91 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.List;
 
 @Entity
-@Table(name="orders")
-@Getter @Setter @Builder
-@NoArgsConstructor @AllArgsConstructor
+@Table(name = "orders")
+@Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Order {
 
-  @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
 
-  @Column(name="user_id")
+  @Column(name = "user_id", nullable = false)
   private Integer userId;
 
   @Enumerated(EnumType.STRING)
-  @Column(name="status", nullable=false)
-  private OrderStatus status; // giữ enum hiện tại: PENDING_PAYMENT...
+  @Column(nullable = false)
+  private OrderStatus status;
 
-  @Column(name="items_total", precision=10, scale=2)
+  // ====== Tổng tiền hàng ======
+  @Column(name = "items_total", precision = 12, scale = 2)
   private BigDecimal itemsTotal;
 
-  @Column(name="shipping_fee", precision=12, scale=2)
-  private BigDecimal shippingFee;
+  // ====== Thông tin vận chuyển (THÊM CHO KHỚP VỚI OrderService) ======
+  @Column(name = "shipping_distance_km", precision = 12, scale = 2)
+  private BigDecimal shippingDistanceKm;
 
-  @Column(name="shipping_discount", precision=12, scale=2)
+  @Column(name = "shipping_fee_before", precision = 12, scale = 2)
+  private BigDecimal shippingFeeBefore;
+
+  @Column(name = "shipping_discount", precision = 12, scale = 2)
   private BigDecimal shippingDiscount;
 
-  @Column(name="grand_total", precision=12, scale=2)
+  @Column(name = "shipping_fee_final", precision = 12, scale = 2)
+  private BigDecimal shippingFeeFinal;
+
+  // Giữ field cũ nếu trước đây bạn dùng (không bắt buộc)
+  @Column(name = "shipping_fee", precision = 12, scale = 2)
+  private BigDecimal shippingFee;
+
+  // ====== Tổng cộng ======
+  @Column(name = "grand_total", precision = 12, scale = 2)
   private BigDecimal grandTotal;
 
-  @Column(name="voucher_code", length=50)
+  @Column(name = "total_amount", precision = 12, scale = 2)
+  private BigDecimal totalAmount;
+
+  // ====== Voucher ======
+  @Column(name = "voucher_code")
   private String voucherCode;
 
-  @Column(name="receiver_name", length=120)
+  // ====== Địa chỉ nhận ======
+  @Column(name = "receiver_name")
   private String receiverName;
 
-  @Column(name="phone", length=20)
+  @Column(name = "phone")
   private String phone;
 
-  @Column(name="address_line", length=255)
+  @Column(name = "address_line")
   private String addressLine;
 
-  @Column(name="province", length=100)
+  @Column(name = "province")
   private String province;
 
-  @Column(name="weight_kg", precision=12, scale=3)
+  // ====== Khối lượng ======
+  @Column(name = "weight_kg", precision = 12, scale = 2)
   private BigDecimal weightKg;
 
-  @Column(name="order_date", nullable=false)
-  private LocalDateTime createdAt; // map sang order_date
+  // ====== Thời gian ======
+  @Column(name = "order_date", updatable = false, insertable = false,
+          columnDefinition = "timestamp default current_timestamp")
+  private Instant createdAt;
 
-  @OneToMany(mappedBy="order", cascade=CascadeType.ALL, orphanRemoval=true, fetch=FetchType.LAZY)
-  private List<OrderItem> items = new ArrayList<>();
+  // ====== Quan hệ ======
+  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<OrderItem> items;
 
-  @OneToOne(mappedBy="order", cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+  @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
   private ShippingRecord shippingRecord;
 
-  @PrePersist
-  public void prePersist() {
-    if (createdAt == null) createdAt = LocalDateTime.now();
-    if (status == null) status = OrderStatus.PENDING_PAYMENT;
+  // ====== Hỗ trợ tương thích ngược (nếu code cũ còn dùng getShippingFee()) ======
+  public BigDecimal getShippingFeeOrFinal() {
+    return shippingFeeFinal != null ? shippingFeeFinal : shippingFee;
   }
 }

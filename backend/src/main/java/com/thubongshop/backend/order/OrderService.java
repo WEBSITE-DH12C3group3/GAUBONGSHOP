@@ -2,8 +2,9 @@ package com.thubongshop.backend.order;
 
 import com.thubongshop.backend.order.dto.CreateOrderRequest;
 import com.thubongshop.backend.order.dto.OrderResponse;
-import com.thubongshop.backend.product.ProductRepository;           // dùng đúng repo
+import com.thubongshop.backend.product.ProductRepository;           // dùng đúng repo sản phẩm của bạn
 import com.thubongshop.backend.shippingcore.ShippingCalculatorService;
+import com.thubongshop.backend.shippingcore.dto.ShippingQuote;
 import com.thubongshop.backend.shippingcore.dto.ShippingQuoteRequest;
 import com.thubongshop.backend.shippingvoucher.ShipVoucher;
 import com.thubongshop.backend.shippingvoucher.ShipVoucherService;
@@ -19,6 +20,12 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.Instant;
+
 
 @Service
 @RequiredArgsConstructor
@@ -30,17 +37,31 @@ public class OrderService {
   private final OrderItemRepo itemRepo;
   private final ShippingRecordRepo shippingRecordRepo;
 
-  private final ProductRepository productRepository;     // ✅ khớp với repo của bạn
+  private final ProductRepository productRepository; // ✅ repo hiện có của bạn
 
   private final ShippingCalculatorService shippingCalc;
   private final ShipVoucherService voucherService;
 
+  /**
+   * Tạo đơn hàng đầy đủ:
+   * - Tính tiền hàng & tổng khối lượng dựa trên danh sách items.
+   * - Xin báo giá vận chuyển từ ShippingCalculatorService (dựa vào lat/lng người nhận).
+   * - Áp voucher vận chuyển (nếu có) theo logic trong shippingvoucher service.
+   * - Lưu Order + OrderItems + ShippingRecord.
+   */
   @Transactional
   public OrderResponse createOrder(CreateOrderRequest req, Integer currentUserId) {
+    if (req == null) {
+      throw new BusinessException("REQ_NULL", "Thiếu thông tin đơn hàng");
+    }
     if (req.items() == null || req.items().isEmpty()) {
       throw new BusinessException("EMPTY_ITEMS", "Đơn hàng không có sản phẩm");
     }
+    if (req.destLat() == null || req.destLng() == null) {
+      throw new BusinessException("DEST_NULL", "Thiếu vị trí giao hàng (lat/lng)");
+    }
 
+    // --- 1) Cộng tiền hàng & khối lượng ---
     BigDecimal itemsTotal = BigDecimal.ZERO;
     BigDecimal weightKg   = BigDecimal.ZERO;
 
@@ -54,7 +75,7 @@ public class OrderService {
         throw new BusinessException("INVALID_QTY", "Số lượng không hợp lệ");
       }
 
-      // 🔒 Product.price hiện là Double → ép an toàn sang BigDecimal
+      // Giá sản phẩm trong entity hiện là Double → ép sang BigDecimal an toàn
       Double priceDouble = p.getPrice();
       if (priceDouble == null) {
         throw new BusinessException("PRICE_NULL", "Giá sản phẩm chưa được cấu hình");
@@ -80,58 +101,124 @@ public class OrderService {
 
     itemsTotal = itemsTotal.setScale(2, MONEY_RM);
 
-    // Báo giá vận chuyển
-    var quote = shippingCalc.quote(
-        new ShippingQuoteRequest(itemsTotal, weightKg, req.province(), req.voucherCode(), null, null, null)
-    );
+    // --- 2) Báo giá vận chuyển (dựa theo lat/lng + subtotal + khối lượng + voucher) ---
+      ShippingQuote quote = shippingCalc.quote(
+          new ShippingQuoteRequest(
+              itemsTotal, weightKg, req.destLat(), req.destLng(), req.voucherCode(), null, null
+          )
+      );
 
-    BigDecimal shippingFee   = quote.finalFee()   == null ? BigDecimal.ZERO : quote.finalFee().setScale(2, MONEY_RM);
-    BigDecimal shippingDisc  = quote.discount()   == null ? BigDecimal.ZERO : quote.discount().setScale(2, MONEY_RM);
-    BigDecimal grandTotal    = itemsTotal.add(shippingFee).setScale(2, MONEY_RM);
 
-    // Tạo order
+    // ShippingQuote mới trả về:
+    // - distanceKm
+    // - feeBeforeVoucher
+    // - feeAfterVoucher
+    // - etaDaysMin/Max
+    // - carrier/service
+    BigDecimal shippingFeeBefore = n2(quote.feeBeforeVoucher());
+    BigDecimal shippingFeeFinal  = n2(quote.feeAfterVoucher());
+    BigDecimal shippingDiscount  = shippingFeeBefore.subtract(shippingFeeFinal).max(BigDecimal.ZERO);
+    BigDecimal distanceKm        = n2(quote.distanceKm());
+
+    // --- 3) Tổng tiền phải trả ---
+    BigDecimal grandTotal = itemsTotal.add(shippingFeeFinal).setScale(2, MONEY_RM);
+
+    // --- 4) Lưu Order + Items ---
     var order = Order.builder()
         .userId(currentUserId)
         .status(OrderStatus.PENDING_PAYMENT)
         .itemsTotal(itemsTotal)
-        .shippingFee(shippingFee)
-        .shippingDiscount(shippingDisc)
+        // các trường shipping chi tiết (đã có trong DB của bạn)
+        .shippingDistanceKm(distanceKm)
+        .shippingFeeBefore(shippingFeeBefore)
+        .shippingDiscount(shippingDiscount)
+        .shippingFeeFinal(shippingFeeFinal)
+        .shippingFee(shippingFeeFinal)
+        // order tổng
         .grandTotal(grandTotal)
-        .voucherCode(quote.appliedVoucher())
+        .totalAmount(grandTotal)
+        // voucher ship (nếu bạn muốn lưu mã)
+        .voucherCode(req.voucherCode())
+        // thông tin nhận hàng
         .receiverName(req.receiverName())
         .phone(req.phone())
         .addressLine(req.addressLine())
         .province(req.province())
+        // trọng lượng
         .weightKg(weightKg)
         .build();
 
-    // Gắn 2 chiều & lưu
     for (var oi : items) oi.setOrder(order);
     order.setItems(items);
 
     order = orderRepo.save(order);
-    // nếu Order.items chưa cascade ALL thì lưu rõ ràng:
+    // đề phòng cascade chưa full:
     itemRepo.saveAll(items);
 
-    // Shipping record
+    // --- 5) Lưu ShippingRecord ---
     var sr = ShippingRecord.builder()
         .order(order)
         .carrier(quote.carrier())
         .trackingCode(null)
         .status(ShippingRecord.ShipStatus.CREATED)
-        .feeCharged(shippingFee)
+        .feeCharged(shippingFeeFinal)
         .build();
     sr = shippingRecordRepo.save(sr);
-    order.setShippingRecord(sr);  // nhất quán bộ nhớ
+    order.setShippingRecord(sr); // đồng bộ trong bộ nhớ
 
-    // Lượt dùng voucher
-    if (quote.appliedVoucher() != null) {
-      ShipVoucher v = voucherService.getActiveOrThrow(quote.appliedVoucher());
+    // --- 6) Tăng lượt dùng voucher vận chuyển (nếu có) ---
+    if (req.voucherCode() != null && !req.voucherCode().isBlank()) {
+      ShipVoucher v = voucherService.getActiveOrThrow(req.voucherCode());
+      // Nếu bạn muốn trừ theo mức giảm thực tế, có thể bổ sung tham số.
       voucherService.increaseUsed(v);
     }
 
     return toDto(order);
   }
+
+  /**
+   * API bổ sung (đã báo bạn trước đó): cho phép tạo đơn nếu phía ngoài
+   * đã có sẵn các con số phí vận chuyển.
+   * Không xóa bỏ, chỉ thêm để các luồng khác có thể tái sử dụng.
+   */
+  @Transactional
+  public Order createOrderWithShipping(
+      Integer userId,
+      String receiverName,
+      String phone,
+      String addressLine,
+      String province,
+      BigDecimal itemsTotal,
+      BigDecimal shippingDistanceKm,
+      BigDecimal shippingFeeBefore,
+      BigDecimal shippingDiscount,
+      BigDecimal shippingFeeFinal,
+      BigDecimal weightKg
+  ) {
+    Order o = new Order();
+    o.setUserId(userId);
+    o.setReceiverName(receiverName);
+    o.setPhone(phone);
+    o.setAddressLine(addressLine);
+    o.setProvince(province);
+
+    o.setItemsTotal(n2(itemsTotal));
+    o.setShippingDistanceKm(n2(shippingDistanceKm));
+    o.setShippingFeeBefore(n2(shippingFeeBefore));
+    o.setShippingDiscount(n2(shippingDiscount));
+    o.setShippingFeeFinal(n2(shippingFeeFinal));
+    o.setWeightKg(n2(weightKg));
+
+    BigDecimal grand = n2(itemsTotal).add(n2(shippingFeeFinal));
+    o.setGrandTotal(grand);
+    o.setTotalAmount(grand);
+
+    if (o.getStatus() == null) o.setStatus(OrderStatus.PENDING_PAYMENT);
+
+    return orderRepo.save(o);
+  }
+
+  // ================== Các API tra cứu/ cập nhật khác (giữ nguyên) ==================
 
   public Page<OrderResponse> findMyOrders(Integer userId, Pageable pageable) {
     return orderRepo.findByUserId(userId, pageable).map(this::toDto);
@@ -192,9 +279,9 @@ public class OrderService {
     shippingRecordRepo.save(sr);
 
     switch (status) {
-      case PICKED, IN_TRANSIT -> o.setStatus(OrderStatus.SHIPPED); // đã bàn giao hãng
+      case PICKED, IN_TRANSIT -> o.setStatus(OrderStatus.SHIPPED);
       case DELIVERED -> o.setStatus(OrderStatus.DELIVERED);
-      case FAILED -> { /* xử lý riêng nếu cần */ }
+      case FAILED -> { /* có thể set trạng thái riêng nếu bạn muốn */ }
       default -> { /* CREATED -> giữ nguyên */ }
     }
     o = orderRepo.save(o);
@@ -213,7 +300,7 @@ public class OrderService {
             it.getQuantity(),
             it.getWeightKgPerItem()
         ))
-        .toList();
+        .toList(); // nếu dự án dùng Java <16 thì đổi thành .collect(java.util.stream.Collectors.toList())
 
     OrderResponse.Shipping shipDto = null;
     if (o.getShippingRecord() != null) {
@@ -226,12 +313,19 @@ public class OrderService {
       );
     }
 
+    // Convert Instant -> LocalDateTime theo timezone hệ thống (hoặc ZoneId.of("Asia/Ho_Chi_Minh"))
+    java.time.LocalDateTime createdAtLdt = null;
+    if (o.getCreatedAt() != null) {
+      createdAtLdt = java.time.LocalDateTime.ofInstant(o.getCreatedAt(), java.time.ZoneId.systemDefault());
+    }
+
     return new OrderResponse(
         o.getId(),
         o.getUserId(),
         o.getStatus(),
         o.getItemsTotal(),
-        o.getShippingFee(),
+        // hiển thị phí ship: ưu tiên feeFinal, fallback fee cũ nếu có
+        o.getShippingFeeFinal() != null ? o.getShippingFeeFinal() : o.getShippingFee(),
         o.getShippingDiscount(),
         o.getGrandTotal(),
         o.getVoucherCode(),
@@ -240,9 +334,14 @@ public class OrderService {
         o.getAddressLine(),
         o.getProvince(),
         o.getWeightKg(),
-        o.getCreatedAt(),
+        createdAtLdt,     // <- LocalDateTime, khớp DTO của bạn
         shipDto,
         itemDtos
     );
+  }
+
+
+  private static BigDecimal n2(BigDecimal v) {
+    return v == null ? BigDecimal.ZERO : v.setScale(2, MONEY_RM);
   }
 }

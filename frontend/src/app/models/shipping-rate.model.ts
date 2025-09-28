@@ -17,3 +17,20 @@ export interface PageResp<T> {
   size: number;
   number: number;
 }
+
+export interface CarrierRateRule {
+  id?: number;
+  serviceId: number;      // FK -> shipping_services.id
+  minKm: number;          // null/0 = từ 0
+  maxKm?: number | null;  // null = vô cực
+  baseFee: number;        // VND
+  perKmFee: number;       // VND/km
+  freeKm?: number | null; // miễn phí km đầu
+  minFee?: number | null; // sàn thu
+  active: boolean;
+  activeFrom?: string | null;
+  activeTo?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+

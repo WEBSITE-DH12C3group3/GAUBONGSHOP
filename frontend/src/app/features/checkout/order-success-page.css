@@ -1,0 +1,13 @@
+/* Animated success check */
+.success-svg { width: 72px; height: 72px; display: block; margin: 0 auto; }
+.success-circle {
+  stroke: #16a34a; stroke-width: 2; stroke-dasharray: 166; stroke-dashoffset: 166;
+  animation: circle 0.6s ease forwards;
+}
+.success-check {
+  stroke: #16a34a; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 48; stroke-dashoffset: 48;
+  animation: check 0.4s 0.35s ease forwards;
+}
+@keyframes circle { to { stroke-dashoffset: 0; } }
+@keyframes check  { to { stroke-dashoffset: 0; } }

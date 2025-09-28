@@ -7,4 +7,7 @@ import java.util.Optional;
 public interface ShippingCarrierRepo extends JpaRepository<ShippingCarrier, Integer> {
   boolean existsByCodeIgnoreCase(String code);
   Optional<ShippingCarrier> findByCodeIgnoreCase(String code);
+
+    ShippingCarrier findByCodeAndActiveTrue(String code);
+
 }

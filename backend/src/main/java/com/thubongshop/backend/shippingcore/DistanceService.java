@@ -2,7 +2,7 @@ package com.thubongshop.backend.shippingcore;
 
 import org.springframework.stereotype.Service;
 
-@Service("shippingDistanceService") // 👈 đặt tên bean khác để không đụng
+@Service("shippingCoreDistanceService")
 public class DistanceService {
 
   public double haversineKm(double lat1, double lon1, double lat2, double lon2){
