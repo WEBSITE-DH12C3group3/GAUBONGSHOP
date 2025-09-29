@@ -1,0 +1,45 @@
+:host { display: block; }
+
+/* Hộp bao canvas để Chart.js biết chiều cao (vì maintainAspectRatio:false) */
+.chart-box { position: relative; height: 260px; }
+.chart-box.tall { height: 320px; }
+.chart-box.sm { height: 180px; }
+
+/* Trạng thái rỗng */
+.empty {
+  font-size: 0.875rem;
+  color: #9ca3af; /* gray-400 */
+  margin-bottom: .5rem;
+}
+
+/* Skeleton đơn giản cho KPI */
+.skeleton {
+  border-radius: 1rem;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 37%, #f3f4f6 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
+/* Loading overlay */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.6);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+}
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid #f3f4f6;
+  border-top-color: #ec4899; /* pink-500/600 */
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

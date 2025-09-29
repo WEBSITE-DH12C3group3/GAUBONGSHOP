@@ -85,7 +85,6 @@ export const routes: Routes = [
       { path: 'wishlist', component: WishlistComponent },
       { path: 'chat', canActivate: [authGuard], component: ClientChatPage },
       { path: 'order-success', component: OrderSuccessPageComponent },
- // 👇 ĐƠN HÀNG KHÁCH
       { path: 'order',       canActivate: [authGuard], component: MyOrdersComponent },
       { path: 'order/:id',   canActivate: [authGuard], component: OrderDetailComponent },
       { path: 'history',     canActivate: [authGuard], component: MyOrdersComponent, data: { mode: 'history' } },
@@ -113,6 +112,11 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: Dashboard },
+
+      { path: 'analytics',
+        canActivate: [permissionGuard],
+        data: { permissions: ['view_reports'] },
+        loadChildren: () => import('./admin/analytics/routes').then(m => m.ANALYTICS_ROUTES) },
 
       // Danh mục
       {

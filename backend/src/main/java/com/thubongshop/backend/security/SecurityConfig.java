@@ -76,6 +76,7 @@ public class SecurityConfig {
 
         // 7) Admin (v1 & v2) theo quyền
         .requestMatchers("/api/admin/users/**", "/api/admin/roles/**").hasRole("ADMIN")
+        .requestMatchers("/api/admin/stats/**").hasAnyAuthority("view_reports")
         .requestMatchers("/api/admin/products/**").hasAuthority("manage_products")
         .requestMatchers("/api/admin/orders/**").hasAuthority("manage_orders")
         .requestMatchers("/api/admin/imports/**").hasAuthority("manage_imports")

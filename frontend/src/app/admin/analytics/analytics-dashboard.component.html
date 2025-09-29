@@ -1,0 +1,184 @@
+<div class="p-4 space-y-4 relative">
+
+  <!-- Loading overlay -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="bg-white rounded-2xl shadow p-4 grid md:grid-cols-5 gap-3">
+    <div>
+      <label class="block text-sm text-gray-500 mb-1">Từ ngày</label>
+      <input type="date" [(ngModel)]="start" autocomplete="off"
+             class="w-full border rounded-xl px-3 py-2"/>
+    </div>
+    <div>
+      <label class="block text-sm text-gray-500 mb-1">Đến ngày</label>
+      <input type="date" [(ngModel)]="end" autocomplete="off"
+             class="w-full border rounded-xl px-3 py-2"/>
+    </div>
+    <div>
+      <label class="block text-sm text-gray-500 mb-1">Nhóm kỳ</label>
+      <select [(ngModel)]="groupBy" class="w-full border rounded-xl px-3 py-2">
+        <option value="DAY">Ngày</option>
+        <option value="WEEK">Tuần</option>
+        <option value="MONTH">Tháng</option>
+      </select>
+    </div>
+    <div class="md:col-span-2 flex items-end">
+      <button (click)="onApplyFilters()"
+              class="ml-auto bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-xl shadow">
+        Áp dụng
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI cards -->
+  <div class="grid md:grid-cols-5 gap-4" *ngIf="summary as s; else kpiEmpty">
+    <div class="bg-white rounded-2xl shadow p-4">
+      <div class="text-gray-500 text-sm">Doanh thu ròng</div>
+      <div class="text-2xl font-semibold">{{ s.netRevenue | number:'1.0-0' }} đ</div>
+    </div>
+    <div class="bg-white rounded-2xl shadow p-4">
+      <div class="text-gray-500 text-sm">Đơn hàng</div>
+      <div class="text-2xl font-semibold">{{ s.orders }}</div>
+      <div class="text-xs text-emerald-600">Paid: {{ s.paidOrders }}</div>
+    </div>
+    <div class="bg-white rounded-2xl shadow p-4">
+      <div class="text-gray-500 text-sm">Khách hàng</div>
+      <div class="text-2xl font-semibold">{{ s.customers }}</div>
+    </div>
+    <div class="bg-white rounded-2xl shadow p-4">
+      <div class="text-gray-500 text-sm">AOV</div>
+      <div class="text-2xl font-semibold">{{ s.aov | number:'1.0-0' }} đ</div>
+    </div>
+    <div class="bg-white rounded-2xl shadow p-4">
+      <div class="text-gray-500 text-sm">Lợi nhuận gộp</div>
+      <div class="text-2xl font-semibold">{{ s.grossProfit | number:'1.0-0' }} đ</div>
+    </div>
+  </div>
+  <ng-template #kpiEmpty>
+    <div class="grid md:grid-cols-5 gap-4">
+      <div class="skeleton h-20"></div>
+      <div class="skeleton h-20"></div>
+      <div class="skeleton h-20"></div>
+      <div class="skeleton h-20"></div>
+      <div class="skeleton h-20"></div>
+    </div>
+  </ng-template>
+
+  <!-- Charts -->
+  <div class="grid md:grid-cols-2 gap-4">
+    <div class="bg-white rounded-2xl shadow p-4">
+      <div class="mb-2 font-semibold">Revenue & Margin</div>
+      <div class="empty" *ngIf="!hasSeries()">Không có dữ liệu trong khoảng thời gian này.</div>
+      <div class="chart-box tall">
+        <canvas id="chartRevenue"></canvas>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-4">
+      <div class="mb-2 font-semibold">Orders</div>
+      <div class="empty" *ngIf="!hasSeries()">Không có dữ liệu.</div>
+      <div class="chart-box tall">
+        <canvas id="chartOrders"></canvas>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-4">
+      <div class="mb-2 font-semibold">Theo danh mục</div>
+      <div class="empty" *ngIf="!has(byCategory)">Không có dữ liệu.</div>
+      <div class="chart-box">
+        <canvas id="chartCategory"></canvas>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-4">
+      <div class="mb-2 font-semibold">Theo thương hiệu</div>
+      <div class="empty" *ngIf="!has(byBrand)">Không có dữ liệu.</div>
+      <div class="chart-box">
+        <canvas id="chartBrand"></canvas>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-4 md:col-span-2">
+      <div class="mb-2 font-semibold">Phương thức thanh toán</div>
+      <div class="empty" *ngIf="!has(payments)">Không có dữ liệu.</div>
+      <div class="chart-box sm">
+        <canvas id="chartPayment"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tables -->
+  <div class="grid md:grid-cols-2 gap-4">
+    <div class="bg-white rounded-2xl shadow p-4">
+      <div class="mb-2 font-semibold">Top sản phẩm</div>
+      <div *ngIf="!has(topProducts)" class="empty">Không có dữ liệu.</div>
+      <div class="overflow-auto" *ngIf="has(topProducts)">
+        <table class="min-w-full text-sm">
+          <thead>
+          <tr class="text-left text-gray-500">
+            <th class="py-2">Sản phẩm</th>
+            <th>SL</th>
+            <th>Doanh số</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let p of topProducts" class="border-t">
+            <td class="py-2">{{ p.productName }}</td>
+            <td>{{ p.quantity }}</td>
+            <td>{{ p.sales | number:'1.0-0' }} đ</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-4">
+      <div class="mb-2 font-semibold">Top khách hàng</div>
+      <div *ngIf="!has(topCustomers)" class="empty">Không có dữ liệu.</div>
+      <div class="overflow-auto" *ngIf="has(topCustomers)">
+        <table class="min-w-full text-sm">
+          <thead>
+          <tr class="text-left text-gray-500">
+            <th class="py-2">Khách</th>
+            <th>Đơn</th>
+            <th>Chi tiêu</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let c of topCustomers" class="border-t">
+            <td class="py-2">{{ c.key }}</td>
+            <td>{{ c.count }}</td>
+            <td>{{ c.amount | number:'1.0-0' }} đ</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Coupon & Ship-voucher -->
+  <div class="grid md:grid-cols-2 gap-4">
+    <div class="bg-white rounded-2xl shadow p-4">
+      <div class="mb-2 font-semibold">Mã khuyến mãi</div>
+      <div *ngIf="!has(coupons)" class="empty">Không có dữ liệu.</div>
+      <ul class="text-sm space-y-1" *ngIf="has(coupons)">
+        <li *ngFor="let x of coupons">
+          {{ x.key }} — {{ x.amount | number:'1.0-0' }} đ ({{ x.count }} đơn)
+        </li>
+      </ul>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-4">
+      <div class="mb-2 font-semibold">Ship-voucher</div>
+      <div *ngIf="!has(shipVouchers)" class="empty">Không có dữ liệu.</div>
+      <ul class="text-sm space-y-1" *ngIf="has(shipVouchers)">
+        <li *ngFor="let x of shipVouchers">
+          {{ x.key }} — {{ x.amount | number:'1.0-0' }} đ ({{ x.count }} đơn)
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
