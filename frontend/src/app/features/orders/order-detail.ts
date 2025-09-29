@@ -1,40 +1,95 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe, NgFor, NgIf } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { ChangeDetectorRef, NgZone } from '@angular/core';
-import { OrderService } from '../../shared/services/order.service';
-import { OrderResponse } from '../../models/order.model';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { NgIf, NgFor, DatePipe, DecimalPipe, NgClass } from '@angular/common';
+import {
+  OrderClientService,
+  OrderDetailDto,
+  OrderStatus,
+} from '../../shared/services/order-client.service';
 
 @Component({
   selector: 'app-order-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, NgIf, NgFor, CurrencyPipe, DatePipe],
-  templateUrl: './order-detail.html'
+  imports: [NgIf, NgFor, DatePipe, DecimalPipe, NgClass],
+  templateUrl: './order-detail.html',
 })
-export class OrderDetailPage implements OnInit {
-  private api = inject(OrderService);
-  private route = inject(ActivatedRoute);
-  private cdr = inject(ChangeDetectorRef);
-  private zone = inject(NgZone);
-
+export class OrderDetailComponent implements OnInit {
   id!: number;
-  data?: OrderResponse;
+  loading = false;
+  order?: OrderDetailDto;
 
-  ngOnInit() {
-    this.id = +(this.route.snapshot.paramMap.get('id') || 0);
-    this.fetch();
+  readonly steps: { key: OrderStatus; label: string }[] = [
+    { key: 'PENDING_PAYMENT', label: 'Chờ duyệt' },
+    { key: 'PACKING', label: 'Chuẩn bị hàng' },
+    { key: 'SHIPPED', label: 'Đã gửi' },
+    { key: 'DELIVERED', label: 'Đã giao' },
+    { key: 'PAID', label: 'Đã thanh toán' },
+  ];
+
+  constructor(
+    private route: ActivatedRoute,
+    private api: OrderClientService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    this.id = Number(this.route.snapshot.paramMap.get('id'));
+    this.load();
   }
 
-  fetch() {
-    this.api.myOrderDetail(this.id).subscribe({
-      next: d => this.zone.run(() => { this.data = d; this.cdr.markForCheck(); })
+  load(): void {
+    this.loading = true;
+    this.api.detail(this.id).subscribe({
+      next: (d) => {
+        this.order = d;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      complete: () => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
     });
   }
 
-  cancel() {
-    if (!confirm('Bạn chắc muốn hủy đơn này?')) return;
-    this.api.cancelMyOrder(this.id).subscribe({
-      next: _ => this.zone.run(() => { this.fetch(); this.cdr.markForCheck(); })
+  stepIndex(): number {
+    const map = ['PENDING_PAYMENT', 'PACKING', 'SHIPPED', 'DELIVERED', 'PAID'] as OrderStatus[];
+    const idx = this.order ? map.indexOf(this.order.status) : 0;
+    return Math.max(0, idx);
+  }
+
+  canConfirm(): boolean {
+    return this.order?.status === 'DELIVERED';
+  }
+
+  confirm(): void {
+    if (!this.order) return;
+    if (!confirm('Xác nhận: Tôi đã nhận hàng?')) return;
+    this.api.confirmReceived(this.order.id).subscribe({
+      next: (d) => {
+        this.order = d;
+        this.cdr.detectChanges();
+      },
+      error: () => this.cdr.detectChanges(),
+    });
+  }
+
+  canCancel(): boolean {
+    return this.order?.status === 'PENDING_PAYMENT';
+  }
+
+  cancel(): void {
+    if (!this.order) return;
+    if (!confirm('Bạn muốn hủy đơn này?')) return;
+    this.api.cancel(this.order.id).subscribe({
+      next: (d) => {
+        this.order = d;
+        this.cdr.detectChanges();
+      },
+      error: () => this.cdr.detectChanges(),
     });
   }
 }

@@ -1,0 +1,155 @@
+/* ======= NỀN & BUTTON ======= */
+.about-page{ background: linear-gradient(180deg,#fff,#fff5f8 40%,#fff 80%); }
+.btn-primary{
+  display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 18px;
+  border-radius:14px;background:linear-gradient(90deg,#ec4899,#f43f5e);color:#fff;font-weight:700;
+  box-shadow:0 10px 22px rgba(244,63,94,.22);transition:.2s;
+}
+.btn-primary:hover{ filter:brightness(1.05) }
+.btn-ghost{
+  display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 16px;border-radius:14px;
+  background:#fff;border:1px solid rgba(244,63,94,.25);color:#db2777;font-weight:700;transition:.2s;
+  box-shadow:0 6px 16px rgba(244,114,182,.12);
+}
+.btn-ghost:hover{ background:#fff0f4 }
+
+/* ======= HERO ======= */
+.hero-bg{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(800px 120px at 15% 20%, rgba(244,114,182,.25), transparent 60%),
+    radial-gradient(800px 140px at 85% 30%, rgba(236,72,153,.22), transparent 60%);
+  filter:saturate(120%);
+}
+.hero-card{
+  position:relative;border-radius:18px;overflow:hidden;isolation:isolate;
+  background:#fff;box-shadow:0 18px 40px rgba(2,6,23,.08);
+  transform: translateY(0); animation: float 6s ease-in-out infinite;
+}
+.hero-card img{ width:100%;height:100%;object-fit:cover;display:block }
+.hero-card:before{
+  content:"";position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(120deg,rgba(255,255,255,.35),transparent 50%);mix-blend-mode:soft-light;
+}
+.hero-card.delay-1{ animation-delay:.4s }
+.hero-card.delay-2{ animation-delay:.8s }
+.hero-card.delay-3{ animation-delay:1.2s }
+@keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+/* ======= STATS ======= */
+.stat{
+  background:#fff;border:1px solid #ffe4ec;border-radius:16px;padding:18px 14px;text-align:center;
+  box-shadow:0 10px 24px rgba(244,63,94,.10);
+}
+.stat-num{ font-weight:900;font-size:28px;line-height:1;background:linear-gradient(180deg,#db2777,#fb7185);-webkit-background-clip:text;color:transparent }
+.stat-label{ color:#6b7280;font-weight:600 }
+
+/* ======= SECTION TITLE ======= */
+.sec-title{
+  font-size:30px;font-weight:900;letter-spacing:-.02em;
+  background:linear-gradient(180deg,#db2777,#fb7185);-webkit-background-clip:text;color:transparent;
+}
+
+/* ======= TIMELINE ======= */
+.timeline{ display:grid; gap:26px }
+.time-item{ display:grid; grid-template-columns: 1.1fr 1fr; gap:18px; align-items:center }
+.time-item.reverse{ grid-template-columns: 1fr 1.1fr }
+.time-item.reverse .time-media{ order:2 } .time-item.reverse .time-card{ order:1 }
+
+.time-media{
+  border-radius:20px; overflow:hidden; box-shadow:0 18px 40px rgba(2,6,23,.10); position:relative;
+}
+.time-media img{ width:100%; height:100%; object-fit:cover; display:block; transform:scale(1.02); transition: transform .6s ease }
+.time-media:hover img{ transform:scale(1.06) }
+
+.time-card{
+  background:#fff; border:1px solid #ffe4ec; border-radius:18px; padding:20px 18px;
+  box-shadow:0 16px 34px rgba(244,63,94,.12);
+}
+.time-card h3{ font-weight:800; color:#111827; margin:0 0 8px }
+.time-card p{ color:#6b7280; margin:0 }
+
+@media (max-width: 1024px){
+  .time-item, .time-item.reverse{ grid-template-columns: 1fr; }
+  .time-item.reverse .time-media, .time-item.reverse .time-card{ order:initial }
+}
+
+/* ======= MOSAIC ======= */
+.mosaic{ position:relative; display:grid; grid-template-columns: repeat(12, 1fr); gap:10px }
+.tile{ width:100%; height:100%; object-fit:cover; border-radius:16px; box-shadow:0 14px 30px rgba(2,6,23,.10) }
+.t1{ grid-column: span 4; height:280px }
+.t2{ grid-column: span 3; height:220px }
+.t3{ grid-column: span 5; height:240px }
+.t4{ grid-column: span 3; height:240px }
+.t5{ grid-column: span 5; height:220px }
+.t6{ grid-column: span 4; height:280px }
+@media (max-width: 768px){
+  .t1,.t2,.t3,.t4,.t5,.t6{ grid-column: span 12; height:220px }
+}
+
+/* ======= VALUES ======= */
+.value{
+  background:#fff;border:1px solid #ffe4ec;border-radius:18px;padding:20px 18px;text-align:center;
+  box-shadow:0 14px 30px rgba(244,63,94,.10); transition:.25s;
+}
+.value:hover{ transform: translateY(-4px) }
+.value-icon{
+  width:48px;height:48px;margin:0 auto 10px;display:grid;place-items:center;border-radius:14px;
+  background:linear-gradient(180deg,#fecdd3,#fff); color:#db2777; box-shadow:0 10px 18px rgba(244,114,182,.16)
+}
+.value h3{ font-weight:800; margin:6px 0; color:#111827 }
+.value p{ color:#6b7280; margin:0 }
+
+/* ======= TESTIMONIAL ======= */
+.testi{
+  background:#fff;border:1px solid #ffe4ec;border-radius:18px;padding:18px 16px;box-shadow:0 12px 28px rgba(244,63,94,.10)
+}
+.testi blockquote{ margin:0 0 8px; font-weight:600; color:#111827 }
+.testi figcaption{ color:#6b7280 }
+
+/* ======= CTA ======= */
+.cta{
+  position:relative; overflow:hidden; border-radius:22px; padding:32px 18px; text-align:center;
+  background:linear-gradient(120deg,#fff0f5,#ffe5ec);
+  border:1px solid #ffd1dc; box-shadow: 0 24px 60px rgba(244,63,94,.18);
+}
+.cta h3{ font-size:26px; font-weight:900; margin:0 0 8px; color:#111827 }
+.cta p{ color:#6b7280; margin:0 }
+.cta-glow{
+  position:absolute; inset:-40% -20% auto; height:220px;
+  background: radial-gradient(closest-side, rgba(244,114,182,.22), transparent 65%);
+  transform: translateY(-40px); filter: blur(12px)
+}
+
+/* ======= HIỆU ỨNG GẤU BÔNG RƠI ======= */
+.fx{ position:fixed; inset:0; overflow:hidden; z-index:0 }
+.fx--bears span{
+  position:absolute; top:-10%;
+  left: var(--x, 50%);
+  width: var(--size, 44px); height: var(--size, 44px);
+  background-image: url('../../../assets/hero/about12.png');  /* PNG gấu bông (nền trong suốt) */
+  background-size: contain; background-repeat: no-repeat;
+  filter: drop-shadow(0 8px 16px rgba(244,63,94,.15));
+  animation: bearFall var(--dur, 22s) linear infinite;
+  animation-delay: var(--delay, 0s);
+  transform: rotate(var(--rot, 0deg));
+  opacity: .9;
+  will-change: transform, opacity;
+}
+
+/* Keyframes: rơi + đung đưa nhẹ + xoay */
+@keyframes bearFall{
+  0%   { transform: translate(-10px, -10%) rotate(var(--rot,0)) scale(1); opacity:.0 }
+  10%  { opacity:.95 }
+  50%  { transform: translate(20px, 55vh) rotate(calc(var(--rot,0) + 180deg)) scale(.98) }
+  100% { transform: translate(-10px, 110vh) rotate(calc(var(--rot,0) + 360deg)) scale(1); opacity:.15 }
+}
+
+/* Tôn trọng người dùng hạn chế chuyển động */
+@media (prefers-reduced-motion: reduce){
+  .fx--bears span{ animation: none !important; opacity:.05 }
+  .hero-card{ animation: none !important }
+}
+
+/* Z-index đảm bảo nội dung nằm trên lớp hiệu ứng */
+.about-page > section, .about-page .mx-auto { position:relative; z-index:1 }

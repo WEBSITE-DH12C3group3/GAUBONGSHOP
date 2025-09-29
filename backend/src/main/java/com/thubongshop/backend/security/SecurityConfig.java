@@ -34,19 +34,18 @@ public class SecurityConfig {
       .cors(cors -> cors.configurationSource(corsConfigurationSource()))
       .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .authorizeHttpRequests(auth -> auth
-        // Preflight
+        // 1) Preflight
         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-        // Auth public
+        // 2) Auth public (đăng nhập/đăng ký/forgot) + error
         .requestMatchers(
           "/api/users/login",
           "/api/users/register",
           "/api/users/forgot-password/**",
-          "/api/chat/**",
           "/error"
         ).permitAll()
 
-        // Static & docs
+        // 3) Static & docs
         .requestMatchers(
           "/uploads/**",
           "/brandimg/**",
@@ -55,7 +54,7 @@ public class SecurityConfig {
           "/swagger-ui.html"
         ).permitAll()
 
-        // Catalog public GET
+        // 4) Catalog public GET
         .requestMatchers(HttpMethod.GET,
           "/api/products/**",
           "/api/categories/**",
@@ -67,25 +66,25 @@ public class SecurityConfig {
           "/api/favorites/**"
         ).permitAll()
 
-        // Pusher auth (bắt buộc đăng nhập)
+        // 5) Chat: bắt buộc đăng nhập
         .requestMatchers(HttpMethod.POST, "/api/chat/pusher/auth").authenticated()
-
-        // Chat & client (đăng nhập là đủ; nếu muốn chặt role, đổi thành hasAnyRole("CLIENT","ADMIN"))
-        .requestMatchers("/api/client/**").authenticated()
         .requestMatchers("/api/chat/**").authenticated()
 
-        // Quản lý user & nhóm: cần ADMIN role
-        .requestMatchers("/api/admin/users/**", "/api/admin/roles/**").hasRole("ADMIN")
+        // 6) Client (v1 & v2) bắt buộc đăng nhập
+        .requestMatchers("/api/client/**").authenticated()
+        .requestMatchers("/api/v2/client/orders/**").authenticated()
 
-        // Theo permission cụ thể
+        // 7) Admin (v1 & v2) theo quyền
+        .requestMatchers("/api/admin/users/**", "/api/admin/roles/**").hasRole("ADMIN")
         .requestMatchers("/api/admin/products/**").hasAuthority("manage_products")
         .requestMatchers("/api/admin/orders/**").hasAuthority("manage_orders")
         .requestMatchers("/api/admin/imports/**").hasAuthority("manage_imports")
         .requestMatchers("/api/admin/reports/**").hasAuthority("view_reports")
         .requestMatchers("/api/admin/customers/**")
           .hasAnyAuthority("manage_customers", "manage_customer", "ROLE_ADMIN", "ADMIN")
+        .requestMatchers("/api/v2/admin/orders/**").hasAuthority("manage_orders")
 
-        // Mặc định
+        // 8) Mặc định: cần đăng nhập
         .anyRequest().authenticated()
       )
       .exceptionHandling(ex -> ex
@@ -101,10 +100,8 @@ public class SecurityConfig {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration cfg = new CorsConfiguration();
-    // Cách 1: cho wildcard port (dev)
+    // Dev: cho wildcard port (Angular, Vite, v.v.)
     cfg.setAllowedOriginPatterns(List.of("http://localhost:*", "http://127.0.0.1:*"));
-    // Cách 2 (khuyên dùng khi cố định origin): 
-    // cfg.setAllowedOrigins(List.of("http://localhost:4200"));
     cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS","HEAD"));
     cfg.setAllowedHeaders(List.of("Authorization","Content-Type","Accept","Origin","X-Requested-With"));
     cfg.setExposedHeaders(List.of("Authorization","Content-Type"));

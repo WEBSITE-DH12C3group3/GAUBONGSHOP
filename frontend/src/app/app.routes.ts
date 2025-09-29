@@ -17,6 +17,10 @@ import { ClientChatPage } from './features/chat/client-chat';
 import { ForgotPasswordComponent } from './features/forgot-password/forgot-password';
 import { CheckoutPageComponent  } from './features/checkout/checkout-page';
 import { OrderSuccessPageComponent } from './features/checkout/order-success-page';
+import { AboutComponent } from './features/about/about';
+import { MyOrdersComponent } from './features/orders/my-orders';
+import { OrderDetailComponent } from './features/orders/order-detail';
+
 
 // Admin
 import { Dashboard } from './admin/dashboard/dashboard';
@@ -71,6 +75,7 @@ export const routes: Routes = [
       { path: 'home', component: HomeComponent },
       { path: 'login', component: Login },
       { path: 'register', component: RegisterComponent },
+      { path: 'about', component: AboutComponent },
       { path: 'profile', component: ProfileComponent },
       { path: 'products', component: ProductsComponent },
       { path: 'product/:id', component: ProductDetailComponent },
@@ -80,6 +85,10 @@ export const routes: Routes = [
       { path: 'wishlist', component: WishlistComponent },
       { path: 'chat', canActivate: [authGuard], component: ClientChatPage },
       { path: 'order-success', component: OrderSuccessPageComponent },
+ // 👇 ĐƠN HÀNG KHÁCH
+      { path: 'order',       canActivate: [authGuard], component: MyOrdersComponent },
+      { path: 'order/:id',   canActivate: [authGuard], component: OrderDetailComponent },
+      { path: 'history',     canActivate: [authGuard], component: MyOrdersComponent, data: { mode: 'history' } },
       // ===== Cart + chekcout + Orders (customer)
       {
         path: 'cart',
@@ -93,21 +102,6 @@ export const routes: Routes = [
           import('./features/checkout/checkout-page').then(m => m.CheckoutPageComponent),
       },
 
-      {
-        path: 'orders',
-        loadComponent: () =>
-          import('./features/orders/my-orders').then(m => m.MyOrdersPage),
-      },
-      {
-        path: 'orders/checkout',
-        loadComponent: () =>
-          import('./features/checkout/checkout').then(m => m.CheckoutPage),
-      },
-      {
-        path: 'orders/:id',
-        loadComponent: () =>
-          import('./features/orders/order-detail').then(m => m.OrderDetailPage),
-      },
     ],
   },
 
@@ -185,12 +179,12 @@ export const routes: Routes = [
       {
         path: 'orders',
         loadComponent: () =>
-          import('./admin/orders-admin/orders-admin').then(m => m.OrdersAdminPage),
+          import('./admin/orders-admin/orders-admin').then(m => m.OrdersAdminComponent),
       },
       {
         path: 'orders/:id',
         loadComponent: () =>
-          import('./admin/orders-admin/orders-admin').then(m => m.OrdersAdminPage),
+          import('./admin/orders-admin/orders-admin').then(m => m.OrdersAdminComponent),
       },
 
       // Live chat
