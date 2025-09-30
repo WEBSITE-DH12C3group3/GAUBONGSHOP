@@ -1,31 +1,53 @@
 <footer class="footer">
   <div class="container">
-    <div class="col">
-      <h3>GauBongShop</h3>
+    <!-- Cột 1: Thương hiệu -->
+    <div class="col brand">
+      <h3>🧸 GauBongShop</h3>
       <p>Shop gấu bông đáng yêu – quà tặng cho mọi người.</p>
+      <img src="assets/payment-methods.png" alt="Thanh toán" class="payment" />
+      <p class="cert">✅ Đã đăng ký kinh doanh</p>
     </div>
 
-    <div class="col">
-      <h4>Liên kết</h4>
-      <a routerLink="/home">Trang chủ</a>
-      <a routerLink="/products">Sản phẩm</a>
-      <a routerLink="/about">Giới thiệu</a>
-      <a routerLink="/contact">Liên hệ</a>
+    <!-- Cột 2: Liên kết -->
+    <div class="col links">
+      <h4>Liên kết nhanh</h4>
+      <a routerLink="/home"><i class="fa-solid fa-house"></i> Trang chủ</a>
+      <a routerLink="/products"><i class="fa-solid fa-box"></i> Sản phẩm</a>
+      <a routerLink="/about"><i class="fa-solid fa-circle-info"></i> Giới thiệu</a>
+      <a routerLink="/contact"><i class="fa-solid fa-envelope"></i> Liên hệ</a>
     </div>
 
-    <div class="col">
+    <!-- Cột 3: Hỗ trợ khách hàng -->
+    <div class="col support">
+      <h4>Hỗ trợ khách hàng</h4>
+      <a href="#"><i class="fa-solid fa-question-circle"></i> FAQ</a>
+      <a href="#"><i class="fa-solid fa-rotate-left"></i> Chính sách đổi trả</a>
+      <a href="#"><i class="fa-solid fa-shield-halved"></i> Chính sách bảo mật</a>
+      <a href="#"><i class="fa-solid fa-truck-fast"></i> Hướng dẫn mua hàng</a>
+    </div>
+
+    <!-- Cột 4: Liên hệ -->
+    <div class="col contact">
       <h4>Liên hệ</h4>
+      <p><i class="fa-solid fa-location-dot"></i> 123 Đường Hoa, Hà Nội</p>
       <p><i class="fa-solid fa-phone"></i> 090 123 4567</p>
       <p><i class="fa-solid fa-envelope"></i> support@giaubongshop.com</p>
       <div class="social">
-        <i class="fa-brands fa-facebook"></i>
-        <i class="fa-brands fa-instagram"></i>
-        <i class="fa-brands fa-tiktok"></i>
+        <a href="#"><i class="fa-brands fa-facebook"></i></a>
+        <a href="#"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+        <a href="#"><i class="fa-brands fa-youtube"></i></a>
       </div>
+      <!-- Newsletter -->
+      <form class="newsletter">
+        <input type="email" placeholder="Nhập email để nhận ưu đãi" />
+        <button type="submit">Đăng ký</button>
+      </form>
     </div>
   </div>
 
+  <!-- Dòng cuối -->
   <div class="bottom">
-    © 2025 GauBongShop. All rights reserved.
+    © 2025 GauBongShop. All rights reserved. | Thiết kế bởi GauBongTeam
   </div>
 </footer>
