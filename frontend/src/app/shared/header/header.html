@@ -137,131 +137,43 @@
 
   <!-- Nav bar (desktop) -->
   <nav class="hidden lg:block border-t border-gray-100">
-    <div class="max-w-7xl mx-auto px-4 lg:px-8 h-12 flex items-center justify-between text-[15px] font-medium text-gray-700">
+    <div class="max-w-7xl mx-auto px-4 lg:px-8 py-2 flex items-center justify-between text-[15px] font-medium text-gray-700">
+      <!-- === DANH SÁCH CHỦ ĐỀ TRỰC TIẾP TRÊN NAV === -->
+      <ng-container *ngIf="!loadingTree; else themesLoading">
+        <div class="nav-pills flex flex-wrap items-center gap-2">
+          <!-- Mỗi CHỦ ĐỀ là một nav-group riêng -->
+          <div class="nav-group group relative" *ngFor="let th of themeTree">
+            <button class="pill-btn" aria-haspopup="true" aria-expanded="false">
+              <span class="cursor-pointer">{{ th.name }}</span>
+              <i class="fa-solid fa-angle-down ml-2 text-xs"></i>
+            </button>
 
-      <!-- LEFT: Mega groups -->
-      <div class="flex items-center gap-2">
+            <!-- Panel xổ ra: Danh mục thuộc CHỦ ĐỀ (gọn 3 cột) -->
+            <div class="mega-panel" role="menu" [attr.aria-label]="th.name">
+              <ng-container *ngIf="th.categories?.length; else noCats">
+                <div class="grid grid-cols-3 gap-2 md:gap-3">
+                  <a
+                    *ngFor="let c of th.categories; trackBy: trackCategory"
+                    class="chip-pill chip-compact cursor-pointer w-full text-center"
+                    (click)="goCategory(c)"
+                  >
+                    {{ c.name }}
+                  </a>
+                </div>
+              </ng-container>
 
-        <!-- Danh mục -->
-        <div class="nav-group group relative">
-          <button class="pill-btn" aria-haspopup="true" aria-expanded="false">
-            <i class="fa-solid fa-grid-2 mr-2"></i> Danh mục
-            <i class="fa-solid fa-angle-down ml-2 text-xs"></i>
-          </button>
-
-          <div class="mega-panel" role="menu" aria-label="Danh mục">
-            <div class="grid grid-cols-3 gap-5">
-              <div>
-                <h4 class="mega-title">Gấu bông</h4>
-                <div class="mega-chips">
-                  <a routerLink="/products/teddy" class="chip-pill">Gấu Teddy</a>
-                  <a routerLink="/products/bear-classic" class="chip-pill">Gấu Classic</a>
-                  <a routerLink="/products/bear-giant" class="chip-pill">Gấu Cỡ Lớn</a>
-                  <a routerLink="/products/bear-couple" class="chip-pill">Cặp Đôi</a>
-                </div>
-              </div>
-              <div>
-                <h4 class="mega-title">Động vật</h4>
-                <div class="mega-chips">
-                  <a routerLink="/products/thobong" class="chip-pill">Thỏ Bông</a>
-                  <a routerLink="/products/meo" class="chip-pill">Mèo Bông</a>
-                  <a routerLink="/products/cho" class="chip-pill">Chó Bông</a>
-                  <a routerLink="/products/khung-long" class="chip-pill">Khủng Long</a>
-                </div>
-              </div>
-              <div>
-                <h4 class="mega-title">Phụ kiện</h4>
-                <div class="mega-chips">
-                  <a routerLink="/products/hoabong" class="chip-pill">Hoa Bông</a>
-                  <a routerLink="/products/phukienshop" class="chip-pill">Phụ kiện trang trí</a>
-                  <a routerLink="/products/vo-ao" class="chip-pill">Vỏ/Áo</a>
-                  <a routerLink="/products/nhan-boc" class="chip-pill">Nhồi bông</a>
-                </div>
-              </div>
+              <ng-template #noCats>
+                <div class="p-3 text-sm text-gray-500">Chưa có danh mục.</div>
+              </ng-template>
             </div>
+
           </div>
         </div>
+      </ng-container>
 
-        <!-- Thương hiệu -->
-        <div class="nav-group group relative">
-          <button class="pill-btn" aria-haspopup="true" aria-expanded="false">
-            <i class="fa-solid fa-tags mr-2"></i> Thương hiệu
-            <i class="fa-solid fa-angle-down ml-2 text-xs"></i>
-          </button>
-
-          <div class="mega-panel" role="menu" aria-label="Thương hiệu">
-            <div class="grid grid-cols-3 gap-5">
-              <div>
-                <h4 class="mega-title">Phổ biến</h4>
-                <div class="mega-chips">
-                  <a routerLink="/brands/gauvip" class="chip-pill">GấuVIP</a>
-                  <a routerLink="/brands/lovely" class="chip-pill">Lovely Plush</a>
-                  <a routerLink="/brands/softie" class="chip-pill">Softie</a>
-                  <a routerLink="/brands/cottony" class="chip-pill">Cottony</a>
-                </div>
-              </div>
-              <div>
-                <h4 class="mega-title">Theo dòng</h4>
-                <div class="mega-chips">
-                  <a routerLink="/brands/premium" class="chip-pill">Premium</a>
-                  <a routerLink="/brands/eco" class="chip-pill">Eco</a>
-                  <a routerLink="/brands/kids" class="chip-pill">Kids</a>
-                  <a routerLink="/brands/seasonal" class="chip-pill">Seasonal</a>
-                </div>
-              </div>
-              <div>
-                <h4 class="mega-title">Sưu tập</h4>
-                <div class="mega-chips">
-                  <a routerLink="/brands/limited" class="chip-pill">Limited</a>
-                  <a routerLink="/brands/collab" class="chip-pill">Collab</a>
-                  <a routerLink="/brands/signature" class="chip-pill">Signature</a>
-                  <a routerLink="/brands/bestseller" class="chip-pill">Best Seller</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Chủ đề -->
-        <div class="nav-group group relative">
-          <button class="pill-btn" aria-haspopup="true" aria-expanded="false">
-            <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Chủ đề
-            <i class="fa-solid fa-angle-down ml-2 text-xs"></i>
-          </button>
-
-          <div class="mega-panel" role="menu" aria-label="Chủ đề">
-            <div class="grid grid-cols-3 gap-5">
-              <div>
-                <h4 class="mega-title">Dịp tặng</h4>
-                <div class="mega-chips">
-                  <a routerLink="/topics/sinh-nhat" class="chip-pill">Sinh nhật</a>
-                  <a routerLink="/topics/valentine" class="chip-pill">Valentine</a>
-                  <a routerLink="/topics/noel" class="chip-pill">Giáng sinh</a>
-                  <a routerLink="/topics/ky-niem" class="chip-pill">Kỷ niệm</a>
-                </div>
-              </div>
-              <div>
-                <h4 class="mega-title">Phong cách</h4>
-                <div class="mega-chips">
-                  <a routerLink="/topics/cute" class="chip-pill">Cute</a>
-                  <a routerLink="/topics/minimal" class="chip-pill">Minimal</a>
-                  <a routerLink="/topics/pastel" class="chip-pill">Pastel</a>
-                  <a routerLink="/topics/luxury" class="chip-pill">Luxury</a>
-                </div>
-              </div>
-              <div>
-                <h4 class="mega-title">Giá & kích thước</h4>
-                <div class="mega-chips">
-                  <a routerLink="/topics/under-199" class="chip-pill">Dưới 199k</a>
-                  <a routerLink="/topics/199-499" class="chip-pill">199k–499k</a>
-                  <a routerLink="/topics/over-499" class="chip-pill">Trên 499k</a>
-                  <a routerLink="/topics/size-xxl" class="chip-pill">Size XXL</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ng-template #themesLoading>
+        <div class="p-3 text-sm text-gray-500">Đang tải chủ đề…</div>
+      </ng-template>
 
       <!-- RIGHT: Links ngắn gọn -->
       <div class="flex items-center gap-4">

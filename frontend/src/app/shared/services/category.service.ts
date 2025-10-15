@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Category, CategoryResponse } from '../../models/category.model';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -26,4 +27,10 @@ export class CategoryService {
   getCategoryById(id: number): Observable<Category> {
     return this.http.get<Category>(`${this.apiUrl}/${id}`);
   }
+
+  getAll(): Observable<Category[]> {
+  return this.http.get<CategoryResponse>(this.apiUrl).pipe(
+    map(res => res?.content ?? [])
+  );
+}
 }

@@ -8,16 +8,24 @@ import {
   ChangeDetectorRef,
   inject,
   PLATFORM_ID,
-  ElementRef
+  ElementRef,
 } from '@angular/core';
+
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 
+import { ThemeService } from '../../shared/services/theme.service';
+import { BrandService } from '../../shared/services/brand.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { ChatClientService } from '../../shared/services/chat-client.service';
 import { ChatSocketService } from '../../shared/services/chat-socket.service';
 import { CartService } from '../../shared/services/cart.service';
+
+import { Theme } from '../../models/theme.model';
+import { Brand } from '../../models/brand.model';
+import { Category } from '../../models/category.model';
+
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -26,52 +34,64 @@ import { Subscription } from 'rxjs';
   templateUrl: './header.html',
   styleUrls: ['./header.css'],
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent implements OnInit, OnDestroy {
+  // --------- Platform & DI ---------
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
 
-  // ---------------- UI state ----------------
+  private themeService = inject(ThemeService);
+  private brandService = inject(BrandService);
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
+  private elRef = inject(ElementRef<HTMLElement>);
+
+  // Public để template dùng trực tiếp
+  public auth = inject(AuthService);
+  private chatApi = inject(ChatClientService);
+  private socket = inject(ChatSocketService);
+  private cartService = inject(CartService);
+
+  // --------- UI state ---------
   searchTerm = new FormControl<string>('');
   cartCount = 0;
   dropdownOpen = false;
-  mobileOpen = false; // hỗ trợ mobile drawer của giao diện mới
+  mobileOpen = false;
 
-  // Chat badge & session
   showChat = false;
   unreadTotal = 0;
   sessionId?: number;
 
-  // Scroll hide/show
   hiddenOnScroll = false;
   private lastScrollY = 0;
 
-  // Subscriptions
+  // --------- Dữ liệu Brands (nếu cần ở nơi khác) ---------
+  brands: Brand[] = [];
+  brandCols: Brand[][] = [];
+  loadingBrands = true;
+
+  // --------- Dữ liệu Chủ đề & Danh mục (nav) ---------
+  /** Backend trả về /api/themes: mỗi Theme có mảng categories PHẲNG */
+  themeTree: Theme[] = [];
+  loadingTree = true;
+
+  // --------- Subscriptions ---------
+  private sub = new Subscription();
   private authSub?: Subscription;
   private cartSub?: Subscription;
 
-  // Chat channel handle (tuỳ lib, ở đây coi như any)
+  // Chat channel handle
   private chatChannel: any;
 
-  constructor(
-    public auth: AuthService,
-    private router: Router,
-    private chatApi: ChatClientService,
-    private socket: ChatSocketService,
-    private cdr: ChangeDetectorRef,
-    private cartService: CartService,
-    private elRef: ElementRef<HTMLElement>
-  ) {}
-
-  // -------------- Lifecycle --------------
+  // ================= Lifecycle =================
   ngOnInit(): void {
     if (!this.isBrowser) return;
 
-    // Cart badge & đồng bộ khi đã đăng nhập
+    // --- Cart badge & đồng bộ khi login ---
     if (this.isLoggedIn()) {
       this.cartService.mergeLocalToServer().subscribe({
-        complete: () => this.cartService.refreshCount()
+        complete: () => this.cartService.refreshCount(),
       });
     } else {
       this.cartService.refreshCount();
@@ -81,13 +101,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.cdr.markForCheck();
     });
 
-    // Livechat theo trạng thái đăng nhập
+    // --- Livechat theo trạng thái đăng nhập ---
     this.authSub = this.auth.isLoggedIn$().subscribe((isOk) => {
       const prev = this.showChat;
       this.showChat = !!isOk;
 
       if (this.showChat) {
-        // Khởi tạo socket với token
         const token = this.getToken();
         this.socket.init(() => ({ Authorization: token }));
 
@@ -98,21 +117,55 @@ export class HeaderComponent implements OnInit, OnDestroy {
             this.bindChatChannel(s.id);
             this.cdr.markForCheck();
           },
-          error: () => {}
+          error: () => {},
         });
       } else {
         this.sessionId = undefined;
-        this.unreadTotal = 0;
+               this.unreadTotal = 0;
         this.unbindChatChannel();
       }
 
       if (prev !== this.showChat) this.cdr.markForCheck();
     });
 
-    // Storage sync (token/cart từ tab khác)
+    // --- LẤY CHỦ ĐỀ + DANH MỤC (PHẲNG) để hiển thị trực tiếp trên NAV ---
+    this.sub.add(
+      this.themeService.getAll().subscribe({
+        next: (list) => {
+          this.themeTree = list || [];
+          this.loadingTree = false;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.themeTree = [];
+          this.loadingTree = false;
+          this.cdr.markForCheck();
+        },
+      })
+    );
+
+    // --- Brands (nếu vẫn dùng ở khu vực khác, vd brand mega menu) ---
+    this.sub.add(
+      this.brandService.getAll().subscribe({
+        next: (data) => {
+          this.brands = data || [];
+          this.brandCols = this.toGrid(this.brands, 3);
+          this.loadingBrands = false;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.brands = [];
+          this.brandCols = [];
+          this.loadingBrands = false;
+          this.cdr.markForCheck();
+        },
+      })
+    );
+
+    // --- Cross-tab storage sync ---
     window.addEventListener('storage', this.onStorage);
 
-    // Scroll baseline
+    // --- Scroll baseline ---
     this.lastScrollY = window.scrollY;
   }
 
@@ -121,10 +174,29 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.authSub?.unsubscribe();
     this.cartSub?.unsubscribe();
     this.unbindChatChannel();
+    this.sub.unsubscribe();
     window.removeEventListener('storage', this.onStorage);
   }
 
-  // -------------- Event bindings --------------
+  // ================= Helpers =================
+  private toGrid<T>(items: T[], cols: number): T[][] {
+    const out: T[][] = Array.from({ length: cols }, () => []);
+    items.forEach((it, i) => out[i % cols].push(it));
+    return out;
+  }
+
+  /** Chia mảng thành N cột đều nhau (dùng cho danh mục trong panel) */
+  splitInto<T>(arr: T[] | undefined, cols = 2): T[][] {
+    const items = arr || [];
+    const out: T[][] = Array.from({ length: cols }, () => []);
+    items.forEach((it, i) => out[i % cols].push(it));
+    return out;
+  }
+
+  trackTheme = (_: number, th: Theme) => th.id;
+  trackCategory = (_: number, c: Category) => c.id;
+
+  // ================= Scroll handler =================
   @HostListener('window:scroll')
   onWindowScroll() {
     if (!this.isBrowser) return;
@@ -139,12 +211,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  // ================= Outside click (đóng dropdown tài khoản) =================
   @HostListener('document:click', ['$event'])
   onDocumentClick(ev: MouseEvent) {
     if (!this.isBrowser) return;
     const target = ev.target as HTMLElement;
-    // Đóng dropdown nếu click ngoài vùng account wrapper
-    // Sử dụng data-attr để linh hoạt với HTML mới: [data-account-wrapper]
     if (!target.closest('[data-account-wrapper]')) {
       if (this.dropdownOpen) {
         this.dropdownOpen = false;
@@ -153,7 +224,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  // -------------- UI handlers --------------
+  // ================= UI handlers =================
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;
     this.cdr.markForCheck();
@@ -175,13 +246,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     (event.target as HTMLInputElement).removeAttribute('readonly');
   }
 
-  onLogout() {
-    if (!this.isBrowser) return;
-    this.auth.logout?.();
-    this.unreadTotal = 0;
-    this.router.navigate(['/']);
-  }
-
+  // ================= Search =================
   onSearch() {
     const q = (this.searchTerm.value || '').trim();
     if (q) {
@@ -189,41 +254,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  openChat() {
+  // ================= Auth / Account =================
+  onLogout() {
     if (!this.isBrowser) return;
+    this.auth.logout?.();
     this.unreadTotal = 0;
-    this.cdr.markForCheck();
-    this.router.navigate(['/chat']);
+    this.router.navigate(['/']);
   }
 
-  // -------------- Chat helpers --------------
-  private bindChatChannel(id: number) {
-    try {
-      this.unbindChatChannel();
-      const ch = this.socket.sub(`private-chat.${id}`);
-      ch.bind('message:new', () => {
-        if (this.router.url !== '/chat') {
-          this.unreadTotal++;
-          this.cdr.markForCheck();
-        }
-      });
-      this.chatChannel = ch;
-    } catch {}
-  }
-
-  private unbindChatChannel() {
-    try {
-      if (this.chatChannel?.unbind) {
-        this.chatChannel.unbind('message:new');
-      }
-      if (this.chatChannel?.unsubscribe) {
-        this.chatChannel.unsubscribe();
-      }
-    } catch {}
-    this.chatChannel = undefined;
-  }
-
-  // -------------- Auth helpers --------------
   private isLoggedIn(): boolean {
     try {
       if (typeof (this.auth as any).isLoggedIn === 'function') {
@@ -251,13 +289,47 @@ export class HeaderComponent implements OnInit, OnDestroy {
     return /^Bearer\s/i.test(raw) ? raw : raw ? `Bearer ${raw}` : '';
   }
 
-  // -------------- Cross-tab sync --------------
+  // ================= Chat helpers =================
+  openChat() {
+    if (!this.isBrowser) return;
+    this.unreadTotal = 0;
+    this.cdr.markForCheck();
+    this.router.navigate(['/chat']);
+  }
+
+  private bindChatChannel(id: number) {
+    try {
+      this.unbindChatChannel();
+      const ch = this.socket.sub(`private-chat.${id}`);
+      ch.bind('message:new', () => {
+        if (this.router.url !== '/chat') {
+          this.unreadTotal++;
+          this.cdr.markForCheck();
+        }
+      });
+      this.chatChannel = ch;
+    } catch {}
+  }
+
+  private unbindChatChannel() {
+    try {
+      if (this.chatChannel?.unbind) {
+        this.chatChannel.unbind('message:new');
+      }
+      if (this.chatChannel?.unsubscribe) {
+        this.chatChannel.unsubscribe();
+      }
+    } catch {}
+    this.chatChannel = undefined;
+  }
+
+  // ================= Cross-tab sync =================
   private onStorage = (e: StorageEvent) => {
     if (e.key === 'token' || e.key === 'access_token' || e.key === 'jwt') {
       const now = this.isLoggedIn();
       if (now) {
         this.cartService.mergeLocalToServer().subscribe({
-          complete: () => this.cartService.refreshCount()
+          complete: () => this.cartService.refreshCount(),
         });
       }
       if (now !== this.showChat) {
@@ -269,4 +341,19 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.cartService.refreshCount();
     }
   };
+
+  // ================== Điều hướng theo CHỦ ĐỀ / DANH MỤC ==================
+  /** Click danh mục -> điều hướng /products?category=<id> */
+  goCategory(cat: Category) {
+    if (!cat?.id) return;
+    this.router.navigate(['/products'], { queryParams: { category: cat.id } });
+    this.closeAll();
+  }
+
+  /** (Tuỳ chọn) Click tên chủ đề -> nếu có lọc theo theme */
+  goTheme(theme: Theme) {
+    if (!theme?.id) return;
+    this.router.navigate(['/products'], { queryParams: { theme: theme.id } });
+    this.closeAll();
+  }
 }

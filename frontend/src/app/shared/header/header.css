@@ -101,3 +101,25 @@
 }
 :root.dark .topbar__glow { mix-blend-mode: screen; opacity: .4; }
 :root.dark .topbar__link { @apply text-rose-100 hover:text-rose-300; }
+/* Cho dải chủ đề có thể xuống hàng, giữ các pill gọn đẹp */
+.nav-pills {
+  row-gap: .5rem; /* khoảng cách dọc khi xuống hàng */
+}
+
+.nav-pills .pill-btn {
+  white-space: nowrap; /* nút không bị bẻ chữ */
+}
+
+/* Tuỳ chọn: thu nhỏ padding để vừa nhiều pill hơn */
+.pill-btn {
+  padding-left: .9rem;
+  padding-right: .9rem;
+}
+
+/* Nén kích thước để danh mục nhìn gọn, đỡ tốn chỗ */
+.chip-compact {
+  padding: 0.45rem 0.8rem;   /* nhỏ hơn mặc định 1 chút */
+  font-size: 14px;           /* gọn chữ hơn */
+  line-height: 1.2;
+}
+

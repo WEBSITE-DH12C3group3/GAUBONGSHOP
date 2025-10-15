@@ -18,6 +18,14 @@
       <i class="fa-solid fa-chart-line mr-3"></i> Thống kê
     </a>
 
+    <a *appHasPermission="'manage_themes'"
+      routerLink="/admin/themes"
+      routerLinkActive="active"
+      class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
+      <i class="fa-solid fa-swatchbook mr-3"></i>
+      Chủ đề
+    </a>
+
     <a *appHasPermission="'manage_categories'" routerLink="/admin/categories" routerLinkActive="active"
        class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition">
       <i class="fa-solid fa-layer-group mr-3"></i> Danh mục

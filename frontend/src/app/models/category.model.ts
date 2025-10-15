@@ -4,6 +4,7 @@ export interface Category {
   description?: string;
   isFeatured?: boolean;
   createdAt?: string;
+  slug?: string;
 }
 
 export interface CategoryResponse {

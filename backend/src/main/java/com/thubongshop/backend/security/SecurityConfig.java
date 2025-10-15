@@ -95,6 +95,7 @@ public HttpFirewall allowUrlEncodedFirewall() {
         .requestMatchers("/api/admin/customers/**")
           .hasAnyAuthority("manage_customers", "manage_customer", "ROLE_ADMIN", "ADMIN")
         .requestMatchers("/api/v2/admin/orders/**").hasAuthority("manage_orders")
+        .requestMatchers("/api/admin/themes/**").hasAuthority("manage_themes")
 
         // 9️⃣ Mặc định yêu cầu đăng nhập
         .anyRequest().authenticated()

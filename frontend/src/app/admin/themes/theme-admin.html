@@ -1,0 +1,89 @@
+<div class="max-w-6xl mx-auto p-4 lg:p-6">
+  <div class="flex items-center justify-between mb-5">
+    <h1 class="text-2xl lg:text-3xl font-extrabold bg-gradient-to-r from-rose-600 to-pink-500 bg-clip-text text-transparent">
+      Quản lý Chủ đề
+    </h1>
+    <button class="btn-secondary" (click)="startCreate()">+ Chủ đề mới</button>
+  </div>
+
+  <!-- Form -->
+  <div class="rounded-2xl border border-rose-100 bg-white p-4 shadow-sm mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="label">Tên chủ đề</label>
+        <input class="input" [(ngModel)]="form.name" placeholder="VD: Dịp tặng, Phong cách..." />
+      </div>
+      <div>
+        <label class="label">Slug (tuỳ chọn)</label>
+        <input class="input" [(ngModel)]="form.slug" placeholder="vd-dip-tang" />
+      </div>
+      <div class="md:col-span-2">
+        <label class="label">Mô tả</label>
+        <textarea class="input" rows="2" [(ngModel)]="form.description"></textarea>
+      </div>
+    </div>
+
+    <!-- Category multi-select -->
+    <div class="mt-4">
+      <label class="label">Danh mục thuộc chủ đề</label>
+      <div class="flex flex-wrap gap-2">
+        <button
+          *ngFor="let c of categories"
+          type="button"
+          (click)="toggleCat(c.id)"
+          [class]="isSelectedCat(c.id) ? 'chip chip--active' : 'chip'"
+          [title]="c.description || c.name"
+        >
+          {{ c.name }}
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-4 flex gap-2 justify-end">
+      <button class="btn-secondary" (click)="startCreate()">Làm mới</button>
+      <button class="btn-primary" (click)="save()">{{ editing ? 'Cập nhật' : 'Tạo mới' }}</button>
+    </div>
+  </div>
+
+  <!-- List -->
+  <div class="rounded-2xl border border-rose-100 bg-white overflow-hidden">
+    <div class="grid grid-cols-[1fr_160px_160px_160px] gap-4 px-4 py-3 font-semibold text-rose-700 bg-rose-50 border-b border-rose-100">
+      <div>Tên</div>
+      <div>Slug</div>
+      <div>Số danh mục</div>
+      <div>Thao tác</div>
+    </div>
+
+    <ng-container *ngIf="!loading; else loadingTpl">
+      <div *ngFor="let t of themes" class="grid grid-cols-[1fr_160px_160px_160px] gap-4 px-4 py-3 border-b border-rose-50 items-center">
+        <div class="font-semibold text-slate-900">{{ t.name }}</div>
+        <div class="text-slate-600">{{ t.slug }}</div>
+        <div class="text-slate-700">{{ t.categoryCount }}</div>
+        <div class="flex gap-2">
+          <button class="h-9 px-3 rounded-lg bg-white border border-rose-200 hover:bg-rose-50 text-rose-700 text-xs font-semibold shadow-sm transition"
+                  (click)="startEdit(t)">Sửa</button>
+          <button class="h-9 px-3 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold shadow-sm transition"
+                  (click)="remove(t)">Xoá</button>
+        </div>
+
+        <!-- hàng con: hiển thị categories -->
+        <div class="col-span-4 px-2 pb-4">
+          <div class="flex flex-wrap gap-2">
+            <a *ngFor="let c of t.categories"
+               class="chip"
+               [routerLink]="['/products']"
+               [queryParams]="{ category: c.id }">
+              {{ c.name }}
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="themes.length===0" class="p-6 text-center text-slate-500">Chưa có chủ đề.</div>
+    </ng-container>
+
+    <ng-template #loadingTpl>
+      <div class="p-6 text-center text-slate-500">Đang tải…</div>
+    </ng-template>
+  </div>
+</div>

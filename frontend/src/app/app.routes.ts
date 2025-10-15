@@ -64,6 +64,9 @@ import { WishlistComponent } from './features/wishlist/wishlist.component';
 // mânger cusyomer
 import { CustomersAdminComponent } from './admin/customers-admin/customers-admin';
 
+// theme
+import { ThemeAdminComponent } from './admin/themes/theme-admin';
+
 
 export const routes: Routes = [
   // ===== Customer layout =====
@@ -142,6 +145,18 @@ export const routes: Routes = [
           { path: ':id', component: ProductAdminFormComponent },
         ],
       },
+
+      // Theme
+      {
+        path: 'themes',
+        canActivate: [permissionGuard],
+        data: { permissions: ['manage_themes'] },
+        children: [
+          { path: '', component: ThemeAdminComponent },
+        ],
+      },
+
+
 
       // Thương hiệu
       {
