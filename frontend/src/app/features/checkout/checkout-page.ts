@@ -31,6 +31,17 @@ type CartItem = {
   name?: string;
 };
 
+/** ✅ Mở rộng giỏ hàng */
+interface ExtendedCart {
+  items: CartItem[];
+  totalQuantity: number;
+  totalAmount: number;
+  selectedItems: CartItem[];
+  selectedAmount: number;
+  couponCode?: string;
+  couponDiscount?: number;
+}
+
 @Component({
   selector: 'app-checkout-page',
   standalone: true,
@@ -43,14 +54,7 @@ type CartItem = {
   changeDetection: ChangeDetectionStrategy.Default,
 })
 export class CheckoutPageComponent implements OnInit {
-  cart?: {
-    items: CartItem[];
-    totalQuantity: number;
-    totalAmount: number;
-    selectedItems: CartItem[];
-    selectedAmount: number;
-  };
-
+  cart?: ExtendedCart; // ✅ thay type
   origin?: { lat: number; lng: number; address?: string };
   showMap = false;
   distanceKmPreview: number | null = null;
@@ -72,7 +76,7 @@ export class CheckoutPageComponent implements OnInit {
 
   subtotal = 0;
   weightKg = 0;
-
+  couponCode: string = '';
   placing = false;
   errMsg?: string;
 
@@ -111,31 +115,33 @@ export class CheckoutPageComponent implements OnInit {
     this.loadCart();
     this.loadProvinces();
 
-    // Tỉnh -> nạp quận
+    // ✅ Lấy coupon từ query hoặc localStorage
+    const q = (this.router.parseUrl(this.router.url).queryParams?.['coupon'] || '').trim();
+    const stored = (localStorage.getItem('couponCode') || '').trim();
+    this.couponCode = q || stored || '';
+    if (this.couponCode) localStorage.setItem('couponCode', this.couponCode);
+
+    // tỉnh -> quận
     this.addressForm.get('provinceCode')!.valueChanges.subscribe((code: string | number) => {
       this.addressForm.patchValue({ districtCode: '', wardCode: '' }, { emitEvent: false });
       this.districts = []; this.wards = [];
-      if (code !== null && code !== undefined && `${code}` !== '') {
-        this.loadDistricts$(`${code}`).subscribe(list => { this.districts = list ?? []; this.cdr.detectChanges(); });
-      }
+      if (code) this.loadDistricts$(`${code}`).subscribe(list => { this.districts = list ?? []; this.cdr.detectChanges(); });
       this.tryPreview();
     });
 
-    // Quận -> nạp phường
+    // quận -> phường
     this.addressForm.get('districtCode')!.valueChanges.subscribe((code: string | number) => {
       this.addressForm.patchValue({ wardCode: '' }, { emitEvent: false });
       this.wards = [];
-      if (code !== null && code !== undefined && `${code}` !== '') {
-        this.loadWards$(`${code}`).subscribe(list => { this.wards = list ?? []; this.cdr.detectChanges(); });
-      }
+      if (code) this.loadWards$(`${code}`).subscribe(list => { this.wards = list ?? []; this.cdr.detectChanges(); });
       this.tryPreview();
     });
 
-    // Auto preview
     this.addressForm.valueChanges.subscribe(() => this.tryPreview());
     this.shippingForm.valueChanges.subscribe(() => this.tryPreview());
   }
 
+  /** ✅ Giữ 1 bản duy nhất loadCart/applyCartSummary */
   private loadCart(): void {
     const snap = (this.cartSvc as any).getSnapshot?.();
     if (snap) this.applyCartSummary(snap);
@@ -152,6 +158,8 @@ export class CheckoutPageComponent implements OnInit {
       totalAmount: resp.totalAmount ?? 0,
       selectedItems: items,
       selectedAmount: amount,
+      couponCode: this.couponCode || localStorage.getItem('couponCode') || undefined,
+      couponDiscount: Number(localStorage.getItem('couponDiscount') || 0),
     };
 
     this.subtotal = items.reduce((s, it) => s + (it.price ?? 0) * (it.quantity ?? 0), 0);
@@ -163,6 +171,20 @@ export class CheckoutPageComponent implements OnInit {
 
     this.cdr.detectChanges();
     this.tryPreview();
+
+    // Quận -> nạp phường
+    this.addressForm.get('districtCode')!.valueChanges.subscribe((code: string | number) => {
+      this.addressForm.patchValue({ wardCode: '' }, { emitEvent: false });
+      this.wards = [];
+      if (code !== null && code !== undefined && `${code}` !== '') {
+        this.loadWards$(`${code}`).subscribe(list => { this.wards = list ?? []; this.cdr.detectChanges(); });
+      }
+      this.tryPreview();
+    });
+
+    // Auto preview
+    this.addressForm.valueChanges.subscribe(() => this.tryPreview());
+    this.shippingForm.valueChanges.subscribe(() => this.tryPreview());
   }
 
   openMapPicker() { this.showMap = true; this.cdr.detectChanges(); }
@@ -396,6 +418,7 @@ placeOrder() {
     addressLine: `${f.addressLine}`,
     province: this.provinceName,
     voucherCode: (this.shippingForm.value.voucherCode || '').trim() || undefined,
+    couponCode: (this.couponCode || '').trim() || undefined,
     items,
     destLat: Number(f.lat),
     destLng: Number(f.lng),

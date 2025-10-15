@@ -32,24 +32,38 @@ export interface OrderDetailDto extends OrderListItemDto {
 
 /** Payload tạo đơn — khớp FE hiện có */
 export interface CreateOrderItem { productId: number; quantity: number; weightKgPerItem?: number; }
+
 export interface CreateOrderRequest {
   receiverName: string;
   phone: string;
   addressLine: string;
   province: string;
   voucherCode?: string;
+
+  /** ✅ Thêm couponCode để truyền mã giảm giá sản phẩm sang backend */
+  couponCode?: string;
+
   items: {
     productId: number;
     quantity: number;
     weightKgPerItem?: number;
   }[];
+
   destLat: number;
   destLng: number;
-  note?: string;             // ✅ thêm dòng này
-  paymentMethod?: string;    // ✅ (tuỳ chọn, nếu bạn gửi lên backend)
+  note?: string;             // ✅ giữ lại nếu backend có nhận ghi chú
+  paymentMethod?: string;    // ✅ giữ lại nếu backend có xử lý thanh toán
 }
 
-export interface CreateOrderResponse { id: number; status: string; grandTotal: number; }
+export interface CreateOrderResponse {
+  id: number;
+  status: string;
+  grandTotal: number;
+
+  /** ✅ Tuỳ chọn: nếu backend trả thông tin giảm giá thì thêm hai dòng dưới */
+  couponCode?: string;
+  couponDiscount?: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class OrderClientService {
@@ -60,9 +74,13 @@ export class OrderClientService {
 
   constructor(private http: HttpClient) {}
 
-  /** Tạo đơn: dùng endpoint v1 đang support POST */
+  /** ✅ Tạo đơn: gửi couponCode nếu có */
   create(payload: CreateOrderRequest): Observable<CreateOrderResponse> {
-    return this.http.post<CreateOrderResponse>(this.BASE_V1, payload);
+    const body: CreateOrderRequest = {
+      ...payload,
+      couponCode: payload.couponCode ? payload.couponCode.trim() : undefined // ✅ đảm bảo gửi đúng mã giảm giá
+    };
+    return this.http.post<CreateOrderResponse>(this.BASE_V1, body);
   }
 
   /** Danh sách đơn của tôi (v2) */
@@ -73,7 +91,12 @@ export class OrderClientService {
 
   /** Lịch sử mua hàng = đã thanh toán */
   history(page = 0, size = 10): Observable<Page<OrderListItemDto>> {
-    return this.list(page, size).pipe(map(p => ({ ...p, content: p.content.filter(x => x.status === 'PAID') })));
+    return this.list(page, size).pipe(
+      map(p => ({
+        ...p,
+        content: p.content.filter(x => x.status === 'PAID')
+      }))
+    );
   }
 
   detail(id: number): Observable<OrderDetailDto> {

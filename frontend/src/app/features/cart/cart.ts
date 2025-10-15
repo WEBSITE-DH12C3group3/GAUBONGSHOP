@@ -69,7 +69,15 @@ export class CartComponent implements OnInit {
     private couponApi: CouponService
   ) {}
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+
+    // ✅ Khôi phục coupon từ localStorage nếu có (giúp user refresh không mất)
+    const savedCode = (localStorage.getItem('couponCode') || '').trim();
+    if (savedCode) {
+      this.couponCode = savedCode;
+    }
+  }
 
   private load() {
     this.api.getMyCart().subscribe({
@@ -175,7 +183,16 @@ export class CartComponent implements OnInit {
     };
 
     this.couponApi.apply(req).subscribe({
-      next: res => this.couponPreview = { code: res.code, discountAmount: res.discountAmount || 0 },
+      next: res => {
+        const discount = Number(res.discountAmount || 0);
+        this.couponPreview = { code: res.code, discountAmount: discount };
+
+        // ✅ Lưu sang localStorage để checkout/refresh đọc lại
+        try {
+          localStorage.setItem('couponCode', res.code || '');
+          localStorage.setItem('couponDiscount', String(discount));
+        } catch {}
+      },
       error: err => alert(err?.error?.error || 'Mã không hợp lệ')
     });
   }
@@ -183,6 +200,11 @@ export class CartComponent implements OnInit {
   clearCoupon() {
     this.couponPreview = null;
     this.couponCode = '';
+    // ✅ Xoá lưu trữ để checkout không còn áp dụng
+    try {
+      localStorage.removeItem('couponCode');
+      localStorage.removeItem('couponDiscount');
+    } catch {}
   }
 
   // ===== tính tổng sau khi giảm & điều hướng checkout =====
@@ -191,15 +213,32 @@ export class CartComponent implements OnInit {
   }
 
   get payable(): number {
-    const discount = this.couponPreview?.discountAmount ?? 0;
+    // ✅ Nếu chưa preview mà đã có lưu trong localStorage thì vẫn trừ được
+    const lsDiscount = Number(localStorage.getItem('couponDiscount') || 0);
+    const discount = this.couponPreview?.discountAmount ?? lsDiscount ?? 0;
     const result = this.subtotal - discount;
     return result > 0 ? result : 0;
   }
 
   goCheckout() {
     const code = (this.couponPreview?.code || this.couponCode || '').trim();
-    if (code) localStorage.setItem('couponCode', code);
-    this.router.navigate(['/checkout'], { queryParams: code ? { coupon: code } : {} });
+    const lsDiscount = Number(localStorage.getItem('couponDiscount') || 0);
+    const discount = Number(this.couponPreview?.discountAmount ?? lsDiscount);
+
+
+
+    // ✅ Lưu để checkout & trang success đọc được nếu user refresh
+    try {
+      if (code) localStorage.setItem('couponCode', code);
+      localStorage.setItem('couponDiscount', String(discount));
+    } catch {}
+
+    // ✅ Điều hướng kèm cả code + số tiền giảm
+    const queryParams: any = {};
+    if (code) queryParams.coupon = code;
+    if (discount > 0) queryParams.cd = discount;
+
+    this.router.navigate(['/checkout'], { queryParams });
   }
   // =========================================================
 }

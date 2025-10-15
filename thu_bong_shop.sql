@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 11, 2025 at 04:09 PM
+-- Generation Time: Oct 15, 2025 at 06:34 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -127,8 +127,6 @@ CREATE TABLE `carts` (
 --
 
 INSERT INTO `carts` (`id`, `user_id`, `product_id`, `quantity`, `selected`, `created_at`) VALUES
-(5, 43, 13, 1, 1, '2025-09-22 21:32:12'),
-(6, 43, 12, 1, 0, '2025-09-22 21:32:13'),
 (7, 42, 13, 2, 1, '2025-09-23 02:35:15'),
 (8, 38, 13, 1, 1, '2025-09-23 14:47:17'),
 (9, 4, 11, 1, 1, '2025-09-24 13:26:24'),
@@ -138,7 +136,9 @@ INSERT INTO `carts` (`id`, `user_id`, `product_id`, `quantity`, `selected`, `cre
 (13, 42, 12, 1, 1, '2025-09-26 02:32:53'),
 (14, 42, 9, 1, 1, '2025-09-26 02:32:58'),
 (21, 44, 4, 3, 1, '2025-09-29 16:44:18'),
-(22, 44, 12, 1, 1, '2025-09-30 07:45:40');
+(22, 44, 12, 1, 1, '2025-09-30 07:45:40'),
+(23, 43, 14, 1, 1, '2025-10-14 18:15:31'),
+(24, 43, 12, 1, 1, '2025-10-14 20:44:04');
 
 -- --------------------------------------------------------
 
@@ -232,7 +232,7 @@ CREATE TABLE `coupons` (
 --
 
 INSERT INTO `coupons` (`id`, `code`, `description`, `discount_type`, `discount_value`, `max_discount_amount`, `min_order_amount`, `exclude_discounted_items`, `applicable_payment_methods`, `applicable_roles`, `region_include`, `region_exclude`, `first_order_only`, `stackable`, `max_uses`, `used_count`, `max_uses_per_user`, `start_date`, `end_date`, `active`, `created_at`, `updated_at`) VALUES
-(1, 'WELCOME10', 'Giảm 10% cho đơn đầu tiên', 'percent', 10.00, 50000.00, 200000.00, 0, 'COD,e_wallet', 'Customer', NULL, NULL, 1, 0, 1000, 0, 1, '2025-08-31 17:00:00', '2025-12-31 16:59:59', 1, '2025-09-18 02:26:43', '2025-09-18 02:26:43');
+(3, 'hehe', 'Giảm 10% cho đơn đầu tiên', 'percent', 10.00, 50000.00, 20000.00, 1, NULL, NULL, NULL, NULL, 0, 0, 1000, 0, 1, '2025-10-13 07:19:00', '2026-04-13 07:19:00', 1, '2025-10-14 18:19:57', '2025-10-15 03:54:43');
 
 -- --------------------------------------------------------
 
@@ -606,27 +606,29 @@ CREATE TABLE `orders` (
   `status` enum('PENDING_PAYMENT','PAID','PACKING','SHIPPED','DELIVERED','CANCELED') NOT NULL DEFAULT 'PENDING_PAYMENT',
   `items_total` decimal(10,2) NOT NULL DEFAULT 0.00,
   `shipping_fee` decimal(12,2) DEFAULT NULL,
-  `total_amount` decimal(10,2) NOT NULL
+  `total_amount` decimal(10,2) NOT NULL,
+  `coupon_code` varchar(50) DEFAULT NULL,
+  `coupon_discount` decimal(10,2) DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id`, `user_id`, `shipping_address_id`, `shipping_carrier_id`, `shipping_service_id`, `shipping_distance_km`, `shipping_fee_before`, `shipping_discount`, `grand_total`, `voucher_code`, `receiver_name`, `phone`, `address_line`, `province`, `weight_kg`, `shipping_fee_final`, `shipping_eta_min`, `shipping_eta_max`, `shipping_quote_id`, `order_date`, `status`, `items_total`, `shipping_fee`, `total_amount`) VALUES
-(1, 1, NULL, NULL, NULL, NULL, NULL, 0.00, 0.00, NULL, '', '', '', '', 0.000, NULL, NULL, NULL, NULL, '2025-08-25 14:50:57', 'PENDING_PAYMENT', 0.00, NULL, 890000.00),
-(2, 1, NULL, NULL, NULL, NULL, NULL, 0.00, 0.00, NULL, '', '', '', '', 0.000, NULL, NULL, NULL, NULL, '2025-08-25 14:50:57', 'CANCELED', 0.00, NULL, 250000.00),
-(3, 44, NULL, NULL, NULL, 2.44, 17880.00, 0.00, 547880.00, NULL, 'Nguyễn Văn A', '0900000000', '12 Ngõ 34 Xã Đàn', 'Hà Nội', 1.100, 17880.00, NULL, NULL, NULL, '2025-09-28 05:39:27', 'CANCELED', 530000.00, 17880.00, 547880.00),
-(4, 44, NULL, NULL, NULL, 2.44, 17880.00, 0.00, 547880.00, NULL, 'Nguyễn Văn A', '0900000000', '12 Ngõ 34 Xã Đàn', 'Hà Nội', 1.100, 17880.00, NULL, NULL, NULL, '2025-09-28 05:44:30', 'PENDING_PAYMENT', 530000.00, 17880.00, 547880.00),
-(5, 44, NULL, NULL, NULL, 3.39, 19780.00, 0.00, 909780.00, NULL, 'phùng thị trang', '0349459165', 'Ngõ 35 Phố Kim Mã Thượng', 'Thành phố Hà Nội', 1.000, 19780.00, NULL, NULL, NULL, '2025-09-28 12:06:11', 'CANCELED', 890000.00, 19780.00, 909780.00),
-(6, 44, NULL, NULL, NULL, 5.42, 36260.00, 0.00, 926260.00, NULL, 'trang trang', '0123456789', 'Đường Số 19', 'Thành phố Hà Nội', 1.000, 36260.00, NULL, NULL, NULL, '2025-09-28 12:37:30', 'PENDING_PAYMENT', 890000.00, 36260.00, 926260.00),
-(7, 44, NULL, NULL, NULL, 2.96, 18920.00, 0.00, 908920.00, NULL, 'Phùng thị trang', '0123456891', 'Ngách 2 Ngõ 72 Phố Dương Quảng Hàm', 'Thành phố Hà Nội', 1.000, 18920.00, NULL, NULL, NULL, '2025-09-28 13:02:13', 'DELIVERED', 890000.00, 18920.00, 908920.00),
-(8, 44, NULL, NULL, NULL, 2.96, 18920.00, 0.00, 908920.00, NULL, 'Phùng thị trang', '0123456891', 'Ngách 2 Ngõ 72 Phố Dương Quảng Hàm', 'Thành phố Hà Nội', 1.000, 18920.00, NULL, NULL, NULL, '2025-09-28 13:02:13', 'PENDING_PAYMENT', 890000.00, 18920.00, 908920.00),
-(9, 44, NULL, NULL, NULL, 6.67, 40010.00, 0.00, 930010.00, NULL, 'my', '01234568799', 'Phố An Dương', 'Thành phố Hà Nội', 1.000, 40010.00, NULL, NULL, NULL, '2025-09-28 13:04:51', 'DELIVERED', 890000.00, 40010.00, 930010.00),
-(10, 44, NULL, NULL, NULL, 6.67, 40010.00, 0.00, 930010.00, NULL, 'my', '01234568799', 'Phố An Dương', 'Thành phố Hà Nội', 1.000, 40010.00, NULL, NULL, NULL, '2025-09-28 13:04:51', 'PENDING_PAYMENT', 890000.00, 40010.00, 930010.00),
-(11, 44, NULL, NULL, NULL, 3.92, 20840.00, 0.00, 910840.00, NULL, 'trang trang', '0123456789', 'Ngõ Núi Trúc', 'Thành phố Hà Nội', 1.000, 20840.00, NULL, NULL, NULL, '2025-09-28 13:20:22', 'PAID', 890000.00, 20840.00, 910840.00),
-(12, 44, NULL, NULL, NULL, 3.64, 20280.00, 0.00, 620280.00, NULL, 'trang trang', '0349459165', 'Phố Đội Cấn', 'Thành phố Hà Nội', 0.600, 20280.00, NULL, NULL, NULL, '2025-09-29 16:55:56', 'PENDING_PAYMENT', 600000.00, 20280.00, 620280.00),
-(13, 44, NULL, NULL, NULL, 6.40, 39200.00, 0.00, 849200.00, NULL, 'phùng trang', '0349459165', 'Phố Nguyễn Trung Trực', 'Thành phố Hà Nội', 0.800, 39200.00, NULL, NULL, NULL, '2025-09-30 07:48:07', 'SHIPPED', 810000.00, 39200.00, 849200.00);
+INSERT INTO `orders` (`id`, `user_id`, `shipping_address_id`, `shipping_carrier_id`, `shipping_service_id`, `shipping_distance_km`, `shipping_fee_before`, `shipping_discount`, `grand_total`, `voucher_code`, `receiver_name`, `phone`, `address_line`, `province`, `weight_kg`, `shipping_fee_final`, `shipping_eta_min`, `shipping_eta_max`, `shipping_quote_id`, `order_date`, `status`, `items_total`, `shipping_fee`, `total_amount`, `coupon_code`, `coupon_discount`) VALUES
+(1, 1, NULL, NULL, NULL, NULL, NULL, 0.00, 0.00, NULL, '', '', '', '', 0.000, NULL, NULL, NULL, NULL, '2025-08-25 14:50:57', 'PENDING_PAYMENT', 0.00, NULL, 890000.00, NULL, 0.00),
+(2, 1, NULL, NULL, NULL, NULL, NULL, 0.00, 0.00, NULL, '', '', '', '', 0.000, NULL, NULL, NULL, NULL, '2025-08-25 14:50:57', 'CANCELED', 0.00, NULL, 250000.00, NULL, 0.00),
+(3, 44, NULL, NULL, NULL, 2.44, 17880.00, 0.00, 547880.00, NULL, 'Nguyễn Văn A', '0900000000', '12 Ngõ 34 Xã Đàn', 'Hà Nội', 1.100, 17880.00, NULL, NULL, NULL, '2025-09-28 05:39:27', 'CANCELED', 530000.00, 17880.00, 547880.00, NULL, 0.00),
+(4, 44, NULL, NULL, NULL, 2.44, 17880.00, 0.00, 547880.00, NULL, 'Nguyễn Văn A', '0900000000', '12 Ngõ 34 Xã Đàn', 'Hà Nội', 1.100, 17880.00, NULL, NULL, NULL, '2025-09-28 05:44:30', 'PENDING_PAYMENT', 530000.00, 17880.00, 547880.00, NULL, 0.00),
+(5, 44, NULL, NULL, NULL, 3.39, 19780.00, 0.00, 909780.00, NULL, 'phùng thị trang', '0349459165', 'Ngõ 35 Phố Kim Mã Thượng', 'Thành phố Hà Nội', 1.000, 19780.00, NULL, NULL, NULL, '2025-09-28 12:06:11', 'CANCELED', 890000.00, 19780.00, 909780.00, NULL, 0.00),
+(6, 44, NULL, NULL, NULL, 5.42, 36260.00, 0.00, 926260.00, NULL, 'trang trang', '0123456789', 'Đường Số 19', 'Thành phố Hà Nội', 1.000, 36260.00, NULL, NULL, NULL, '2025-09-28 12:37:30', 'PENDING_PAYMENT', 890000.00, 36260.00, 926260.00, NULL, 0.00),
+(7, 44, NULL, NULL, NULL, 2.96, 18920.00, 0.00, 908920.00, NULL, 'Phùng thị trang', '0123456891', 'Ngách 2 Ngõ 72 Phố Dương Quảng Hàm', 'Thành phố Hà Nội', 1.000, 18920.00, NULL, NULL, NULL, '2025-09-28 13:02:13', 'DELIVERED', 890000.00, 18920.00, 908920.00, NULL, 0.00),
+(8, 44, NULL, NULL, NULL, 2.96, 18920.00, 0.00, 908920.00, NULL, 'Phùng thị trang', '0123456891', 'Ngách 2 Ngõ 72 Phố Dương Quảng Hàm', 'Thành phố Hà Nội', 1.000, 18920.00, NULL, NULL, NULL, '2025-09-28 13:02:13', 'PENDING_PAYMENT', 890000.00, 18920.00, 908920.00, NULL, 0.00),
+(9, 44, NULL, NULL, NULL, 6.67, 40010.00, 0.00, 930010.00, NULL, 'my', '01234568799', 'Phố An Dương', 'Thành phố Hà Nội', 1.000, 40010.00, NULL, NULL, NULL, '2025-09-28 13:04:51', 'DELIVERED', 890000.00, 40010.00, 930010.00, NULL, 0.00),
+(10, 44, NULL, NULL, NULL, 6.67, 40010.00, 0.00, 930010.00, NULL, 'my', '01234568799', 'Phố An Dương', 'Thành phố Hà Nội', 1.000, 40010.00, NULL, NULL, NULL, '2025-09-28 13:04:51', 'PENDING_PAYMENT', 890000.00, 40010.00, 930010.00, NULL, 0.00),
+(11, 44, NULL, NULL, NULL, 3.92, 20840.00, 0.00, 910840.00, NULL, 'trang trang', '0123456789', 'Ngõ Núi Trúc', 'Thành phố Hà Nội', 1.000, 20840.00, NULL, NULL, NULL, '2025-09-28 13:20:22', 'PAID', 890000.00, 20840.00, 910840.00, NULL, 0.00),
+(12, 44, NULL, NULL, NULL, 3.64, 20280.00, 0.00, 620280.00, NULL, 'trang trang', '0349459165', 'Phố Đội Cấn', 'Thành phố Hà Nội', 0.600, 20280.00, NULL, NULL, NULL, '2025-09-29 16:55:56', 'PENDING_PAYMENT', 600000.00, 20280.00, 620280.00, NULL, 0.00),
+(13, 44, NULL, NULL, NULL, 6.40, 39200.00, 0.00, 849200.00, NULL, 'phùng trang', '0349459165', 'Phố Nguyễn Trung Trực', 'Thành phố Hà Nội', 0.800, 39200.00, NULL, NULL, NULL, '2025-09-30 07:48:07', 'SHIPPED', 810000.00, 39200.00, 849200.00, NULL, 0.00);
 
 --
 -- Triggers `orders`
@@ -1886,7 +1888,7 @@ ALTER TABLE `carrier_rate_rules`
 -- AUTO_INCREMENT for table `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -1904,7 +1906,7 @@ ALTER TABLE `chat_sessions`
 -- AUTO_INCREMENT for table `coupons`
 --
 ALTER TABLE `coupons`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `distance_cache`
