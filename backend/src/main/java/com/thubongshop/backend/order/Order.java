@@ -6,6 +6,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "orders")
@@ -57,6 +58,12 @@ public class Order {
   // ====== Voucher ======
   @Column(name = "voucher_code")
   private String voucherCode;
+
+  @Column(name = "coupon_code", length = 50)
+  private String couponCode;
+
+  @Column(name = "coupon_discount", precision = 10, scale = 2)
+  private BigDecimal couponDiscount = BigDecimal.ZERO;
 
   // ====== Địa chỉ nhận ======
   @Column(name = "receiver_name")

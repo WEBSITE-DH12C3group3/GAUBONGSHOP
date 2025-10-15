@@ -87,24 +87,53 @@
         </div>
         <div class="flex justify-between">
           <span>Tổng tiền (tất cả):</span>
-          <span class="font-semibold">{{ data.totalAmount | currency:'VND':'symbol':'1.0-0' }}</span>
+          <span class="font-semibold">{{ subtotal | currency:'VND':'symbol':'1.0-0' }}</span>
         </div>
+
+        <!-- Coupon box -->
+        <div class="mt-4 p-4 bg-white rounded-lg shadow">
+          <div class="flex gap-2 items-center">
+            <input [(ngModel)]="couponCode"
+                   class="border rounded px-3 py-2 flex-1"
+                   placeholder="Nhập mã giảm giá (vd: WELCOME10)" />
+            <button (click)="previewCoupon()"
+                    class="px-4 py-2 rounded bg-pink-600 text-white hover:opacity-90">
+              Áp dụng
+            </button>
+          </div>
+
+          <div *ngIf="couponPreview" class="text-sm mt-2">
+            <div>Mã: <b>{{ couponPreview.code }}</b> | Giảm: 
+              <b>{{ couponPreview.discountAmount | currency:'VND' }}</b>
+            </div>
+            <button (click)="clearCoupon()" class="text-red-600 mt-1 underline">Huỷ mã</button>
+          </div>
+        </div>
+
+        <!-- Tổng sau giảm -->
+        <div class="mt-2 text-sm">
+          <div *ngIf="couponPreview" class="flex justify-between">
+            <span>Giảm giá:</span>
+            <span class="font-semibold">-{{ couponPreview.discountAmount | currency:'VND':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Số tiền sẽ thanh toán:</span>
+            <span class="text-pink-600 font-bold">{{ payable | currency:'VND':'symbol':'1.0-0' }}</span>
+          </div>
+        </div>
+
         <hr class="my-2" />
         <div class="flex justify-between">
           <span>Đã chọn để thanh toán:</span>
           <span class="font-medium">{{ data.selectedQuantity }}</span>
         </div>
-        <div class="flex justify-between">
-          <span>Số tiền sẽ thanh toán:</span>
-          <span class="text-pink-600 font-bold">{{ data.selectedAmount | currency:'VND':'symbol':'1.0-0' }}</span>
-        </div>
       </div>
 
       <div class="mt-4">
-        <a routerLink="/checkout"
-           class="block text-center bg-pink-600 hover:bg-pink-700 text-white py-2 rounded-lg font-medium">
+        <button (click)="goCheckout()"
+                class="block w-full text-center bg-pink-600 hover:bg-pink-700 text-white py-2 rounded-lg font-medium">
           Thanh toán
-        </a>
+        </button>
         <p class="text-xs text-gray-500 mt-2">
           * Nếu bạn không chọn sản phẩm nào, hệ thống sẽ mặc định thanh toán toàn bộ giỏ hàng.
         </p>

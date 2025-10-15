@@ -1,18 +1,79 @@
 <div class="container mx-auto p-4" style="max-width: 720px">
   <h2 class="text-2xl font-semibold mb-4">Xác nhận đặt hàng</h2>
 
+  <!-- Khi CHƯA có kết quả đặt hàng -->
   <div *ngIf="!result">
     <p class="text-gray-600 mb-4">Nhấn "Đặt hàng" để tạo đơn từ giỏ hàng hiện tại.</p>
+
+    <!-- Tóm tắt dự kiến (trước khi đặt hàng) -->
+    <div class="bg-white rounded-lg p-4 shadow mb-4">
+      <h4 class="font-semibold mb-2">Tóm tắt dự kiến</h4>
+      <div class="space-y-1 text-sm">
+        <div class="flex justify-between">
+          <span>Tiền hàng:</span>
+          <b>{{ subtotal | currency:'VND' }}</b>
+        </div>
+        <div class="flex justify-between" *ngIf="couponPreview">
+          <span>Giảm giá:</span>
+          <b>-{{ couponPreview.discountAmount | currency:'VND' }}</b>
+        </div>
+        <div class="flex justify-between">
+          <span>Phí vận chuyển:</span>
+          <b>{{ shippingFee | currency:'VND' }}</b>
+        </div>
+        <div class="flex justify-between text-base pt-1 border-t mt-1">
+          <span>Tổng thanh toán:</span>
+          <b>{{ payablePreview | currency:'VND' }}</b>
+        </div>
+      </div>
+    </div>
+
     <button class="px-4 py-2 rounded-2xl bg-black text-white" (click)="placeOrder()" [disabled]="placing">
       {{ placing ? 'Đang xử lý...' : 'Đặt hàng' }}
     </button>
     <a class="ml-3 px-4 py-2 rounded-2xl border" routerLink="/cart">Quay lại giỏ</a>
   </div>
 
+  <!-- Khi ĐÃ có kết quả đặt hàng -->
   <div *ngIf="result" class="mt-6 p-4 rounded-2xl border shadow bg-white">
     <h3 class="text-xl font-semibold mb-2">Đặt hàng thành công</h3>
     <p>Mã đơn: <b>#{{ result.id }}</b></p>
     <p>Trạng thái: <span class="uppercase">{{ result.status }}</span></p>
     <a class="text-blue-600 underline" routerLink="/orders">Xem đơn của tôi</a>
+  </div>
+
+  <!-- Ô nhập mã giảm giá (dùng cho preview trước khi đặt hàng) -->
+  <div class="bg-white rounded-lg p-4 shadow mt-4">
+    <div class="flex items-center gap-2">
+      <input [(ngModel)]="couponCode" class="border rounded px-3 py-2 flex-1"
+             placeholder="Mã giảm giá" />
+      <button (click)="applyAtCheckout()" class="px-4 py-2 bg-pink-600 text-white rounded">
+        Áp dụng
+      </button>
+      <button *ngIf="couponPreview" (click)="clearCoupon()" class="px-3 py-2 border rounded">
+        Hủy mã
+      </button>
+    </div>
+
+    <div *ngIf="couponPreview" class="mt-2 text-sm">
+      Mã <b>{{ couponPreview.code }}</b> giảm
+      <b>{{ couponPreview.discountAmount | currency:'VND' }}</b>.
+    </div>
+
+    <!-- Khi đã có kết quả đặt hàng: ưu tiên hiển thị theo BE -->
+    <div class="mt-3" *ngIf="result as r; else previewBlock">
+      <div>Tạm tính: <b>{{ r.itemsTotal | currency:'VND' }}</b></div>
+      <div *ngIf="r.couponDiscount">Giảm giá: <b>-{{ r.couponDiscount | currency:'VND' }}</b></div>
+      <div>Phí vận chuyển: <b>{{ r.shippingFee | currency:'VND' }}</b></div>
+      <div class="text-lg mt-1">Tổng: <b>{{ r.grandTotal | currency:'VND' }}</b></div>
+    </div>
+
+    <!-- Trước khi đặt hàng: hiển thị theo preview -->
+    <ng-template #previewBlock>
+      <div>Tạm tính: <b>{{ subtotal | currency:'VND' }}</b></div>
+      <div *ngIf="couponPreview">Giảm giá: <b>-{{ couponPreview.discountAmount | currency:'VND' }}</b></div>
+      <div>Phí vận chuyển: <b>{{ shippingFee | currency:'VND' }}</b></div>
+      <div class="text-lg mt-1">Tổng: <b>{{ payablePreview | currency:'VND' }}</b></div>
+    </ng-template>
   </div>
 </div>

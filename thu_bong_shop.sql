@@ -3,12 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 23, 2025 at 12:15 AM
+-- Generation Time: Oct 11, 2025 at 04:09 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
-
-CREATE DATABASE IF NOT EXISTS thu_bong_shop;
-USE thu_bong_shop;
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -106,7 +103,9 @@ CREATE TABLE `carrier_rate_rules` (
 INSERT INTO `carrier_rate_rules` (`id`, `service_id`, `min_km`, `max_km`, `base_fee`, `per_km_fee`, `min_fee`, `free_km`, `cod_surcharge`, `area_surcharge`, `active_from`, `active_to`, `is_active`) VALUES
 (1, 1, 0.00, 5.00, 15000.00, 2000.00, 15000.00, 1.00, 0.00, 0.00, NULL, NULL, 1),
 (2, 1, 5.00, 20.00, 20000.00, 3000.00, 25000.00, 0.00, 0.00, 0.00, NULL, NULL, 1),
-(3, 1, 20.00, NULL, 30000.00, 4000.00, 40000.00, 0.00, 0.00, 0.00, NULL, NULL, 1);
+(3, 1, 20.00, NULL, 30000.00, 4000.00, 40000.00, 0.00, 0.00, 0.00, NULL, NULL, 1),
+(4, 2, 1.00, 10.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, '2025-09-28', '2025-09-30', 1),
+(5, 3, 2.00, 4.00, 0.00, 10000.00, 0.00, 0.00, 0.00, 0.00, '2025-09-28', '2025-10-04', 1);
 
 -- --------------------------------------------------------
 
@@ -129,7 +128,17 @@ CREATE TABLE `carts` (
 
 INSERT INTO `carts` (`id`, `user_id`, `product_id`, `quantity`, `selected`, `created_at`) VALUES
 (5, 43, 13, 1, 1, '2025-09-22 21:32:12'),
-(6, 43, 12, 1, 0, '2025-09-22 21:32:13');
+(6, 43, 12, 1, 0, '2025-09-22 21:32:13'),
+(7, 42, 13, 2, 1, '2025-09-23 02:35:15'),
+(8, 38, 13, 1, 1, '2025-09-23 14:47:17'),
+(9, 4, 11, 1, 1, '2025-09-24 13:26:24'),
+(10, 37, 13, 1, 1, '2025-09-25 03:21:42'),
+(11, 37, 12, 1, 1, '2025-09-25 03:21:44'),
+(12, 42, 14, 1, 1, '2025-09-26 02:32:46'),
+(13, 42, 12, 1, 1, '2025-09-26 02:32:53'),
+(14, 42, 9, 1, 1, '2025-09-26 02:32:58'),
+(21, 44, 4, 3, 1, '2025-09-29 16:44:18'),
+(22, 44, 12, 1, 1, '2025-09-30 07:45:40');
 
 -- --------------------------------------------------------
 
@@ -183,7 +192,9 @@ INSERT INTO `chat_sessions` (`id`, `participant1_id`, `participant2_id`, `status
 (6, 42, 1, 'open', '2025-09-20 06:51:54', '2025-09-20 08:51:27'),
 (7, 4, 1, 'open', '2025-09-21 06:26:29', '2025-09-21 06:26:29'),
 (8, 38, 1, 'open', '2025-09-21 06:32:52', '2025-09-21 06:32:52'),
-(9, 43, 1, 'open', '2025-09-22 10:56:08', '2025-09-22 10:56:08');
+(9, 43, 1, 'open', '2025-09-22 10:56:08', '2025-09-22 10:56:08'),
+(10, 44, 1, 'open', '2025-09-26 09:02:47', '2025-09-26 13:54:53'),
+(11, 41, 1, 'open', '2025-09-30 00:31:05', '2025-09-30 00:55:27');
 
 -- --------------------------------------------------------
 
@@ -303,7 +314,10 @@ CREATE TABLE `favorites` (
 --
 
 INSERT INTO `favorites` (`id`, `user_id`, `product_id`, `created_at`) VALUES
-(3, 37, 13, '2025-09-21 12:21:13');
+(3, 37, 13, '2025-09-21 12:21:13'),
+(7, 42, 11, '2025-09-25 19:30:29'),
+(8, 42, 12, '2025-09-25 19:30:30'),
+(9, 44, 12, '2025-09-30 00:45:21');
 
 -- --------------------------------------------------------
 
@@ -446,7 +460,24 @@ INSERT INTO `messages` (`id`, `chat_session_id`, `sender_id`, `content`, `is_rea
 (64, 6, 42, 'djfhsf', 1, '2025-09-20 15:30:50'),
 (65, 6, 37, 'ê', 1, '2025-09-20 15:51:08'),
 (66, 6, 37, 'tao bảo', 1, '2025-09-20 15:51:13'),
-(67, 6, 42, 'oiioi', 1, '2025-09-20 15:51:27');
+(67, 6, 42, 'oiioi', 1, '2025-09-20 15:51:27'),
+(68, 10, 44, 'chào shop', 1, '2025-09-26 16:19:24'),
+(69, 10, 37, 'chào bạn nha', 1, '2025-09-26 16:20:09'),
+(70, 10, 44, 'shop cho mình hỏi địa chỉ ở đâu vậy', 1, '2025-09-26 16:20:31'),
+(71, 10, 37, 'mình ở hà nội', 1, '2025-09-26 16:20:45'),
+(72, 10, 37, '320 phú diễn ạ', 1, '2025-09-26 16:20:58'),
+(73, 10, 44, 'hello', 1, '2025-09-26 20:22:50'),
+(74, 10, 44, 'hello', 1, '2025-09-26 20:22:56'),
+(75, 10, 44, 'hello', 1, '2025-09-26 20:26:58'),
+(76, 10, 44, 'hello', 1, '2025-09-26 20:28:00'),
+(77, 10, 44, 'e', 1, '2025-09-26 20:29:01'),
+(78, 10, 37, 'hjfie', 1, '2025-09-26 20:48:34'),
+(79, 10, 44, 'èwefr', 1, '2025-09-26 20:48:42'),
+(80, 10, 37, 'tao đây', 1, '2025-09-26 20:49:32'),
+(81, 10, 37, 'tjhdbfvuih', 1, '2025-09-26 20:49:38'),
+(82, 10, 37, 'mẹ m', 1, '2025-09-26 20:49:43'),
+(83, 10, 37, 'tao đấy', 1, '2025-09-26 20:54:53'),
+(84, 11, 41, 'hjdfgjday', 0, '2025-09-30 07:55:27');
 
 -- --------------------------------------------------------
 
@@ -526,7 +557,24 @@ INSERT INTO `notifications` (`id`, `user_id`, `message_id`, `type`, `is_read`, `
 (63, 1, 64, 'new_message', 0, '2025-09-20 15:30:50'),
 (64, 42, 65, 'new_message', 1, '2025-09-20 15:51:08'),
 (65, 42, 66, 'new_message', 1, '2025-09-20 15:51:13'),
-(66, 1, 67, 'new_message', 0, '2025-09-20 15:51:27');
+(66, 1, 67, 'new_message', 0, '2025-09-20 15:51:27'),
+(67, 1, 68, 'new_message', 0, '2025-09-26 16:19:24'),
+(68, 44, 69, 'new_message', 1, '2025-09-26 16:20:10'),
+(69, 1, 70, 'new_message', 0, '2025-09-26 16:20:31'),
+(70, 44, 71, 'new_message', 1, '2025-09-26 16:20:45'),
+(71, 44, 72, 'new_message', 1, '2025-09-26 16:20:58'),
+(72, 1, 73, 'new_message', 0, '2025-09-26 20:22:50'),
+(73, 1, 74, 'new_message', 0, '2025-09-26 20:22:56'),
+(74, 1, 75, 'new_message', 0, '2025-09-26 20:26:58'),
+(75, 1, 76, 'new_message', 0, '2025-09-26 20:28:00'),
+(76, 1, 77, 'new_message', 0, '2025-09-26 20:29:01'),
+(77, 44, 78, 'new_message', 1, '2025-09-26 20:48:34'),
+(78, 1, 79, 'new_message', 0, '2025-09-26 20:48:42'),
+(79, 44, 80, 'new_message', 1, '2025-09-26 20:49:32'),
+(80, 44, 81, 'new_message', 1, '2025-09-26 20:49:38'),
+(81, 44, 82, 'new_message', 1, '2025-09-26 20:49:43'),
+(82, 44, 83, 'new_message', 1, '2025-09-26 20:54:53'),
+(83, 1, 84, 'new_message', 0, '2025-09-30 07:55:27');
 
 -- --------------------------------------------------------
 
@@ -542,13 +590,22 @@ CREATE TABLE `orders` (
   `shipping_service_id` int(11) DEFAULT NULL,
   `shipping_distance_km` decimal(8,2) DEFAULT NULL,
   `shipping_fee_before` decimal(12,2) DEFAULT NULL,
-  `shipping_discount` decimal(12,2) DEFAULT NULL,
+  `shipping_discount` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `grand_total` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `voucher_code` varchar(50) DEFAULT NULL,
+  `receiver_name` varchar(120) NOT NULL DEFAULT '',
+  `phone` varchar(20) NOT NULL DEFAULT '',
+  `address_line` varchar(255) NOT NULL DEFAULT '',
+  `province` varchar(100) NOT NULL DEFAULT '',
+  `weight_kg` decimal(12,3) NOT NULL DEFAULT 0.000,
   `shipping_fee_final` decimal(12,2) DEFAULT NULL,
   `shipping_eta_min` int(11) DEFAULT NULL,
   `shipping_eta_max` int(11) DEFAULT NULL,
   `shipping_quote_id` bigint(20) DEFAULT NULL,
   `order_date` timestamp NOT NULL DEFAULT current_timestamp(),
-  `status` enum('pending','processing','shipped','delivered','cancelled') DEFAULT 'pending',
+  `status` enum('PENDING_PAYMENT','PAID','PACKING','SHIPPED','DELIVERED','CANCELED') NOT NULL DEFAULT 'PENDING_PAYMENT',
+  `items_total` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `shipping_fee` decimal(12,2) DEFAULT NULL,
   `total_amount` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -556,9 +613,74 @@ CREATE TABLE `orders` (
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id`, `user_id`, `shipping_address_id`, `shipping_carrier_id`, `shipping_service_id`, `shipping_distance_km`, `shipping_fee_before`, `shipping_discount`, `shipping_fee_final`, `shipping_eta_min`, `shipping_eta_max`, `shipping_quote_id`, `order_date`, `status`, `total_amount`) VALUES
-(1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-08-25 14:50:57', 'pending', 890000.00),
-(2, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-08-25 14:50:57', 'shipped', 250000.00);
+INSERT INTO `orders` (`id`, `user_id`, `shipping_address_id`, `shipping_carrier_id`, `shipping_service_id`, `shipping_distance_km`, `shipping_fee_before`, `shipping_discount`, `grand_total`, `voucher_code`, `receiver_name`, `phone`, `address_line`, `province`, `weight_kg`, `shipping_fee_final`, `shipping_eta_min`, `shipping_eta_max`, `shipping_quote_id`, `order_date`, `status`, `items_total`, `shipping_fee`, `total_amount`) VALUES
+(1, 1, NULL, NULL, NULL, NULL, NULL, 0.00, 0.00, NULL, '', '', '', '', 0.000, NULL, NULL, NULL, NULL, '2025-08-25 14:50:57', 'PENDING_PAYMENT', 0.00, NULL, 890000.00),
+(2, 1, NULL, NULL, NULL, NULL, NULL, 0.00, 0.00, NULL, '', '', '', '', 0.000, NULL, NULL, NULL, NULL, '2025-08-25 14:50:57', 'CANCELED', 0.00, NULL, 250000.00),
+(3, 44, NULL, NULL, NULL, 2.44, 17880.00, 0.00, 547880.00, NULL, 'Nguyễn Văn A', '0900000000', '12 Ngõ 34 Xã Đàn', 'Hà Nội', 1.100, 17880.00, NULL, NULL, NULL, '2025-09-28 05:39:27', 'CANCELED', 530000.00, 17880.00, 547880.00),
+(4, 44, NULL, NULL, NULL, 2.44, 17880.00, 0.00, 547880.00, NULL, 'Nguyễn Văn A', '0900000000', '12 Ngõ 34 Xã Đàn', 'Hà Nội', 1.100, 17880.00, NULL, NULL, NULL, '2025-09-28 05:44:30', 'PENDING_PAYMENT', 530000.00, 17880.00, 547880.00),
+(5, 44, NULL, NULL, NULL, 3.39, 19780.00, 0.00, 909780.00, NULL, 'phùng thị trang', '0349459165', 'Ngõ 35 Phố Kim Mã Thượng', 'Thành phố Hà Nội', 1.000, 19780.00, NULL, NULL, NULL, '2025-09-28 12:06:11', 'CANCELED', 890000.00, 19780.00, 909780.00),
+(6, 44, NULL, NULL, NULL, 5.42, 36260.00, 0.00, 926260.00, NULL, 'trang trang', '0123456789', 'Đường Số 19', 'Thành phố Hà Nội', 1.000, 36260.00, NULL, NULL, NULL, '2025-09-28 12:37:30', 'PENDING_PAYMENT', 890000.00, 36260.00, 926260.00),
+(7, 44, NULL, NULL, NULL, 2.96, 18920.00, 0.00, 908920.00, NULL, 'Phùng thị trang', '0123456891', 'Ngách 2 Ngõ 72 Phố Dương Quảng Hàm', 'Thành phố Hà Nội', 1.000, 18920.00, NULL, NULL, NULL, '2025-09-28 13:02:13', 'DELIVERED', 890000.00, 18920.00, 908920.00),
+(8, 44, NULL, NULL, NULL, 2.96, 18920.00, 0.00, 908920.00, NULL, 'Phùng thị trang', '0123456891', 'Ngách 2 Ngõ 72 Phố Dương Quảng Hàm', 'Thành phố Hà Nội', 1.000, 18920.00, NULL, NULL, NULL, '2025-09-28 13:02:13', 'PENDING_PAYMENT', 890000.00, 18920.00, 908920.00),
+(9, 44, NULL, NULL, NULL, 6.67, 40010.00, 0.00, 930010.00, NULL, 'my', '01234568799', 'Phố An Dương', 'Thành phố Hà Nội', 1.000, 40010.00, NULL, NULL, NULL, '2025-09-28 13:04:51', 'DELIVERED', 890000.00, 40010.00, 930010.00),
+(10, 44, NULL, NULL, NULL, 6.67, 40010.00, 0.00, 930010.00, NULL, 'my', '01234568799', 'Phố An Dương', 'Thành phố Hà Nội', 1.000, 40010.00, NULL, NULL, NULL, '2025-09-28 13:04:51', 'PENDING_PAYMENT', 890000.00, 40010.00, 930010.00),
+(11, 44, NULL, NULL, NULL, 3.92, 20840.00, 0.00, 910840.00, NULL, 'trang trang', '0123456789', 'Ngõ Núi Trúc', 'Thành phố Hà Nội', 1.000, 20840.00, NULL, NULL, NULL, '2025-09-28 13:20:22', 'PAID', 890000.00, 20840.00, 910840.00),
+(12, 44, NULL, NULL, NULL, 3.64, 20280.00, 0.00, 620280.00, NULL, 'trang trang', '0349459165', 'Phố Đội Cấn', 'Thành phố Hà Nội', 0.600, 20280.00, NULL, NULL, NULL, '2025-09-29 16:55:56', 'PENDING_PAYMENT', 600000.00, 20280.00, 620280.00),
+(13, 44, NULL, NULL, NULL, 6.40, 39200.00, 0.00, 849200.00, NULL, 'phùng trang', '0349459165', 'Phố Nguyễn Trung Trực', 'Thành phố Hà Nội', 0.800, 39200.00, NULL, NULL, NULL, '2025-09-30 07:48:07', 'SHIPPED', 810000.00, 39200.00, 849200.00);
+
+--
+-- Triggers `orders`
+--
+DELIMITER $$
+CREATE TRIGGER `orders_total_amount_sync` BEFORE INSERT ON `orders` FOR EACH ROW BEGIN
+  IF NEW.total_amount IS NULL OR NEW.total_amount = 0 THEN
+    SET NEW.total_amount = IFNULL(NEW.grand_total, 0);
+  END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_audits`
+--
+
+CREATE TABLE `order_audits` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `action` varchar(40) NOT NULL,
+  `old_status` varchar(30) DEFAULT NULL,
+  `new_status` varchar(30) DEFAULT NULL,
+  `by_user_id` int(11) DEFAULT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `order_audits`
+--
+
+INSERT INTO `order_audits` (`id`, `order_id`, `action`, `old_status`, `new_status`, `by_user_id`, `note`, `created_at`) VALUES
+(1, 11, 'STATUS_CHANGE', 'PAID', 'PAID', NULL, NULL, '2025-09-28 23:51:13'),
+(2, 11, 'STATUS_CHANGE', 'PAID', 'PAID', NULL, NULL, '2025-09-28 23:51:17'),
+(3, 2, 'STATUS_CHANGE', 'CANCELED', 'CANCELED', NULL, NULL, '2025-09-28 23:57:46'),
+(4, 11, 'STATUS_CHANGE', 'PACKING', 'PACKING', NULL, NULL, '2025-09-29 05:05:40'),
+(5, 11, 'STATUS_CHANGE', 'SHIPPED', 'SHIPPED', NULL, NULL, '2025-09-29 05:08:43'),
+(6, 11, 'STATUS_CHANGE', 'SHIPPED', 'SHIPPED', NULL, NULL, '2025-09-29 05:08:47'),
+(7, 11, 'STATUS_CHANGE', 'DELIVERED', 'DELIVERED', NULL, NULL, '2025-09-29 05:09:03'),
+(8, 11, 'STATUS_CHANGE', 'DELIVERED', 'DELIVERED', NULL, NULL, '2025-09-29 05:09:08'),
+(9, 9, 'STATUS_CHANGE', 'PACKING', 'PACKING', NULL, NULL, '2025-09-29 05:28:08'),
+(10, 9, 'STATUS_CHANGE', 'SHIPPED', 'SHIPPED', NULL, NULL, '2025-09-29 05:28:22'),
+(11, 9, 'STATUS_CHANGE', 'DELIVERED', 'DELIVERED', NULL, NULL, '2025-09-29 05:28:27'),
+(12, 9, 'STATUS_CHANGE', 'DELIVERED', 'DELIVERED', NULL, NULL, '2025-09-29 05:28:33'),
+(13, 3, 'STATUS_CHANGE', 'CANCELED', 'CANCELED', NULL, NULL, '2025-09-29 05:44:28'),
+(14, 7, 'STATUS_CHANGE', 'PACKING', 'PACKING', NULL, NULL, '2025-09-29 09:40:11'),
+(15, 7, 'STATUS_CHANGE', 'SHIPPED', 'SHIPPED', NULL, NULL, '2025-09-29 09:40:42'),
+(16, 7, 'STATUS_CHANGE', 'DELIVERED', 'DELIVERED', NULL, NULL, '2025-09-29 09:40:56'),
+(17, 13, 'STATUS_CHANGE', 'PACKING', 'PACKING', NULL, NULL, '2025-09-30 00:50:40'),
+(18, 13, 'STATUS_CHANGE', 'PACKING', 'PACKING', NULL, NULL, '2025-09-30 00:50:43'),
+(19, 13, 'STATUS_CHANGE', 'SHIPPED', 'SHIPPED', NULL, NULL, '2025-09-30 00:50:47');
 
 -- --------------------------------------------------------
 
@@ -583,16 +705,54 @@ CREATE TABLE `order_items` (
   `order_id` int(11) DEFAULT NULL,
   `product_id` int(11) DEFAULT NULL,
   `quantity` int(11) DEFAULT NULL,
-  `price` decimal(10,2) DEFAULT NULL
+  `price` decimal(10,2) DEFAULT NULL,
+  `unit_price` decimal(10,2) DEFAULT NULL,
+  `product_name` varchar(255) DEFAULT NULL,
+  `weight_kg_per_item` decimal(12,3) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `order_items`
 --
 
-INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `price`) VALUES
-(1, 1, NULL, 2, 445000.00),
-(2, 2, NULL, 1, 250000.00);
+INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `price`, `unit_price`, `product_name`, `weight_kg_per_item`) VALUES
+(1, 1, NULL, 2, 445000.00, 445000.00, NULL, NULL),
+(2, 2, NULL, 1, 250000.00, 250000.00, NULL, NULL),
+(3, 3, 4, 2, NULL, 200000.00, 'gấu bông noel', 0.300),
+(4, 3, 6, 1, NULL, 130000.00, 'GẤU NÂU MỀM MẠI', 0.500),
+(5, 4, 4, 2, NULL, 200000.00, 'gấu bông noel', 0.300),
+(6, 4, 6, 1, NULL, 130000.00, 'GẤU NÂU MỀM MẠI', 0.500),
+(7, 5, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(8, 5, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(9, 5, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(10, 5, 11, 2, NULL, 130000.00, 'GẤU TRÚC HAM ĂN', 0.200),
+(11, 6, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(12, 6, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(13, 6, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(14, 6, 11, 2, NULL, 130000.00, 'GẤU TRÚC HAM ĂN', 0.200),
+(15, 7, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(16, 8, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(17, 7, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(18, 8, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(19, 8, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(20, 7, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(21, 8, 11, 2, NULL, 130000.00, 'GẤU TRÚC HAM ĂN', 0.200),
+(22, 7, 11, 2, NULL, 130000.00, 'GẤU TRÚC HAM ĂN', 0.200),
+(23, 10, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(24, 9, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(25, 9, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(26, 10, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(27, 9, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(28, 10, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(29, 9, 11, 2, NULL, 130000.00, 'GẤU TRÚC HAM ĂN', 0.200),
+(30, 10, 11, 2, NULL, 130000.00, 'GẤU TRÚC HAM ĂN', 0.200),
+(31, 11, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(32, 11, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(33, 11, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(34, 11, 11, 2, NULL, 130000.00, 'GẤU TRÚC HAM ĂN', 0.200),
+(35, 12, 4, 3, NULL, 200000.00, 'gấu bông noel', 0.200),
+(36, 13, 4, 3, NULL, 200000.00, 'gấu bông noel', 0.200),
+(37, 13, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200);
 
 -- --------------------------------------------------------
 
@@ -626,8 +786,8 @@ CREATE TABLE `password_reset_codes` (
 --
 
 INSERT INTO `password_reset_codes` (`id`, `email`, `code`, `created_at`, `expires_at`, `used`) VALUES
-(14, 'hoahoavuive2004@gmail.com', '151411', '2025-09-21 13:40:56', '2025-09-21 13:45:56', b'1'),
-(15, 'phungtrang19012004@gmail.com', '504295', '2025-09-21 13:42:24', '2025-09-21 13:47:24', b'1');
+(16, 'hoahoavuive2004@gmail.com', '530154', '2025-09-23 14:45:53', '2025-09-23 14:50:53', b'1'),
+(17, 'phungtrang19012004@gmail.com', '837343', '2025-09-24 13:25:11', '2025-09-24 13:30:11', b'1');
 
 -- --------------------------------------------------------
 
@@ -683,7 +843,8 @@ INSERT INTO `permissions` (`id`, `name`, `description`) VALUES
 (21, 'manage_customer', 'Quản lý khách hàng'),
 (22, 'view_reports', 'Xem báo cáo'),
 (23, 'manage_users', 'Quản lý nhóm người dùng'),
-(24, 'manage_permission', 'Quản lý phân quyền chức năng');
+(24, 'manage_permission', 'Quản lý phân quyền chức năng'),
+(25, 'manage_shippingrate', 'Quản lý biểu phí vận chuyển (thêm/sửa/xoá)');
 
 -- --------------------------------------------------------
 
@@ -863,7 +1024,9 @@ CREATE TABLE `role_permissions` (
 --
 
 INSERT INTO `role_permissions` (`role_id`, `permission_id`, `id`) VALUES
-(2, 12, 75),
+(2, 12, 76),
+(2, 13, 77),
+(2, 14, 78),
 (3, 12, 41),
 (3, 13, 48),
 (3, 14, 40),
@@ -876,7 +1039,8 @@ INSERT INTO `role_permissions` (`role_id`, `permission_id`, `id`) VALUES
 (3, 21, 43),
 (3, 22, 52),
 (3, 23, 51),
-(3, 24, 47);
+(3, 24, 47),
+(3, 25, 75);
 
 -- --------------------------------------------------------
 
@@ -928,7 +1092,9 @@ CREATE TABLE `shipping_carriers` (
 --
 
 INSERT INTO `shipping_carriers` (`id`, `code`, `name`, `is_active`, `created_at`) VALUES
-(1, 'INTERNAL', 'Giao nội bộ', 1, '2025-09-22 03:20:53');
+(1, 'INTERNAL', 'Giao nội bộ', 1, '2025-09-22 03:20:53'),
+(2, 'GHT', 'Giao hỏa tốc', 1, '2025-09-27 17:07:13'),
+(3, 'PTT', 'PHÙNG THỊ TRANG', 1, '2025-09-28 06:00:56');
 
 -- --------------------------------------------------------
 
@@ -956,6 +1122,40 @@ CREATE TABLE `shipping_quotes` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `shipping_records`
+--
+
+CREATE TABLE `shipping_records` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `carrier` varchar(100) DEFAULT NULL,
+  `tracking_code` varchar(50) DEFAULT NULL,
+  `fee_charged` decimal(12,2) DEFAULT NULL,
+  `status` enum('CREATED','PICKED','IN_TRANSIT','DELIVERED','FAILED') NOT NULL DEFAULT 'CREATED',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `shipping_records`
+--
+
+INSERT INTO `shipping_records` (`id`, `order_id`, `carrier`, `tracking_code`, `fee_charged`, `status`, `created_at`, `updated_at`) VALUES
+(1, 3, 'INTERNAL', NULL, 17880.00, 'CREATED', '2025-09-27 22:39:27', '2025-09-27 22:39:27'),
+(2, 4, 'INTERNAL', NULL, 17880.00, 'CREATED', '2025-09-27 22:44:30', '2025-09-27 22:44:30'),
+(3, 5, 'INTERNAL', NULL, 19780.00, 'CREATED', '2025-09-28 05:06:11', '2025-09-28 05:06:11'),
+(4, 6, 'INTERNAL', NULL, 36260.00, 'CREATED', '2025-09-28 05:37:30', '2025-09-28 05:37:30'),
+(5, 8, 'INTERNAL', NULL, 18920.00, 'CREATED', '2025-09-28 06:02:13', '2025-09-28 06:02:13'),
+(6, 7, 'INTERNAL', NULL, 18920.00, 'CREATED', '2025-09-28 06:02:13', '2025-09-28 06:02:13'),
+(7, 9, 'INTERNAL', NULL, 40010.00, 'CREATED', '2025-09-28 06:04:51', '2025-09-28 06:04:51'),
+(8, 10, 'INTERNAL', NULL, 40010.00, 'CREATED', '2025-09-28 06:04:51', '2025-09-28 06:04:51'),
+(9, 11, 'INTERNAL', NULL, 20840.00, 'CREATED', '2025-09-28 06:20:22', '2025-09-28 06:20:22'),
+(10, 12, 'INTERNAL', NULL, 20280.00, 'CREATED', '2025-09-29 09:55:56', '2025-09-29 09:55:56'),
+(11, 13, 'INTERNAL', NULL, 39200.00, 'CREATED', '2025-09-30 00:48:07', '2025-09-30 00:48:07');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `shipping_services`
 --
 
@@ -974,7 +1174,9 @@ CREATE TABLE `shipping_services` (
 --
 
 INSERT INTO `shipping_services` (`id`, `carrier_id`, `code`, `label`, `is_active`, `base_days_min`, `base_days_max`) VALUES
-(1, 1, 'STD', 'Tiêu chuẩn (2–4 ngày)', 1, 2, 4);
+(1, 1, 'STD', 'Tiêu chuẩn (2–4 ngày)', 1, 2, 4),
+(2, 2, 'GHT0111', 'giao siêu nhanh', 1, 1, 2),
+(3, 3, 'WWW', 'WEWEWE', 1, 1, 2);
 
 -- --------------------------------------------------------
 
@@ -1050,6 +1252,57 @@ INSERT INTO `suppliers` (`id`, `name`, `contact_person`, `phone`, `email`, `addr
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `themes`
+--
+
+CREATE TABLE `themes` (
+  `id` int(11) NOT NULL,
+  `name` varchar(120) NOT NULL,
+  `slug` varchar(140) NOT NULL,
+  `description` text DEFAULT NULL,
+  `is_featured` tinyint(1) NOT NULL DEFAULT 0,
+  `display_order` int(11) NOT NULL DEFAULT 0,
+  `active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `themes`
+--
+
+INSERT INTO `themes` (`id`, `name`, `slug`, `description`, `is_featured`, `display_order`, `active`, `created_at`, `updated_at`) VALUES
+(1, 'Noel ấm áp', 'noel-am-ap', 'BST gấu bông & quà tặng mùa lễ hội', 1, 10, 1, '2025-09-29 17:37:07', '2025-09-29 17:37:07'),
+(2, 'Back to School', 'back-to-school', 'Đồ ôm mềm xả stress mùa tựu trường', 1, 20, 1, '2025-09-29 17:37:07', '2025-09-29 17:37:07'),
+(3, 'Valentine ngọt ngào', 'valentine-ngot-ngao', 'Quà yêu thương cho người ấy', 1, 30, 1, '2025-09-29 17:37:07', '2025-09-29 17:37:07');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `theme_categories`
+--
+
+CREATE TABLE `theme_categories` (
+  `theme_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `theme_categories`
+--
+
+INSERT INTO `theme_categories` (`theme_id`, `category_id`, `created_at`) VALUES
+(1, 1, '2025-09-29 17:37:07'),
+(1, 2, '2025-09-29 17:37:07'),
+(2, 2, '2025-09-29 17:37:07'),
+(2, 4, '2025-09-29 17:37:07'),
+(3, 1, '2025-09-29 17:37:07'),
+(3, 5, '2025-09-29 17:37:07');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -1074,7 +1327,7 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `address`, `phone`, 
 (1, 'khachhang1', 'hashed_pass1', 'khachhang1@example.com', '123 Đường Láng, Hà Nội', '0901234567', 'ACTIVE', 'DONG', 0, '2025-08-25 14:50:57'),
 (2, 'seller1', 'hashed_pass2', 'seller1@example.com', '456 Nguyễn Huệ, TP.HCM', '0912345678', 'ACTIVE', 'DONG', 0, '2025-08-25 14:50:57'),
 (3, 'admin1', 'hashed_pass3', 'admin1@example.com', '789 Lê Lợi, Đà Nẵng', '0923456789', 'ACTIVE', 'DONG', 0, '2025-08-25 14:50:57'),
-(4, 'trangtrang', '$2a$10$NvitG1bWsRQHA8hY2mhU1.Aam5/sQM62N9g1JruiuZnk/HNCtomxa', 'phungtrang19012004@gmail.com', 'fffffff', '0349459165', 'ACTIVE', 'DONG', 0, '2025-08-26 03:52:55'),
+(4, 'trangtrang', '$2a$10$DFCziBSUoL7PH/BQHfTLfOB2XclxCOKufsr8X/Yt71MFyWgbz9A2i', 'phungtrang19012004@gmail.com', 'fffffff', '0349459165', 'ACTIVE', 'DONG', 0, '2025-08-26 03:52:55'),
 (8, 'geoserver', '1', 'pwea@gmail.com', 'ss', '0368498289', 'ACTIVE', 'DONG', 0, '2025-08-26 05:16:11'),
 (26, 'customer', '1', 'customer@test', 'hanoi', '0349459165', 'ACTIVE', 'DONG', 0, '2025-08-26 14:19:39'),
 (27, 'admin', '1', 'admin@test', 'hanoi', '03', 'ACTIVE', 'DONG', 0, '2025-08-26 14:20:23'),
@@ -1085,12 +1338,14 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `address`, `phone`, 
 (33, 'khachhang_test', '$2a$10$gy1jz2u5ZuXWC14tB4B1i.8kvTEt.LMKV8LjQTMgMZjGS7IXXsR32', 'khachhang_test@example.com', '123 Hà Nội', '0909999999', 'ACTIVE', 'DONG', 0, '2025-09-11 01:47:29'),
 (35, 'tiendat', '$2a$10$Hh05Mbc2C/i5cgwqKUhZ5OpjpUa9/m6nTv111/YMxhNXwpzBck55C', 'atest@example.com', NULL, NULL, 'ACTIVE', 'DONG', 0, '2025-09-11 14:19:56'),
 (36, 'tiendatngu', '$2a$10$iqs9cMI36IfRmgr9l/PjvORx.1v919EsLp5yYKyqAyqENxKVgCO8u', 'tiendat9012004@gmail.com', 'ha noi', '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-11 14:29:02'),
-(37, 'tiendatngu', '$2a$10$tOmpK/6WzSSG3Iya/O1H2epxi.Dmy1i3IuU.BO7YTNP7nFtfoQZq2', 'dat9012004@gmail.com', 'fffffff', '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-11 16:54:02'),
-(38, 'hoa@gmail.com', '$2a$10$5YX.1dsRgeTn7TdMu8tdq.swj3cqVvpaSujqQpGhKPCw7RDEeH1LS', 'hoahoavuive2004@gmail.com', NULL, '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-19 22:41:38'),
+(37, 'tiendatngu', '$2a$10$tOmpK/6WzSSG3Iya/O1H2epxi.Dmy1i3IuU.BO7YTNP7nFtfoQZq2', 'trang19012004@gmail.com', 'fffffff', '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-11 16:54:02'),
+(38, 'hoa@gmail.com', '$2a$10$0Ssx7WTwykYH7cDxUQupfeeWav4wmVlgHcj5PnZvIu8kC/GVLb89y', 'hoahoavuive2004@gmail.com', NULL, '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-19 22:41:38'),
 (39, 'dat9012004@gmail.com', '$2a$10$ZfphGHZPRSN73iMqdMpvpOuIpWiYeavmWy/ZLTlorGkuANPDMvNAG', 'mai@gmail.com', NULL, '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-20 03:47:34'),
 (41, 'combongu', '$2a$10$1WRmds2qFnZhqcxjwtPUwutwisLh0XJZx979bbDIRH.BMMS9QvIvq', 'nhamnhi@gmail.com', NULL, '0978467297', 'ACTIVE', 'DONG', 0, '2025-09-20 03:58:37'),
 (42, 'hello', '$2a$10$VCWI6ghVP/H0SY.K3B6oouLwZPDkMOfAooDyQMDgIg5xlcMeeKCk.', 'doconlon@gmail.com', NULL, '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-20 03:59:52'),
-(43, 'anhhamc', '$2a$10$w8hm/Kprp.Ky6Ikq0k53xOUTECtxHLZUvtoAkyzs2cK50NxXYM.ki', 'anhha19052004@gmail.com', 'Đông Dương Nam Sơn Tp.Bắc Ninh', '0366379629', 'ACTIVE', 'DONG', 0, '2025-09-22 10:55:37');
+(43, 'anhhamc', '$2a$10$w8hm/Kprp.Ky6Ikq0k53xOUTECtxHLZUvtoAkyzs2cK50NxXYM.ki', 'anhha19052004@gmail.com', 'Đông Dương Nam Sơn Tp.Bắc Ninh', '0366379629', 'ACTIVE', 'DONG', 0, '2025-09-22 10:55:37'),
+(44, 'phùng thị trang', '$2a$10$LSXXFOlRdgQBtFNDE2aU3ukNeQ3oIAo2JORUfRNHTOjMp3HL203ea', 'khachhang@gmail.com', 'dadada', '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-26 07:56:46'),
+(45, 'nhom 13', '$2a$10$JXL7YLq5D7j2qZGW3kdviOpJ88jOwNPX8r6HRvYyM1NsjHtkcez/.', 'test@gmail.com', 'dadada', '0349459165', 'ACTIVE', 'DONG', 0, '2025-09-28 00:21:50');
 
 -- --------------------------------------------------------
 
@@ -1132,13 +1387,15 @@ CREATE TABLE `user_roles` (
 --
 
 INSERT INTO `user_roles` (`id`, `user_id`, `role_id`) VALUES
-(13, 31, 5),
+(13, 4, 3),
 (2, 37, 3),
-(9, 38, 2),
+(9, 38, 1),
 (8, 39, 3),
 (10, 41, 2),
 (12, 42, 1),
-(14, 43, 3);
+(14, 43, 3),
+(15, 44, 1),
+(16, 45, 1);
 
 -- --------------------------------------------------------
 
@@ -1178,6 +1435,25 @@ CREATE TABLE `vn_wards` (
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `v_theme_products`
+-- (See below for the actual view)
+--
+CREATE TABLE `v_theme_products` (
+`theme_id` int(11)
+,`theme_name` varchar(120)
+,`category_id` int(11)
+,`category_name` varchar(100)
+,`product_id` int(11)
+,`product_name` varchar(255)
+,`price` decimal(10,2)
+,`image_url` varchar(255)
+,`brand_id` int(11)
+,`product_created_at` timestamp
+);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `warehouses`
 --
 
@@ -1200,6 +1476,15 @@ CREATE TABLE `warehouses` (
 
 INSERT INTO `warehouses` (`id`, `name`, `address_line`, `province_code`, `district_code`, `ward_code`, `latitude`, `longitude`, `is_active`, `created_at`) VALUES
 (1, 'Cửa hàng chính', '123 Trần Duy Hưng', '01', '001', '00001', 21.0075000, 105.7980000, 1, '2025-09-22 03:20:53');
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `v_theme_products`
+--
+DROP TABLE IF EXISTS `v_theme_products`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_theme_products`  AS SELECT `t`.`id` AS `theme_id`, `t`.`name` AS `theme_name`, `c`.`id` AS `category_id`, `c`.`name` AS `category_name`, `p`.`id` AS `product_id`, `p`.`name` AS `product_name`, `p`.`price` AS `price`, `p`.`image_url` AS `image_url`, `p`.`brand_id` AS `brand_id`, `p`.`created_at` AS `product_created_at` FROM (((`themes` `t` join `theme_categories` `tc` on(`tc`.`theme_id` = `t`.`id`)) join `categories` `c` on(`c`.`id` = `tc`.`category_id`)) left join `products` `p` on(`p`.`category_id` = `c`.`id`)) WHERE `t`.`active` = 1 ;
 
 --
 -- Indexes for dumped tables
@@ -1343,7 +1628,18 @@ ALTER TABLE `orders`
   ADD KEY `idx_order_status` (`status`),
   ADD KEY `idx_orders_ship_addr` (`shipping_address_id`),
   ADD KEY `idx_orders_ship_srv` (`shipping_service_id`),
-  ADD KEY `idx_orders_ship_car` (`shipping_carrier_id`);
+  ADD KEY `idx_orders_ship_car` (`shipping_carrier_id`),
+  ADD KEY `idx_orders_user_status_date` (`user_id`,`status`,`order_date`),
+  ADD KEY `idx_orders_status_date` (`status`,`order_date`),
+  ADD KEY `idx_orders_province` (`province`),
+  ADD KEY `idx_orders_carrier` (`shipping_carrier_id`);
+
+--
+-- Indexes for table `order_audits`
+--
+ALTER TABLE `order_audits`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_order_audits_order` (`order_id`);
 
 --
 -- Indexes for table `order_coupons`
@@ -1459,6 +1755,14 @@ ALTER TABLE `shipping_quotes`
   ADD KEY `fk_sq_srv` (`service_id`);
 
 --
+-- Indexes for table `shipping_records`
+--
+ALTER TABLE `shipping_records`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_shipping_order` (`order_id`),
+  ADD KEY `idx_shipping_status` (`status`);
+
+--
 -- Indexes for table `shipping_services`
 --
 ALTER TABLE `shipping_services`
@@ -1485,6 +1789,20 @@ ALTER TABLE `shipping_voucher_uses`
 --
 ALTER TABLE `suppliers`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `themes`
+--
+ALTER TABLE `themes`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_themes_slug` (`slug`);
+
+--
+-- Indexes for table `theme_categories`
+--
+ALTER TABLE `theme_categories`
+  ADD PRIMARY KEY (`theme_id`,`category_id`),
+  ADD KEY `idx_theme_categories_category` (`category_id`);
 
 --
 -- Indexes for table `users`
@@ -1562,13 +1880,13 @@ ALTER TABLE `brands`
 -- AUTO_INCREMENT for table `carrier_rate_rules`
 --
 ALTER TABLE `carrier_rate_rules`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -1580,7 +1898,7 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `chat_sessions`
 --
 ALTER TABLE `chat_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `coupons`
@@ -1598,7 +1916,7 @@ ALTER TABLE `distance_cache`
 -- AUTO_INCREMENT for table `favorites`
 --
 ALTER TABLE `favorites`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `imports`
@@ -1616,31 +1934,37 @@ ALTER TABLE `import_details`
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=85;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- AUTO_INCREMENT for table `order_audits`
+--
+ALTER TABLE `order_audits`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `password_reset_codes`
 --
 ALTER TABLE `password_reset_codes`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `payments`
@@ -1652,13 +1976,13 @@ ALTER TABLE `payments`
 -- AUTO_INCREMENT for table `permissions`
 --
 ALTER TABLE `permissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `reviews`
@@ -1676,7 +2000,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT for table `role_permissions`
 --
 ALTER TABLE `role_permissions`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
 
 --
 -- AUTO_INCREMENT for table `shipping`
@@ -1688,7 +2012,7 @@ ALTER TABLE `shipping`
 -- AUTO_INCREMENT for table `shipping_carriers`
 --
 ALTER TABLE `shipping_carriers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `shipping_quotes`
@@ -1697,10 +2021,16 @@ ALTER TABLE `shipping_quotes`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `shipping_records`
+--
+ALTER TABLE `shipping_records`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
 -- AUTO_INCREMENT for table `shipping_services`
 --
 ALTER TABLE `shipping_services`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `shipping_vouchers`
@@ -1715,10 +2045,16 @@ ALTER TABLE `suppliers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `themes`
+--
+ALTER TABLE `themes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT for table `user_addresses`
@@ -1730,7 +2066,7 @@ ALTER TABLE `user_addresses`
 -- AUTO_INCREMENT for table `user_roles`
 --
 ALTER TABLE `user_roles`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `warehouses`
@@ -1834,6 +2170,12 @@ ALTER TABLE `orders`
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
+-- Constraints for table `order_audits`
+--
+ALTER TABLE `order_audits`
+  ADD CONSTRAINT `fk_oa_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `order_coupons`
 --
 ALTER TABLE `order_coupons`
@@ -1906,6 +2248,12 @@ ALTER TABLE `shipping_quotes`
   ADD CONSTRAINT `fk_sq_wh` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouses` (`id`);
 
 --
+-- Constraints for table `shipping_records`
+--
+ALTER TABLE `shipping_records`
+  ADD CONSTRAINT `fk_sr_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `shipping_services`
 --
 ALTER TABLE `shipping_services`
@@ -1917,6 +2265,13 @@ ALTER TABLE `shipping_services`
 ALTER TABLE `shipping_voucher_uses`
   ADD CONSTRAINT `fk_svu_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_svu_voucher` FOREIGN KEY (`voucher_id`) REFERENCES `shipping_vouchers` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `theme_categories`
+--
+ALTER TABLE `theme_categories`
+  ADD CONSTRAINT `fk_tc_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_tc_theme` FOREIGN KEY (`theme_id`) REFERENCES `themes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `user_addresses`

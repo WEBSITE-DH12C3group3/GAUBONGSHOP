@@ -38,14 +38,14 @@ public class CouponService {
     }
 
     public CouponResponse get(Integer id) {
-        Coupon c = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Coupon not found"));
+        Coupon c = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiếu giảm giá"));
         return toResWithScopes(c);
     }
 
     public CouponResponse create(CouponRequest r) {
         validate(r);
         String code = r.getCode().trim();
-        if (repo.existsByCodeIgnoreCase(code)) throw new IllegalArgumentException("Code already exists");
+        if (repo.existsByCodeIgnoreCase(code)) throw new IllegalArgumentException("Mã giảm giá đã tồn tại");
         Coupon c = new Coupon();
         apply(c, r);
         c.setCode(code);
@@ -56,9 +56,9 @@ public class CouponService {
 
     public CouponResponse update(Integer id, CouponRequest r) {
         validate(r);
-        Coupon c = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Coupon not found"));
+        Coupon c = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiếu giảm giá"));
         String code = r.getCode().trim();
-        repo.findByCodeIgnoreCase(code).ifPresent(ex -> { if(!ex.getId().equals(id)) throw new IllegalArgumentException("Code already exists");});
+        repo.findByCodeIgnoreCase(code).ifPresent(ex -> { if(!ex.getId().equals(id)) throw new IllegalArgumentException("Mã giảm giá đã tồn tại");});
         apply(c, r);
         c.setCode(code);
         Coupon saved = repo.save(c);
@@ -68,13 +68,13 @@ public class CouponService {
     }
 
     public void delete(Integer id) {
-        if (!repo.existsById(id)) throw new IllegalArgumentException("Coupon not found");
+        if (!repo.existsById(id)) throw new IllegalArgumentException("Không tìm thấy phiếu giảm giá");
         clearScopes(id);
         repo.deleteById(id);
     }
 
     public CouponResponse setActive(Integer id, boolean value) {
-        Coupon c = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Coupon not found"));
+        Coupon c = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiếu giảm giá"));
         c.setActive(value);
         return toResWithScopes(repo.save(c));
     }
@@ -83,7 +83,7 @@ public class CouponService {
 
     public ApplyCouponResponse apply(ApplyCouponRequest req) {
         Coupon c = repo.findByCodeIgnoreCase(req.getCode().trim())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid coupon code"));
+                .orElseThrow(() -> new IllegalArgumentException("Mã giảm giá không hợp lệ"));
 
         validateEligibility(c, req);
 
@@ -103,7 +103,7 @@ public class CouponService {
 
         if (!cats.isEmpty() || !brands.isEmpty() || !prods.isEmpty()) {
             if (applicableSubtotal.compareTo(BigDecimal.ZERO) <= 0)
-                throw new IllegalArgumentException("Coupon not applicable to items");
+                throw new IllegalArgumentException("Mã giảm giá không áp dụng cho các sản phẩm trong giỏ");
         } else {
             applicableSubtotal = req.getOrderTotal();
         }
@@ -118,7 +118,7 @@ public class CouponService {
         res.setDiscountValue(c.getDiscountValue());
         res.setDiscountAmount(discount);
         res.setFinalTotal(finalTotal);
-        res.setMessage("OK");
+        res.setMessage("Áp dụng mã thành công");
         return res;
     }
 
@@ -126,17 +126,17 @@ public class CouponService {
 
     private void validate(CouponRequest r) {
         if (!"percent".equals(r.getDiscountType()) && !"fixed".equals(r.getDiscountType()))
-            throw new IllegalArgumentException("discountType must be percent|fixed");
+            throw new IllegalArgumentException("discountType phải là 'percent' hoặc 'fixed'");
         if ("percent".equals(r.getDiscountType())) {
             if (r.getDiscountValue().compareTo(BigDecimal.ZERO) <= 0 ||
                 r.getDiscountValue().compareTo(BigDecimal.valueOf(100)) > 0)
-                throw new IllegalArgumentException("percent value must be (0,100]");
+                throw new IllegalArgumentException("Giá trị phần trăm phải trong (0, 100]");
         } else {
             if (r.getDiscountValue().compareTo(BigDecimal.ZERO) < 0)
-                throw new IllegalArgumentException("fixed value must be >= 0");
+                throw new IllegalArgumentException("Giá trị giảm cố định phải ≥ 0");
         }
         if (r.getStartDate()!=null && r.getEndDate()!=null && r.getStartDate().isAfter(r.getEndDate()))
-            throw new IllegalArgumentException("startDate must be before endDate");
+            throw new IllegalArgumentException("Ngày bắt đầu phải trước ngày kết thúc");
     }
 
     private void apply(Coupon c, CouponRequest r) {
@@ -207,41 +207,41 @@ public class CouponService {
 
     private void validateEligibility(Coupon c, ApplyCouponRequest req) {
         LocalDateTime now = LocalDateTime.now();
-        if (Boolean.FALSE.equals(c.getActive())) throw new IllegalArgumentException("Coupon is disabled");
-        if (c.getStartDate()!=null && now.isBefore(c.getStartDate())) throw new IllegalArgumentException("Coupon not started");
-        if (c.getEndDate()!=null && now.isAfter(c.getEndDate())) throw new IllegalArgumentException("Coupon expired");
+        if (Boolean.FALSE.equals(c.getActive())) throw new IllegalArgumentException("Mã giảm giá đang bị tắt");
+        if (c.getStartDate()!=null && now.isBefore(c.getStartDate())) throw new IllegalArgumentException("Mã giảm giá chưa bắt đầu áp dụng");
+        if (c.getEndDate()!=null && now.isAfter(c.getEndDate())) throw new IllegalArgumentException("Mã giảm giá đã hết hạn");
         if (c.getMaxUses()!=null && c.getUsedCount()!=null && c.getUsedCount() >= c.getMaxUses())
-            throw new IllegalArgumentException("Coupon exhausted");
+            throw new IllegalArgumentException("Mã giảm giá đã được sử dụng hết");
         if (c.getMinOrderAmount()!=null && req.getOrderTotal().compareTo(c.getMinOrderAmount())<0)
-            throw new IllegalArgumentException("Not meet min order amount");
+            throw new IllegalArgumentException("Chưa đạt giá trị đơn tối thiểu");
 
         if (notBlank(c.getApplicablePaymentMethods())) {
             if (!csvContains(c.getApplicablePaymentMethods(), req.getPaymentMethod()))
-                throw new IllegalArgumentException("Payment method not applicable");
+                throw new IllegalArgumentException("Phương thức thanh toán không phù hợp");
         }
         if (notBlank(c.getApplicableRoles())) {
             if (!csvContains(c.getApplicableRoles(), req.getUserRole()))
-                throw new IllegalArgumentException("Role not applicable");
+                throw new IllegalArgumentException("Vai trò tài khoản không phù hợp");
         }
         if (notBlank(c.getRegionInclude())) {
             if (!csvContains(c.getRegionInclude(), req.getRegion()))
-                throw new IllegalArgumentException("Region not allowed");
+                throw new IllegalArgumentException("Khu vực không nằm trong phạm vi áp dụng");
         }
         if (notBlank(c.getRegionExclude())) {
             if (csvContains(c.getRegionExclude(), req.getRegion()))
-                throw new IllegalArgumentException("Region excluded");
+                throw new IllegalArgumentException("Khu vực thuộc danh sách loại trừ");
         }
         if (Boolean.TRUE.equals(c.getFirstOrderOnly())) {
             if (req.getIsFirstOrder()==null || !req.getIsFirstOrder())
-                throw new IllegalArgumentException("First-order only");
+                throw new IllegalArgumentException("Mã chỉ áp dụng cho đơn đầu tiên");
         }
         if (c.getMaxUsesPerUser()!=null && c.getMaxUsesPerUser()>0) {
-            if (req.getUserId()==null) throw new IllegalArgumentException("User required for this coupon");
+            if (req.getUserId()==null) throw new IllegalArgumentException("Cần đăng nhập để sử dụng mã này");
             CouponUse.CouponUseId id = new CouponUse.CouponUseId(c.getId(), req.getUserId());
             CouponUse u = useRepo.findById(id).orElse(null);
             int usedByUser = (u!=null?u.getUsedCount():0);
             if (usedByUser >= c.getMaxUsesPerUser())
-                throw new IllegalArgumentException("Reached user usage limit");
+                throw new IllegalArgumentException("Bạn đã sử dụng mã này đạt giới hạn cho phép");
         }
     }
 
@@ -276,7 +276,7 @@ public class CouponService {
 
     /* Hook: OrderService gọi khi đơn hoàn tất để cộng usage */
     public void consume(Integer couponId, Integer userId) {
-        Coupon c = repo.findById(couponId).orElseThrow(() -> new IllegalArgumentException("Coupon not found"));
+        Coupon c = repo.findById(couponId).orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiếu giảm giá"));
         c.setUsedCount((c.getUsedCount()==null?0:c.getUsedCount())+1);
         repo.save(c);
         if (userId!=null) {

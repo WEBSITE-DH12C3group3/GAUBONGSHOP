@@ -10,8 +10,11 @@ export class OrderService {
 
   constructor(private http: HttpClient) {}
 
-  checkout(): Observable<OrderResponse> {
-    return this.http.post<OrderResponse>(`${this.base}/checkout`, {});
+  // Sửa: dùng base URL thống nhất + trả về Observable<OrderResponse>
+  checkout(couponCode?: string): Observable<OrderResponse> {
+    const body: any = {};
+    if (couponCode && couponCode.trim()) body.couponCode = couponCode.trim();
+    return this.http.post<OrderResponse>(`${this.base}/checkout`, body);
   }
 
   myOrders(): Observable<OrderResponse[]> {

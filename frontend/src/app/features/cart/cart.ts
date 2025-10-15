@@ -1,10 +1,12 @@
 // src/app/features/cart/cart.ts
-import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, NgZone, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import { CartService } from '../../shared/services/cart.service';
 import { environment } from '../../../environments/environment';
+import { CouponService, ApplyCouponRequest } from '../../shared/services/coupon.service';
+import { FormsModule } from '@angular/forms';
 
 type CartItem = {
   productId: number;
@@ -15,6 +17,9 @@ type CartItem = {
   lineTotal: number;
   selected?: boolean | null;
   availableStock?: number | null;
+  // ===== thêm optional scope =====
+  categoryId?: number | null;
+  brandId?: number | null;
 };
 
 type CartSummary = {
@@ -31,7 +36,7 @@ type CartSummary = {
   standalone: true,
   templateUrl: './cart.html',
   styleUrls: ['./cart.css'],
-  imports: [CommonModule, RouterModule, CurrencyPipe],
+  imports: [CommonModule, RouterModule, CurrencyPipe, FormsModule],
 })
 export class CartComponent implements OnInit {
   data: CartSummary = {
@@ -50,10 +55,18 @@ export class CartComponent implements OnInit {
   })();
   private _fallbackImg = 'https://placehold.co/120x120?text=No+Image';
 
+  couponCode = '';
+  couponPreview: { code: string; discountAmount: number } | null = null;
+
+  // ===== thêm router để chuyển sang checkout =====
+  private router = inject(Router);
+  // ==============================================
+
   constructor(
     private api: CartService,
     private zone: NgZone,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private couponApi: CouponService
   ) {}
 
   ngOnInit(): void { this.load(); }
@@ -141,4 +154,52 @@ export class CartComponent implements OnInit {
       error: (e) => console.error('Không xóa được sản phẩm khỏi giỏ:', e),
     });
   }
+
+  previewCoupon() {
+    if (!this.data?.items?.length || !this.couponCode.trim()) return;
+    const orderTotal = this.data.items.reduce((s, it) => s + it.unitPrice * it.quantity, 0);
+
+    const items = this.data.items.map((it: any) => ({
+      productId: it.productId,
+      unitPrice: it.unitPrice,
+      quantity: it.quantity,
+      categoryId: it.categoryId ?? it.product?.categoryId ?? null,
+      brandId: it.brandId ?? it.product?.brandId ?? null,
+      discounted: false
+    }));
+
+    const req: ApplyCouponRequest = {
+      code: this.couponCode.trim(),
+      orderTotal,
+      items
+    };
+
+    this.couponApi.apply(req).subscribe({
+      next: res => this.couponPreview = { code: res.code, discountAmount: res.discountAmount || 0 },
+      error: err => alert(err?.error?.error || 'Mã không hợp lệ')
+    });
+  }
+
+  clearCoupon() {
+    this.couponPreview = null;
+    this.couponCode = '';
+  }
+
+  // ===== tính tổng sau khi giảm & điều hướng checkout =====
+  get subtotal(): number {
+    return (this.data?.items || []).reduce((s, it) => s + it.unitPrice * it.quantity, 0);
+  }
+
+  get payable(): number {
+    const discount = this.couponPreview?.discountAmount ?? 0;
+    const result = this.subtotal - discount;
+    return result > 0 ? result : 0;
+  }
+
+  goCheckout() {
+    const code = (this.couponPreview?.code || this.couponCode || '').trim();
+    if (code) localStorage.setItem('couponCode', code);
+    this.router.navigate(['/checkout'], { queryParams: code ? { coupon: code } : {} });
+  }
+  // =========================================================
 }

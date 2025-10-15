@@ -22,6 +22,8 @@ public record OrderResponse(
     BigDecimal weightKg,
     LocalDateTime createdAt,
     Shipping shipping,
+    String couponCode,
+    BigDecimal couponDiscount,
     List<Item> items
 ) {
   public record Item(Integer productId, String productName, BigDecimal unitPrice, Integer quantity, BigDecimal weightKgPerItem) {}

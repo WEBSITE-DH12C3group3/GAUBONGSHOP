@@ -29,6 +29,7 @@ public record CreateOrderRequest(
 
     // Mã voucher vận chuyển (optional)
     String voucherCode,
+    String couponCode,
 
     // Danh sách sản phẩm
     @NotNull List<Item> items
