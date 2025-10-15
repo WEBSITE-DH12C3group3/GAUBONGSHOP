@@ -1,0 +1,87 @@
+<div class="p-6">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-xl font-semibold">Phiếu vận chuyển</h1>
+    <a routerLink="/admin/ship-vouchers/new" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">+ Tạo phiếu</a>
+  </div>
+
+  <div class="flex gap-3 mb-4">
+    <input [(ngModel)]="q" (keyup.enter)="search()" class="border rounded-lg px-3 py-2 w-full" placeholder="Tìm theo mã..." />
+    <select [(ngModel)]="sort" (change)="onChangeSort()" class="border rounded-lg px-3 py-2">
+      <option value="id,desc">Mới nhất</option>
+      <option value="code,asc">Mã A→Z</option>
+      <option value="startAt,desc">Hiệu lực mới→cũ</option>
+    </select>
+    <button (click)="search()" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Tìm</button>
+  </div>
+
+  <div class="bg-white rounded-xl shadow overflow-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-2 text-left">Mã</th>
+          <th class="px-4 py-2 text-left">Loại</th>
+          <th class="px-4 py-2 text-left">Giá trị</th>
+          <th class="px-4 py-2 text-left">Điều kiện</th>
+          <th class="px-4 py-2 text-left">Hiệu lực</th>
+          <th class="px-4 py-2 text-left">Đã dùng/Tổng</th>
+          <th class="px-4 py-2 text-left">Trạng thái</th>
+          <th class="px-4 py-2"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="loading()"><td colspan="8" class="px-4 py-6 text-center">Đang tải...</td></tr>
+
+        <tr *ngFor="let v of items()" class="border-t hover:bg-gray-50">
+          <td class="px-4 py-2 font-medium">{{ v.code }}</td>
+          <td class="px-4 py-2">
+<span class="px-2 py-1 rounded text-xs"
+  [class.bg-blue-100]="v.discountType==='percent'"
+  [class.text-blue-700]="v.discountType==='percent'"
+  [class.bg-emerald-100]="v.discountType==='fixed'"
+  [class.text-emerald-700]="v.discountType==='fixed'"
+  [class.bg-gray-200]="v.discountType==='free'"
+  [class.text-gray-700]="v.discountType==='free'">
+  {{ v.discountType | uppercase }}
+</span>
+
+          </td>
+          <td class="px-4 py-2">
+            <ng-container [ngSwitch]="v.discountType">
+              <span *ngSwitchCase="'PERCENT'">{{ v.discountValue }}%</span>
+              <span *ngSwitchCase="'FIXED'">{{ v.discountValue | currency:'VND' }}</span>
+              <span *ngSwitchDefault>-</span>
+            </ng-container>
+          </td>
+          <td class="px-4 py-2">
+            <div *ngIf="v.minOrderAmount">ĐH ≥ {{ v.minOrderAmount | currency:'VND' }}</div>
+            <div *ngIf="v.maxDiscountAmount">Trần: {{ v.maxDiscountAmount | currency:'VND' }}</div>
+          </td>
+          <td class="px-4 py-2">
+<div *ngIf="v.startAt">Từ: {{ v.startAt | date:'short' }}</div>
+<div *ngIf="v.endAt">Đến: {{ v.endAt | date:'short' }}</div>
+          </td>
+          <td class="px-4 py-2">{{ v.usedCount || 0 }}/{{ v.usageLimit || '∞' }}</td>
+          <td class="px-4 py-2">
+            <span class="px-2 py-1 rounded text-xs"
+                  [class.bg-emerald-100]="v.active" [class.text-emerald-700]="v.active"
+                  [class.bg-rose-100]="!v.active" [class.text-rose-700]="!v.active">
+              {{ v.active ? 'Đang bật' : 'Đang tắt' }}
+            </span>
+          </td>
+          <td class="px-4 py-2 text-right">
+            <a [routerLink]="['/admin/ship-vouchers', v.id]" class="px-2 py-1 rounded hover:bg-gray-100">Sửa</a>
+            <button (click)="toggleActive(v)" class="px-2 py-1 rounded hover:bg-gray-100">Bật/Tắt</button>
+            <button (click)="confirmDelete(v.id!)" class="px-2 py-1 rounded hover:bg-rose-50 text-rose-600">Xoá</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- pagination -->
+  <div class="flex items-center gap-3 mt-3">
+    <button class="px-3 py-1 rounded border" (click)="prev()" [disabled]="page()===0">« Trước</button>
+    <div>Trang {{ page()+1 }} / {{ totalPages() }}</div>
+    <button class="px-3 py-1 rounded border" (click)="next()" [disabled]="page()+1>=totalPages()">Sau »</button>
+  </div>
+</div>

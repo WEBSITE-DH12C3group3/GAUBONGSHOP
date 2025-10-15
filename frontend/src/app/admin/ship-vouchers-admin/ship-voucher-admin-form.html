@@ -1,0 +1,65 @@
+<div class="p-6 max-w-3xl">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-xl font-semibold">{{ id ? 'Sửa phiếu vận chuyển' : 'Tạo phiếu vận chuyển' }}</h1>
+    <a routerLink="/admin/ship-vouchers" class="px-3 py-1 border rounded-lg">← Quay lại</a>
+  </div>
+
+  <div class="bg-white rounded-xl shadow p-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm mb-1">Mã</label>
+        <input [(ngModel)]="model().code" class="w-full border rounded-lg px-3 py-2" placeholder="FREESHIP10K" />
+      </div>
+      <div>
+        <label class="block text-sm mb-1">Mô tả</label>
+        <input [(ngModel)]="model().description" class="w-full border rounded-lg px-3 py-2" placeholder="Freeship đơn ≥ 200k" />
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1">Loại giảm</label>
+<select [(ngModel)]="model().discountType" class="w-full border rounded-lg px-3 py-2">
+  <option value="free">FREE</option>
+  <option value="percent">% theo phí</option>
+  <option value="fixed">Giảm cố định (VND)</option>
+</select>
+      </div>
+      <div>
+        <label class="block text-sm mb-1">Giá trị</label>
+        <input type="number" [(ngModel)]="model().discountValue" class="w-full border rounded-lg px-3 py-2" placeholder="0" />
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1">Trần giảm (VND)</label>
+        <input type="number" [(ngModel)]="model().maxDiscountAmount" class="w-full border rounded-lg px-3 py-2" placeholder="vd: 20000" />
+      </div>
+      <div>
+        <label class="block text-sm mb-1">ĐH tối thiểu (VND)</label>
+        <input type="number" [(ngModel)]="model().minOrderAmount" class="w-full border rounded-lg px-3 py-2" placeholder="vd: 200000" />
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1">Bắt đầu</label>
+        <input type="datetime-local" [(ngModel)]="model().startAt" class="w-full border rounded-lg px-3 py-2" />
+      </div>
+      <div>
+        <label class="block text-sm mb-1">Kết thúc</label>
+        <input type="datetime-local" [(ngModel)]="model().endAt"   class="w-full border rounded-lg px-3 py-2" />
+      </div>
+
+      <div>
+        <label class="block text-sm mb-1">Giới hạn tổng</label>
+        <input type="number" [(ngModel)]="model().usageLimit" class="w-full border rounded-lg px-3 py-2" />
+      </div>
+
+      <div class="md:col-span-2 flex items-center gap-3">
+        <label class="text-sm">Kích hoạt</label>
+        <input type="checkbox" [(ngModel)]="model().active" class="w-5 h-5" />
+      </div>
+    </div>
+
+    <div class="mt-4 flex gap-3">
+      <button (click)="save()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700" [disabled]="loading()">Lưu</button>
+      <a routerLink="/admin/ship-vouchers" class="px-4 py-2 border rounded-lg">Huỷ</a>
+    </div>
+  </div>
+</div>

@@ -172,19 +172,8 @@ export class CheckoutPageComponent implements OnInit {
     this.cdr.detectChanges();
     this.tryPreview();
 
-    // Quận -> nạp phường
-    this.addressForm.get('districtCode')!.valueChanges.subscribe((code: string | number) => {
-      this.addressForm.patchValue({ wardCode: '' }, { emitEvent: false });
-      this.wards = [];
-      if (code !== null && code !== undefined && `${code}` !== '') {
-        this.loadWards$(`${code}`).subscribe(list => { this.wards = list ?? []; this.cdr.detectChanges(); });
-      }
-      this.tryPreview();
-    });
-
-    // Auto preview
-    this.addressForm.valueChanges.subscribe(() => this.tryPreview());
-    this.shippingForm.valueChanges.subscribe(() => this.tryPreview());
+    // ❌ KHÔNG đăng ký lại valueChanges ở đây (đã có trong ngOnInit)
+    // Tránh gọi tryPreview() chồng chéo.
   }
 
   openMapPicker() { this.showMap = true; this.cdr.detectChanges(); }
@@ -359,6 +348,13 @@ export class CheckoutPageComponent implements OnInit {
     return !!(this.subtotal >= 0 && this.weightKg >= 0 && f.lat != null && f.lng != null);
   }
 
+  /** ✅ TIỀN HÀNG SAU GIẢM GIÁ SẢN PHẨM */
+  private itemsAmountAfterCoupon(): number {
+    const base = Number(this.cart?.selectedAmount ?? this.subtotal ?? 0);
+    const discount = Number(this.cart?.couponDiscount ?? 0);
+    return Math.max(0, base - discount);
+  }
+
   tryPreview() {
     if (!this.cart || !this.canPreview()) return;
 
@@ -367,7 +363,8 @@ export class CheckoutPageComponent implements OnInit {
     const lng = Number(f.lng);
 
     const req: ShippingQuoteRequest = {
-      orderSubtotal: this.subtotal,
+      // ✅ dùng số tiền đã trừ coupon để backend xét điều kiện freeship/min
+      orderSubtotal: this.itemsAmountAfterCoupon(),
       weightKg: this.weightKg,
       destLat: lat,
       destLng: lng,
@@ -384,7 +381,8 @@ export class CheckoutPageComponent implements OnInit {
         next: (q) => { this.preview = q; this.cdr.detectChanges(); },
         error: (err) => {
           this.preview = null;
-          this.errMsg = err?.error?.error || 'Không tính được phí vận chuyển';
+          // ✅ ưu tiên message thân thiện
+          this.errMsg = err?.error?.message || err?.message || err?.error?.error || 'Không tính được phí vận chuyển';
           this.cdr.detectChanges();
         },
       });
@@ -392,146 +390,146 @@ export class CheckoutPageComponent implements OnInit {
 
   itemsAmount(): number { return this.subtotal; }
   shippingFee(): number { return this.preview?.finalFee ?? 0; }
-  totalToPay(): number { return this.itemsAmount() + this.shippingFee(); }
+
+  /** ✅ Tổng = (tiền hàng sau coupon) + phí ship */
+  totalToPay(): number { return this.itemsAmountAfterCoupon() + this.shippingFee(); }
+
   isAddressValid(): boolean { return this.addressForm.valid; }
 
-placeOrder() {
-  if (!this.cart || !this.preview) {
-    this.errMsg = 'Vui lòng chọn vị trí và tính phí vận chuyển.'; 
-    return;
+  placeOrder() {
+    if (!this.cart || !this.preview) {
+      this.errMsg = 'Vui lòng chọn vị trí và tính phí vận chuyển.'; 
+      return;
+    }
+    if (this.addressForm.invalid) { 
+      this.addressForm.markAllAsTouched(); 
+      return; 
+    }
+
+    const f = this.addressForm.value;
+    const items = (this.cart.selectedItems || []).map(it => ({
+      productId: it.productId,
+      quantity: it.quantity,
+      weightKgPerItem: it.weightKgPerItem ?? 0.2,
+    }));
+
+    const body: CreateOrderRequest = {
+      receiverName: f.receiverName,
+      phone: f.phone,
+      addressLine: `${f.addressLine}`,
+      province: this.provinceName,
+      voucherCode: (this.shippingForm.value.voucherCode || '').trim() || undefined,
+      couponCode: (this.couponCode || '').trim() || undefined, // ✅ gửi coupon lên backend
+      items,
+      destLat: Number(f.lat),
+      destLng: Number(f.lng),
+    };
+
+    this.placing = true; this.errMsg = undefined; this.cdr.detectChanges();
+
+    this.orderSvc.create(body)
+      .pipe(finalize(() => { this.placing = false; this.cdr.detectChanges(); }))
+      .subscribe({
+        next: (res: any) => {
+          // ✅ TÍNH SỐ CHẮC CHẮN: sau coupon + phí ship
+          const itemsAmount = this.itemsAmountAfterCoupon();
+          const shippingFee = Number(this.preview?.finalFee ?? 0);
+          const total = Number(itemsAmount + shippingFee);
+
+          const successPayload = {
+            id: res?.id,
+            code: res?.code ?? res?.id,
+            total,
+            shippingFee,
+            itemsAmount,
+            receiverName: f.receiverName,
+            phone: f.phone,
+            addressLine: f.addressLine,
+            province: this.provinceName,
+            note: this.noteForm.value?.note,
+            paymentMethod: this.paymentForm.value?.method,
+            etaDays: (res as any)?.etaDays ?? (this.preview as any)?.etaDays
+          };
+
+          try {
+            localStorage.setItem(`order_success_${successPayload.id}`, JSON.stringify(successPayload));
+          } catch {}
+
+          this.router.navigate(['/order-success'], {
+            queryParams: { id: successPayload.id },
+            state: successPayload
+          });
+        },
+        error: (err) => {
+          this.errMsg = err?.error?.message || err?.message || err?.error?.error || 'Đặt hàng thất bại';
+          console.error(err);
+        }
+      });
   }
-  if (this.addressForm.invalid) { 
-    this.addressForm.markAllAsTouched(); 
-    return; 
-  }
 
-  const f = this.addressForm.value;
-  const items = (this.cart.selectedItems || []).map(it => ({
-    productId: it.productId,
-    quantity: it.quantity,
-    weightKgPerItem: it.weightKgPerItem ?? 0.2,
-  }));
+  payVnPay() {
+    if (!this.cart || !this.preview) {
+      this.errMsg = 'Vui lòng chọn vị trí và tính phí vận chuyển trước.';
+      return;
+    }
+    if (this.addressForm.invalid) {
+      this.addressForm.markAllAsTouched();
+      return;
+    }
 
-  const body: CreateOrderRequest = {
-    receiverName: f.receiverName,
-    phone: f.phone,
-    addressLine: `${f.addressLine}`,
-    province: this.provinceName,
-    voucherCode: (this.shippingForm.value.voucherCode || '').trim() || undefined,
-    couponCode: (this.couponCode || '').trim() || undefined,
-    items,
-    destLat: Number(f.lat),
-    destLng: Number(f.lng),
-  };
+    // Tạo đơn trước (như COD), sau đó redirect VNPay
+    const f = this.addressForm.value;
+    const items = (this.cart.selectedItems || []).map(it => ({
+      productId: it.productId,
+      quantity: it.quantity,
+      weightKgPerItem: it.weightKgPerItem ?? 0.2,
+    }));
 
-  this.placing = true; this.errMsg = undefined; this.cdr.detectChanges();
+    const body: CreateOrderRequest = {
+      receiverName: f.receiverName,
+      phone: f.phone,
+      addressLine: `${f.addressLine}`,
+      province: this.provinceName,
+      voucherCode: (this.shippingForm.value.voucherCode || '').trim() || undefined,
+      couponCode: (this.couponCode || '').trim() || undefined, // ✅ thêm coupon cho VNPay flow
+      items,
+      destLat: Number(f.lat),
+      destLng: Number(f.lng),
+      note: this.noteForm.value?.note,
+      paymentMethod: 'VNPAY',
+    };
 
-  this.orderSvc.create(body)
-    .pipe(finalize(() => { this.placing = false; this.cdr.detectChanges(); }))
-    .subscribe({
+    this.placing = true;
+    this.errMsg = undefined;
+    this.cdr.detectChanges();
+
+    this.orderSvc.create(body).subscribe({
       next: (res: any) => {
-        // TÍNH SỐ CHẮC CHẮN
-        const itemsAmount = Number(
-          this.cart?.selectedAmount ?? this.cart?.totalAmount ?? this.subtotal ?? 0
-        );
+        const itemsAmount = this.itemsAmountAfterCoupon(); // ✅ sau coupon
         const shippingFee = Number(this.preview?.finalFee ?? 0);
-        const total = Number(itemsAmount + shippingFee);
+        const total = itemsAmount + shippingFee;
 
-        const successPayload = {
-          id: res?.id,
-          code: res?.code ?? res?.id,
-          total,
-          shippingFee,
-          itemsAmount,
-          receiverName: f.receiverName,
-          phone: f.phone,
-          addressLine: f.addressLine,
-          province: this.provinceName,
-          note: this.noteForm.value?.note,
-          paymentMethod: this.paymentForm.value?.method,
-          etaDays: (res as any)?.etaDays ?? (this.preview as any)?.etaDays
-        };
+        const orderCode = res?.code ?? `ORDER${Date.now()}`;
 
-        // LƯU để trang success hydrate khi refresh
-        try {
-          localStorage.setItem(`order_success_${successPayload.id}`, JSON.stringify(successPayload));
-        } catch {}
-
-        // ĐIỀU HƯỚNG SAU KHI ĐÃ LƯU
-        this.router.navigate(['/order-success'], {
-          queryParams: { id: successPayload.id },
-          state: successPayload
+        // ✅ Gọi API backend để lấy link VNPay
+        this.payment.create(orderCode, total).subscribe({
+          next: (resp) => {
+            window.location.href = resp.paymentUrl; // chuyển sang trang VNPay
+          },
+          error: () => {
+            this.errMsg = 'Không thể khởi tạo thanh toán VNPay.';
+            this.placing = false;
+            this.cdr.detectChanges();
+          },
         });
       },
       error: (err) => {
-        this.errMsg = err?.error?.error || 'Đặt hàng thất bại';
-        console.error(err);
-      }
+        this.errMsg = err?.error?.message || err?.message || err?.error?.error || 'Không thể tạo đơn hàng.';
+        this.placing = false;
+        this.cdr.detectChanges();
+      },
     });
-}
-payVnPay() {
-  if (!this.cart || !this.preview) {
-    this.errMsg = 'Vui lòng chọn vị trí và tính phí vận chuyển trước.';
-    return;
   }
-  if (this.addressForm.invalid) {
-    this.addressForm.markAllAsTouched();
-    return;
-  }
-
-  // Tạo đơn trước (như COD), sau đó redirect VNPay
-  const f = this.addressForm.value;
-  const items = (this.cart.selectedItems || []).map(it => ({
-    productId: it.productId,
-    quantity: it.quantity,
-    weightKgPerItem: it.weightKgPerItem ?? 0.2,
-  }));
-
-  const body: CreateOrderRequest = {
-    receiverName: f.receiverName,
-    phone: f.phone,
-    addressLine: `${f.addressLine}`,
-    province: this.provinceName,
-    voucherCode: (this.shippingForm.value.voucherCode || '').trim() || undefined,
-    items,
-    destLat: Number(f.lat),
-    destLng: Number(f.lng),
-    note: this.noteForm.value?.note,
-    paymentMethod: 'VNPAY',
-  };
-
-  this.placing = true;
-  this.errMsg = undefined;
-  this.cdr.detectChanges();
-
-  this.orderSvc.create(body).subscribe({
-    next: (res: any) => {
-      const itemsAmount = Number(this.cart?.selectedAmount ?? this.cart?.totalAmount ?? this.subtotal ?? 0);
-      const shippingFee = Number(this.preview?.finalFee ?? 0);
-      const total = itemsAmount + shippingFee;
-
-      const orderCode = res?.code ?? `ORDER${Date.now()}`;
-
-      // ✅ Gọi API backend để lấy link VNPay
-      this.payment.create(orderCode, total).subscribe({
-        next: (resp) => {
-          window.location.href = resp.paymentUrl; // chuyển sang trang VNPay
-        },
-        error: () => {
-          this.errMsg = 'Không thể khởi tạo thanh toán VNPay.';
-          this.placing = false;
-          this.cdr.detectChanges();
-        },
-      });
-    },
-    error: (err) => {
-      this.errMsg = err?.error?.error || 'Không thể tạo đơn hàng.';
-      this.placing = false;
-      this.cdr.detectChanges();
-    },
-  });
-}
-
 
   private haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const toRad = (d: number) => (d * Math.PI) / 180;

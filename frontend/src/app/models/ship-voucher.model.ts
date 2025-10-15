@@ -4,29 +4,21 @@ export type DiscountType = 'free' | 'percent' | 'fixed';
 export interface ShipVoucher {
   id?: number;
   code: string;
-  description?: string;
+  description?: string | null;
 
-  discountType: DiscountType;
-  discountValue: number;                // % với 'percent', VND với 'fixed', bỏ qua với 'free'
-  maxDiscountAmount?: number | null;    // trần giảm VND
-  minOrderAmount?: number | null;       // tối thiểu giá trị đơn để dùng
+  discountType: DiscountType;     // chuỗi enum từ BE
+  discountValue?: number | null;  // % hoặc VND
+  maxDiscountAmount?: number | null;
+  minOrderAmount?: number | null;
 
-  // Thời gian hiệu lực
-  startDate?: string | null;            // frontend dùng camelCase; backend có thể là startAt
-  endDate?: string | null;
+  startAt?: string | null;        // đổi từ startDate -> startAt
+  endAt?: string | null;          // đổi từ endDate  -> endAt
 
-  // Hạn mức sử dụng
-  maxUses?: number | null;              // tổng lượt được phép dùng (backend: usageLimit)
-  usedCount?: number;                   // đã dùng
-  maxUsesPerUser?: number | null;       // nếu có (backend có thể bỏ qua)
+  usageLimit?: number | null;
+  usedCount?: number | null;
 
-  // Điều kiện mở rộng (tùy bạn có dùng hay không; để optional cho dễ tương thích)
-  minShippingFee?: number | null;
-  applicableCarriers?: string[] | null; // ['GHN','GHTK']...
-  regionInclude?: string[] | null;
-  regionExclude?: string[] | null;
+  active?: boolean;
 
-  active: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

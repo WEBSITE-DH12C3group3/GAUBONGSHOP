@@ -21,7 +21,6 @@ import { AboutComponent } from './features/about/about';
 import { MyOrdersComponent } from './features/orders/my-orders';
 import { OrderDetailComponent } from './features/orders/order-detail';
 
-
 // Admin
 import { Dashboard } from './admin/dashboard/dashboard';
 
@@ -52,7 +51,11 @@ import { ImportDetailComponent } from './admin/imports-admin/import-detail.compo
 import { CouponAdminListComponent } from './admin/coupons-admin/coupon-admin-list';
 import { CouponAdminFormComponent } from './admin/coupons-admin/coupon-admin-form';
 
-// Shipping vouchers
+// Shipping vouchers (⭐ THÊM MỚI)
+import { ShipVoucherAdminListComponent } from './admin/ship-vouchers-admin/ship-voucher-admin-list';
+import { ShipVoucherAdminFormComponent } from './admin/ship-vouchers-admin/ship-voucher-admin-form';
+
+// Shipping rates
 import { ShippingCarrierListComponent } from './admin/shipping-rates/shipping-carrier-list';
 import { ShippingCarrierFormComponent } from './admin/shipping-rates/shipping-carrier-form';
 import { ShippingServiceListComponent } from './admin/shipping-rates/shipping-service-list';
@@ -66,7 +69,6 @@ import { CustomersAdminComponent } from './admin/customers-admin/customers-admin
 
 // theme
 import { ThemeAdminComponent } from './admin/themes/theme-admin';
-
 
 export const routes: Routes = [
   // ===== Customer layout =====
@@ -104,7 +106,6 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/checkout/checkout-page').then(m => m.CheckoutPageComponent),
       },
-
     ],
   },
 
@@ -155,8 +156,6 @@ export const routes: Routes = [
           { path: '', component: ThemeAdminComponent },
         ],
       },
-
-
 
       // Thương hiệu
       {
@@ -227,16 +226,26 @@ export const routes: Routes = [
         ],
       },
 
-      // Phiếu vận chuyển
+      // ⭐ Phiếu vận chuyển (THÊM MỚI)
+      {
+        path: 'ship-vouchers',
+        canActivate: [permissionGuard],
+        data: { permissions: ['manage_shippingvoucher'] },
+        children: [
+          { path: '', component: ShipVoucherAdminListComponent },
+          { path: 'new', component: ShipVoucherAdminFormComponent },
+          { path: ':id', component: ShipVoucherAdminFormComponent },
+        ],
+      },
+
+      // Đơn vị vận chuyển (module sẵn có)
       {
         path: 'shipping-rates',
         loadChildren: () => import('./admin/shipping-rates/shipping-rates.module')
                               .then(m => m.ShippingRatesModule)
       },
 
-      
-
-      // Báo cáo
+      // Báo cáo (giữ nguyên comment)
       // {
       //   path: 'reports',
       //   canActivate: [permissionGuard],
@@ -263,7 +272,7 @@ export const routes: Routes = [
           import('./admin/roles/role-permissions-page').then(m => m.RolePermissionsPageComponent),
       },
 
-      // Settings (nếu muốn ràng buộc quyền riêng, ví dụ: manage_settings)
+      // Settings (giữ nguyên comment)
       // {
       //   path: 'settings',
       //   loadComponent: () =>
