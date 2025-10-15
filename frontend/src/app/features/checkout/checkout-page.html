@@ -15,82 +15,83 @@
         <!-- Người nhận -->
         <div>
           <label class="block text-sm mb-1">Người nhận</label>
-          <input formControlName="receiverName" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
-                 [class.border-rose-500]="addressForm.get('receiverName')?.touched && addressForm.get('receiverName')?.invalid"
-                 placeholder="VD: Nguyễn Văn A">
+          <input formControlName="receiverName"
+            class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
+            [class.border-rose-500]="addressForm.get('receiverName')?.touched && addressForm.get('receiverName')?.invalid"
+            placeholder="VD: Nguyễn Văn A">
           <p *ngIf="addressForm.get('receiverName')?.touched && addressForm.get('receiverName')?.invalid"
-             class="text-xs text-rose-600 mt-1">Vui lòng nhập tên người nhận.</p>
+            class="text-xs text-rose-600 mt-1">Vui lòng nhập tên người nhận.</p>
         </div>
 
         <!-- Phone -->
         <div>
           <label class="block text-sm mb-1">Số điện thoại</label>
-          <input formControlName="phone" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
-                 [class.border-rose-500]="addressForm.get('phone')?.touched && addressForm.get('phone')?.invalid"
-                 placeholder="VD: 0912345678">
+          <input formControlName="phone"
+            class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
+            [class.border-rose-500]="addressForm.get('phone')?.touched && addressForm.get('phone')?.invalid"
+            placeholder="VD: 0912345678">
           <p *ngIf="addressForm.get('phone')?.touched && addressForm.get('phone')?.errors?.['required']"
-             class="text-xs text-rose-600 mt-1">Vui lòng nhập số điện thoại.</p>
+            class="text-xs text-rose-600 mt-1">Vui lòng nhập số điện thoại.</p>
           <p *ngIf="addressForm.get('phone')?.touched && addressForm.get('phone')?.errors?.['pattern']"
-             class="text-xs text-rose-600 mt-1">Số điện thoại không hợp lệ.</p>
+            class="text-xs text-rose-600 mt-1">Số điện thoại không hợp lệ.</p>
         </div>
 
         <!-- Province -->
         <div>
           <label class="block text-sm mb-1">Tỉnh/Thành</label>
-          <select formControlName="provinceCode" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
-                  [class.border-rose-500]="addressForm.get('provinceCode')?.touched && addressForm.get('provinceCode')?.invalid">
+          <select formControlName="provinceCode"
+            class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
+            [class.border-rose-500]="addressForm.get('provinceCode')?.touched && addressForm.get('provinceCode')?.invalid">
             <option value="" disabled>-- Chọn tỉnh/thành --</option>
             <option *ngIf="loadingProv" disabled>Đang tải...</option>
             <!-- LUÔN render list, ép value về string -->
             <option *ngFor="let p of provinces; trackBy: trackByCode" [value]="p.code + ''">{{ p.name }}</option>
           </select>
           <p *ngIf="addressForm.get('provinceCode')?.touched && addressForm.get('provinceCode')?.invalid"
-             class="text-xs text-rose-600 mt-1">Vui lòng chọn Tỉnh/Thành.</p>
+            class="text-xs text-rose-600 mt-1">Vui lòng chọn Tỉnh/Thành.</p>
         </div>
 
         <!-- District -->
         <div>
           <label class="block text-sm mb-1">Quận/Huyện</label>
-          <select formControlName="districtCode" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
-                  [disabled]="!addressForm.value.provinceCode"
-                  [class.border-rose-500]="addressForm.get('districtCode')?.touched && addressForm.get('districtCode')?.invalid">
+          <select formControlName="districtCode"
+            class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
+            [disabled]="!addressForm.value.provinceCode"
+            [class.border-rose-500]="addressForm.get('districtCode')?.touched && addressForm.get('districtCode')?.invalid">
             <option value="" disabled>-- Chọn quận/huyện --</option>
             <option *ngIf="loadingDist" disabled>Đang tải...</option>
             <!-- LUÔN render list, ép value về string -->
             <option *ngFor="let d of districts; trackBy: trackByCode" [value]="d.code + ''">{{ d.name }}</option>
           </select>
           <p *ngIf="addressForm.get('districtCode')?.touched && addressForm.get('districtCode')?.invalid"
-             class="text-xs text-rose-600 mt-1">Vui lòng chọn Quận/Huyện.</p>
+            class="text-xs text-rose-600 mt-1">Vui lòng chọn Quận/Huyện.</p>
         </div>
 
         <!-- Ward -->
         <div>
           <label class="block text-sm mb-1">Phường/Xã</label>
-          <select formControlName="wardCode" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
-                  [disabled]="!addressForm.value.districtCode"
-                  [class.border-rose-500]="addressForm.get('wardCode')?.touched && addressForm.get('wardCode')?.invalid">
+          <select formControlName="wardCode"
+            class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
+            [disabled]="!addressForm.value.districtCode"
+            [class.border-rose-500]="addressForm.get('wardCode')?.touched && addressForm.get('wardCode')?.invalid">
             <option value="" disabled>-- Chọn phường/xã --</option>
             <option *ngIf="loadingWard" disabled>Đang tải...</option>
             <!-- BỎ ng-container; ép value về string -->
             <option *ngFor="let w of wards; trackBy: trackByCode" [value]="w.code + ''">{{ w.name }}</option>
           </select>
           <p *ngIf="addressForm.get('wardCode')?.touched && addressForm.get('wardCode')?.invalid"
-             class="text-xs text-rose-600 mt-1">Vui lòng chọn Phường/Xã.</p>
+            class="text-xs text-rose-600 mt-1">Vui lòng chọn Phường/Xã.</p>
         </div>
 
         <!-- Địa chỉ chi tiết (có suggest) -->
         <div>
           <label class="block text-sm mb-1">Địa chỉ chi tiết</label>
-          <app-address-suggest-input
-            [value]="addressForm.value.addressLine || ''"
-            (valueChange)="addressForm.patchValue({ addressLine: $event })"
-            [province]="provinceName"
-            [district]="districtName"
-            (pickItem)="onSuggestPicked($event)"
-            placeholder="Số nhà, đường, toà nhà...">
+          <app-address-suggest-input [value]="addressForm.value.addressLine || ''"
+            (valueChange)="addressForm.patchValue({ addressLine: $event })" [province]="provinceName"
+            [district]="districtName" (pickItem)="onSuggestPicked($event)" placeholder="Số nhà, đường, toà nhà...">
           </app-address-suggest-input>
           <p *ngIf="addressForm.get('addressLine')?.touched && addressForm.get('addressLine')?.invalid"
-             class="text-xs text-rose-600 mt-1">Vui lòng nhập địa chỉ chi tiết.</p>
+            class="text-xs text-rose-600 mt-1">Vui lòng nhập địa chỉ chi tiết.</p>
         </div>
 
         <!-- Toạ độ -->
@@ -98,12 +99,12 @@
           <div>
             <label class="block text-sm mb-1">Kinh độ (Lng)</label>
             <input formControlName="lng" type="number"
-                   class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600">
+              class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600">
           </div>
           <div>
             <label class="block text-sm mb-1">Vĩ độ (Lat)</label>
             <input formControlName="lat" type="number"
-                   class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600">
+              class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600">
           </div>
         </div>
       </form>
@@ -175,7 +176,8 @@
         <div class="flex justify-between text-base">
           <span class="font-medium">Tổng thanh toán</span>
           <span class="text-pink-600 font-bold">
-            {{ (cart?.selectedAmount ?? cart?.totalAmount ?? 0) + (preview?.finalFee ?? 0) | currency:'VND':'symbol':'1.0-0' }}
+            {{ (cart?.selectedAmount ?? cart?.totalAmount ?? 0) + (preview?.finalFee ?? 0) |
+            currency:'VND':'symbol':'1.0-0' }}
           </span>
         </div>
       </div>
@@ -183,10 +185,34 @@
 
     <!-- Thanh toán -->
     <div class="bg-white rounded-2xl shadow p-5">
-      <h2 class="text-lg font-semibold mb-3">Thanh toán</h2>
-      <form [formGroup]="paymentForm" class="space-y-2">
-        <label class="flex items-center gap-2">
-          <input type="radio" value="COD" formControlName="method"> COD - Thanh toán khi nhận hàng
+      <h2 class="text-lg font-semibold mb-3 text-gray-800">Phương thức thanh toán</h2>
+
+      <form [formGroup]="paymentForm" class="space-y-3">
+        <!-- COD -->
+        <label
+          class="flex items-center gap-3 border rounded-xl px-4 py-3 cursor-pointer transition hover:border-pink-400"
+          [ngClass]="{
+        'border-pink-500 bg-pink-50 shadow-sm':
+          paymentForm.value.method === 'COD'
+      }">
+          <input type="radio" value="COD" formControlName="method" class="accent-pink-500 w-4 h-4" />
+          <span class="font-medium text-gray-700">
+            COD - Thanh toán khi nhận hàng
+          </span>
+        </label>
+
+        <!-- VNPay -->
+        <label
+          class="flex items-center gap-3 border rounded-xl px-4 py-3 cursor-pointer transition hover:border-blue-400"
+          [ngClass]="{
+        'border-blue-500 bg-blue-50 shadow-sm':
+          paymentForm.value.method === 'VNPAY'
+      }">
+          <input type="radio" value="VNPAY" formControlName="method" class="accent-blue-500 w-4 h-4" />
+          <div class="flex items-center gap-2">
+            <img src="assets/img/vnpay-logo.png" alt="VNPay" class="h-6 w-auto object-contain" />
+            <span class="font-medium text-gray-700">VNPay - Thanh toán trực tuyến</span>
+          </div>
         </label>
       </form>
     </div>
@@ -194,31 +220,39 @@
     <!-- Ghi chú + Đặt hàng -->
     <div class="bg-white rounded-2xl shadow p-5" [formGroup]="noteForm">
       <h2 class="text-lg font-semibold mb-3">Ghi chú</h2>
-      <textarea formControlName="note" rows="3" class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
-                placeholder="Yêu cầu giao hàng, giờ nhận, lưu ý..."></textarea>
+      <textarea formControlName="note" rows="3"
+        class="w-full border rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-pink-600"
+        placeholder="Yêu cầu giao hàng, giờ nhận, lưu ý..."></textarea>
 
-      <button type="button" class="mt-4 w-full bg-pink-600 hover:bg-pink-700 text-white py-3 rounded-xl font-semibold"
-              [disabled]="placing || !preview || !isAddressValid()"
-              (click)="placeOrder()">
-        {{ placing ? 'Đang đặt hàng...' : 'Đặt hàng' }}
-      </button>
+      <!-- Nút hành động -->
+      <div class="mt-4 space-y-3">
+        <!-- Nút đặt hàng COD -->
+        <button *ngIf="paymentForm.value.method === 'COD'" type="button"
+          class="w-full bg-pink-600 hover:bg-pink-700 text-white py-3 rounded-xl font-semibold transition-all"
+          [disabled]="placing || !preview || !isAddressValid()" (click)="placeOrder()">
+          {{ placing ? 'Đang đặt hàng...' : 'Đặt hàng (COD)' }}
+        </button>
+
+        <!-- Nút thanh toán VNPay -->
+        <button *ngIf="paymentForm.value.method === 'VNPAY'" type="button"
+          class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white py-3 rounded-xl font-semibold shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all"
+          (click)="payVnPay()">
+          <i class="fa-solid fa-credit-card"></i>
+          Thanh toán qua VNPay
+        </button>
+      </div>
 
       <div *ngIf="errMsg" class="text-rose-600 text-sm mt-2">{{ errMsg }}</div>
     </div>
-  </div>
 
-  <!-- Modal Map Picker -->
-  <div *ngIf="showMap" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-    <div class="bg-white rounded-2xl shadow-lg w-[90vw] max-w-4xl p-4">
-      <h3 class="text-lg font-semibold mb-3">Chọn vị trí giao hàng</h3>
-      <app-address-map-picker
-        [visible]="showMap"
-        [initialLat]="addressForm.value.lat || origin?.lat || 21.027763"
-        [initialLng]="addressForm.value.lng || origin?.lng || 105.834160"
-        [approxAddress]="addressForm.value.addressLine"
-        (picked)="onMapPicked($event)"
-        (cancelled)="onMapCancel()">
-      </app-address-map-picker>
+
+    <!-- Modal Map Picker -->
+    <div *ngIf="showMap" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div class="bg-white rounded-2xl shadow-lg w-[90vw] max-w-4xl p-4">
+        <h3 class="text-lg font-semibold mb-3">Chọn vị trí giao hàng</h3>
+        <app-address-map-picker [visible]="showMap" [initialLat]="addressForm.value.lat || origin?.lat || 21.027763"
+          [initialLng]="addressForm.value.lng || origin?.lng || 105.834160"
+          [approxAddress]="addressForm.value.addressLine" (picked)="onMapPicked($event)" (cancelled)="onMapCancel()">
+        </app-address-map-picker>
+      </div>
     </div>
-  </div>
-</section>

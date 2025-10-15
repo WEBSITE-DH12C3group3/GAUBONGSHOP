@@ -33,10 +33,22 @@ export interface OrderDetailDto extends OrderListItemDto {
 /** Payload tạo đơn — khớp FE hiện có */
 export interface CreateOrderItem { productId: number; quantity: number; weightKgPerItem?: number; }
 export interface CreateOrderRequest {
-  receiverName: string; phone: string; addressLine: string; province: string;
-  voucherCode?: string | null; items: CreateOrderItem[];
-  destLat: number; destLng: number;
+  receiverName: string;
+  phone: string;
+  addressLine: string;
+  province: string;
+  voucherCode?: string;
+  items: {
+    productId: number;
+    quantity: number;
+    weightKgPerItem?: number;
+  }[];
+  destLat: number;
+  destLng: number;
+  note?: string;             // ✅ thêm dòng này
+  paymentMethod?: string;    // ✅ (tuỳ chọn, nếu bạn gửi lên backend)
 }
+
 export interface CreateOrderResponse { id: number; status: string; grandTotal: number; }
 
 @Injectable({ providedIn: 'root' })

@@ -87,6 +87,7 @@ export const routes: Routes = [
       { path: 'order-success', component: OrderSuccessPageComponent },
       { path: 'order',       canActivate: [authGuard], component: MyOrdersComponent },
       { path: 'order/:id',   canActivate: [authGuard], component: OrderDetailComponent },
+      { path: 'checkout/order-success-page', component: OrderSuccessPageComponent },
       { path: 'history',     canActivate: [authGuard], component: MyOrdersComponent, data: { mode: 'history' } },
       // ===== Cart + chekcout + Orders (customer)
       {

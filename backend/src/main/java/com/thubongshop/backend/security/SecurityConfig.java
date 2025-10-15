@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -27,6 +28,13 @@ public class SecurityConfig {
 
   private final JwtFilter jwtFilter;
 
+  /* ✅ Firewall tuỳ chỉnh cho phép callback VNPay chứa ký tự %0A */
+@Bean
+public HttpFirewall allowUrlEncodedFirewall() {
+    return CustomFirewall.vnpayCompatibleFirewall();
+}
+
+
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
@@ -34,10 +42,13 @@ public class SecurityConfig {
       .cors(cors -> cors.configurationSource(corsConfigurationSource()))
       .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .authorizeHttpRequests(auth -> auth
-        // 1) Preflight
+        // 1️⃣ Preflight
         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-        // 2) Auth public (đăng nhập/đăng ký/forgot) + error
+        // 2️⃣ Cho phép callback từ VNPay
+        .requestMatchers("/api/payment/vnpay/**").permitAll()
+
+        // 3️⃣ Auth public
         .requestMatchers(
           "/api/users/login",
           "/api/users/register",
@@ -45,7 +56,7 @@ public class SecurityConfig {
           "/error"
         ).permitAll()
 
-        // 3) Static & docs
+        // 4️⃣ Static & Swagger
         .requestMatchers(
           "/uploads/**",
           "/brandimg/**",
@@ -54,7 +65,7 @@ public class SecurityConfig {
           "/swagger-ui.html"
         ).permitAll()
 
-        // 4) Catalog public GET
+        // 5️⃣ Catalog public GET
         .requestMatchers(HttpMethod.GET,
           "/api/products/**",
           "/api/categories/**",
@@ -66,15 +77,15 @@ public class SecurityConfig {
           "/api/favorites/**"
         ).permitAll()
 
-        // 5) Chat: bắt buộc đăng nhập
+        // 6️⃣ Chat
         .requestMatchers(HttpMethod.POST, "/api/chat/pusher/auth").authenticated()
         .requestMatchers("/api/chat/**").authenticated()
 
-        // 6) Client (v1 & v2) bắt buộc đăng nhập
+        // 7️⃣ Client
         .requestMatchers("/api/client/**").authenticated()
         .requestMatchers("/api/v2/client/orders/**").authenticated()
 
-        // 7) Admin (v1 & v2) theo quyền
+        // 8️⃣ Admin
         .requestMatchers("/api/admin/users/**", "/api/admin/roles/**").hasRole("ADMIN")
         .requestMatchers("/api/admin/stats/**").hasAnyAuthority("view_reports")
         .requestMatchers("/api/admin/products/**").hasAuthority("manage_products")
@@ -85,7 +96,7 @@ public class SecurityConfig {
           .hasAnyAuthority("manage_customers", "manage_customer", "ROLE_ADMIN", "ADMIN")
         .requestMatchers("/api/v2/admin/orders/**").hasAuthority("manage_orders")
 
-        // 8) Mặc định: cần đăng nhập
+        // 9️⃣ Mặc định yêu cầu đăng nhập
         .anyRequest().authenticated()
       )
       .exceptionHandling(ex -> ex
@@ -97,11 +108,10 @@ public class SecurityConfig {
     return http.build();
   }
 
-  // 🌐 CORS
+  /* 🌐 CORS Config */
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration cfg = new CorsConfiguration();
-    // Dev: cho wildcard port (Angular, Vite, v.v.)
     cfg.setAllowedOriginPatterns(List.of("http://localhost:*", "http://127.0.0.1:*"));
     cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS","HEAD"));
     cfg.setAllowedHeaders(List.of("Authorization","Content-Type","Accept","Origin","X-Requested-With"));
@@ -114,13 +124,13 @@ public class SecurityConfig {
     return source;
   }
 
-  // ⚙️ AuthenticationManager
+  /* ⚙️ AuthenticationManager */
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
     return configuration.getAuthenticationManager();
   }
 
-  // 🔑 PasswordEncoder
+  /* 🔑 PasswordEncoder */
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();

@@ -12,7 +12,7 @@ import { AddressBookSelectComponent } from '../../shared/components/address-book
 import { CartService } from '../../shared/services/cart.service';
 import { ShopInfoService } from '../../shared/services/shop-info.service';
 import { VietnamLocationService, Province, District, Ward } from '../../shared/services/vietnam-location.service';
-
+import { PaymentService } from '../../shared/services/payment.service';
 import {
   ShippingPublicService,
   ShippingQuoteRequest,
@@ -87,6 +87,7 @@ export class CheckoutPageComponent implements OnInit {
     private geo: GeoService,
     private addrBook: AddressBookService,
     private shopInfo: ShopInfoService,
+    private payment: PaymentService
   ) {}
 
   ngOnInit(): void {
@@ -444,6 +445,68 @@ placeOrder() {
         console.error(err);
       }
     });
+}
+payVnPay() {
+  if (!this.cart || !this.preview) {
+    this.errMsg = 'Vui lòng chọn vị trí và tính phí vận chuyển trước.';
+    return;
+  }
+  if (this.addressForm.invalid) {
+    this.addressForm.markAllAsTouched();
+    return;
+  }
+
+  // Tạo đơn trước (như COD), sau đó redirect VNPay
+  const f = this.addressForm.value;
+  const items = (this.cart.selectedItems || []).map(it => ({
+    productId: it.productId,
+    quantity: it.quantity,
+    weightKgPerItem: it.weightKgPerItem ?? 0.2,
+  }));
+
+  const body: CreateOrderRequest = {
+    receiverName: f.receiverName,
+    phone: f.phone,
+    addressLine: `${f.addressLine}`,
+    province: this.provinceName,
+    voucherCode: (this.shippingForm.value.voucherCode || '').trim() || undefined,
+    items,
+    destLat: Number(f.lat),
+    destLng: Number(f.lng),
+    note: this.noteForm.value?.note,
+    paymentMethod: 'VNPAY',
+  };
+
+  this.placing = true;
+  this.errMsg = undefined;
+  this.cdr.detectChanges();
+
+  this.orderSvc.create(body).subscribe({
+    next: (res: any) => {
+      const itemsAmount = Number(this.cart?.selectedAmount ?? this.cart?.totalAmount ?? this.subtotal ?? 0);
+      const shippingFee = Number(this.preview?.finalFee ?? 0);
+      const total = itemsAmount + shippingFee;
+
+      const orderCode = res?.code ?? `ORDER${Date.now()}`;
+
+      // ✅ Gọi API backend để lấy link VNPay
+      this.payment.create(orderCode, total).subscribe({
+        next: (resp) => {
+          window.location.href = resp.paymentUrl; // chuyển sang trang VNPay
+        },
+        error: () => {
+          this.errMsg = 'Không thể khởi tạo thanh toán VNPay.';
+          this.placing = false;
+          this.cdr.detectChanges();
+        },
+      });
+    },
+    error: (err) => {
+      this.errMsg = err?.error?.error || 'Không thể tạo đơn hàng.';
+      this.placing = false;
+      this.cdr.detectChanges();
+    },
+  });
 }
 
 
