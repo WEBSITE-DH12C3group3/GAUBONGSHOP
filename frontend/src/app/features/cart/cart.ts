@@ -70,14 +70,17 @@ export class CartComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.load();
+  this.load();
 
-    // ✅ Khôi phục coupon từ localStorage nếu có (giúp user refresh không mất)
-    const savedCode = (localStorage.getItem('couponCode') || '').trim();
-    if (savedCode) {
-      this.couponCode = savedCode;
-    }
-  }
+  // BẮT BUỘC nhập mã mới mỗi lần vào giỏ
+  this.couponCode = '';
+  this.couponPreview = null;
+  try {
+    localStorage.removeItem('couponCode');
+    localStorage.removeItem('couponDiscount');
+  } catch {}
+}
+
 
   private load() {
     this.api.getMyCart().subscribe({
@@ -221,24 +224,12 @@ export class CartComponent implements OnInit {
   }
 
   goCheckout() {
-    const code = (this.couponPreview?.code || this.couponCode || '').trim();
-    const lsDiscount = Number(localStorage.getItem('couponDiscount') || 0);
-    const discount = Number(this.couponPreview?.discountAmount ?? lsDiscount);
+  const code = (this.couponPreview?.code || this.couponCode || '').trim();
 
+  const queryParams: any = {};
+  if (code) queryParams.coupon = code; // để Checkout tự verify & trừ
 
+  this.router.navigate(['/checkout'], { queryParams });
+}
 
-    // ✅ Lưu để checkout & trang success đọc được nếu user refresh
-    try {
-      if (code) localStorage.setItem('couponCode', code);
-      localStorage.setItem('couponDiscount', String(discount));
-    } catch {}
-
-    // ✅ Điều hướng kèm cả code + số tiền giảm
-    const queryParams: any = {};
-    if (code) queryParams.coupon = code;
-    if (discount > 0) queryParams.cd = discount;
-
-    this.router.navigate(['/checkout'], { queryParams });
-  }
-  // =========================================================
 }
