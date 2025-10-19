@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 15, 2025 at 06:34 PM
+-- Generation Time: Oct 19, 2025 at 08:57 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -137,8 +137,7 @@ INSERT INTO `carts` (`id`, `user_id`, `product_id`, `quantity`, `selected`, `cre
 (14, 42, 9, 1, 1, '2025-09-26 02:32:58'),
 (21, 44, 4, 3, 1, '2025-09-29 16:44:18'),
 (22, 44, 12, 1, 1, '2025-09-30 07:45:40'),
-(23, 43, 14, 1, 1, '2025-10-14 18:15:31'),
-(24, 43, 12, 1, 1, '2025-10-14 20:44:04');
+(28, 43, 14, 3, 1, '2025-10-19 18:07:29');
 
 -- --------------------------------------------------------
 
@@ -232,7 +231,8 @@ CREATE TABLE `coupons` (
 --
 
 INSERT INTO `coupons` (`id`, `code`, `description`, `discount_type`, `discount_value`, `max_discount_amount`, `min_order_amount`, `exclude_discounted_items`, `applicable_payment_methods`, `applicable_roles`, `region_include`, `region_exclude`, `first_order_only`, `stackable`, `max_uses`, `used_count`, `max_uses_per_user`, `start_date`, `end_date`, `active`, `created_at`, `updated_at`) VALUES
-(3, 'hehe', 'Giảm 10% cho đơn đầu tiên', 'percent', 10.00, 50000.00, 20000.00, 1, NULL, NULL, NULL, NULL, 0, 0, 1000, 0, 1, '2025-10-13 07:19:00', '2026-04-13 07:19:00', 1, '2025-10-14 18:19:57', '2025-10-15 03:54:43');
+(3, 'hehe', 'Giảm 10% cho đơn đầu tiên', 'percent', 10.00, 50000.00, 20000.00, 1, NULL, NULL, NULL, NULL, 0, 0, 1000, 0, 1, '2025-10-13 07:19:00', '2026-04-13 07:19:00', 1, '2025-10-14 18:19:57', '2025-10-15 03:54:43'),
+(4, 'haha', '', 'fixed', 100000.00, 10000.00, 20000.00, 0, NULL, NULL, NULL, NULL, 0, 0, 1000, 0, 1000, NULL, NULL, 1, '2025-10-15 16:19:02', '2025-10-15 16:19:02');
 
 -- --------------------------------------------------------
 
@@ -628,7 +628,15 @@ INSERT INTO `orders` (`id`, `user_id`, `shipping_address_id`, `shipping_carrier_
 (10, 44, NULL, NULL, NULL, 6.67, 40010.00, 0.00, 930010.00, NULL, 'my', '01234568799', 'Phố An Dương', 'Thành phố Hà Nội', 1.000, 40010.00, NULL, NULL, NULL, '2025-09-28 13:04:51', 'PENDING_PAYMENT', 890000.00, 40010.00, 930010.00, NULL, 0.00),
 (11, 44, NULL, NULL, NULL, 3.92, 20840.00, 0.00, 910840.00, NULL, 'trang trang', '0123456789', 'Ngõ Núi Trúc', 'Thành phố Hà Nội', 1.000, 20840.00, NULL, NULL, NULL, '2025-09-28 13:20:22', 'PAID', 890000.00, 20840.00, 910840.00, NULL, 0.00),
 (12, 44, NULL, NULL, NULL, 3.64, 20280.00, 0.00, 620280.00, NULL, 'trang trang', '0349459165', 'Phố Đội Cấn', 'Thành phố Hà Nội', 0.600, 20280.00, NULL, NULL, NULL, '2025-09-29 16:55:56', 'PENDING_PAYMENT', 600000.00, 20280.00, 620280.00, NULL, 0.00),
-(13, 44, NULL, NULL, NULL, 6.40, 39200.00, 0.00, 849200.00, NULL, 'phùng trang', '0349459165', 'Phố Nguyễn Trung Trực', 'Thành phố Hà Nội', 0.800, 39200.00, NULL, NULL, NULL, '2025-09-30 07:48:07', 'SHIPPED', 810000.00, 39200.00, 849200.00, NULL, 0.00);
+(13, 44, NULL, NULL, NULL, 6.40, 39200.00, 0.00, 849200.00, NULL, 'phùng trang', '0349459165', 'Phố Nguyễn Trung Trực', 'Thành phố Hà Nội', 0.800, 39200.00, NULL, NULL, NULL, '2025-09-30 07:48:07', 'SHIPPED', 810000.00, 39200.00, 849200.00, NULL, 0.00),
+(14, 43, NULL, NULL, NULL, 4.42, 21840.00, 0.00, 351840.00, NULL, 'Hoàng Văn Hà', '0366379629', 'Phố Quốc Tử Giám', 'Thành phố Hà Nội', 0.400, 21840.00, NULL, NULL, NULL, '2025-10-15 16:42:27', 'PENDING_PAYMENT', 330000.00, 21840.00, 351840.00, NULL, 0.00),
+(15, 43, NULL, NULL, NULL, 5.03, 35090.00, 0.00, 365090.00, NULL, 'zzzzz', '0142142122', 'Phố Cao Bá Quát', 'Thành phố Hà Nội', 0.400, 35090.00, NULL, NULL, NULL, '2025-10-15 16:43:45', 'PENDING_PAYMENT', 330000.00, 35090.00, 365090.00, NULL, 0.00),
+(16, 43, NULL, NULL, NULL, 5.65, 36950.00, 0.00, 144950.00, 'FREESHIPHN', 'Hoàng Hà', '0366379629', 'Phố Tràng Thi', 'Thành phố Hà Nội', 0.200, 36950.00, NULL, NULL, NULL, '2025-10-15 21:59:47', 'PENDING_PAYMENT', 120000.00, 36950.00, 144950.00, 'hehe', 12000.00),
+(17, 43, NULL, NULL, NULL, 5.73, 37190.00, 0.00, 145190.00, 'haha', 'hoàng hà', '0123456789', 'Phố Hai Bà Trưng', 'Thành phố Hà Nội', 0.200, 37190.00, NULL, NULL, NULL, '2025-10-15 22:14:03', 'PENDING_PAYMENT', 120000.00, 37190.00, 145190.00, 'hehe', 12000.00),
+(18, 43, NULL, NULL, NULL, 3.67, 20340.00, 0.00, 236340.00, NULL, 'gag', '0981248718', 'Phố Núi Trúc', 'Thành phố Hà Nội', 0.400, 20340.00, NULL, NULL, NULL, '2025-10-15 22:35:32', 'PENDING_PAYMENT', 240000.00, 20340.00, 236340.00, 'hehe', 24000.00),
+(19, 43, NULL, NULL, NULL, 4.63, 22260.00, 0.00, 262260.00, NULL, 'hấ', '01210954015', 'Phố Ngô Tất Tố', 'Thành phố Hà Nội', 0.400, 22260.00, NULL, NULL, NULL, '2025-10-15 23:07:58', 'PENDING_PAYMENT', 240000.00, 22260.00, 262260.00, NULL, 0.00),
+(20, 43, NULL, NULL, NULL, 4.54, 22080.00, 0.00, 454080.00, NULL, 'hà', '0988288282', 'Phố Tôn Đức Thắng', 'Thành phố Hà Nội', 0.800, 22080.00, NULL, NULL, NULL, '2025-10-19 18:00:45', 'PENDING_PAYMENT', 480000.00, 22080.00, 454080.00, 'hehe', 48000.00),
+(21, 43, NULL, NULL, NULL, 3.11, 19220.00, 0.00, 619220.00, NULL, 'tao', '03448837283', 'Ngõ 66 Dịch Vọng Hậu', 'Thành phố Hà Nội', 1.000, 19220.00, NULL, NULL, NULL, '2025-10-19 18:04:17', 'PENDING_PAYMENT', 600000.00, 19220.00, 619220.00, NULL, 0.00);
 
 --
 -- Triggers `orders`
@@ -754,7 +762,17 @@ INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `price`, 
 (34, 11, 11, 2, NULL, 130000.00, 'GẤU TRÚC HAM ĂN', 0.200),
 (35, 12, 4, 3, NULL, 200000.00, 'gấu bông noel', 0.200),
 (36, 13, 4, 3, NULL, 200000.00, 'gấu bông noel', 0.200),
-(37, 13, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200);
+(37, 13, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(38, 14, 14, 1, NULL, 120000.00, 'TIỂU ĐÀO ĐÀO', 0.200),
+(39, 14, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(40, 15, 14, 1, NULL, 120000.00, 'TIỂU ĐÀO ĐÀO', 0.200),
+(41, 15, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200),
+(42, 16, 14, 1, NULL, 120000.00, 'TIỂU ĐÀO ĐÀO', 0.200),
+(43, 17, 14, 1, NULL, 120000.00, 'TIỂU ĐÀO ĐÀO', 0.200),
+(44, 18, 14, 2, NULL, 120000.00, 'TIỂU ĐÀO ĐÀO', 0.200),
+(45, 19, 14, 2, NULL, 120000.00, 'TIỂU ĐÀO ĐÀO', 0.200),
+(46, 20, 14, 4, NULL, 120000.00, 'TIỂU ĐÀO ĐÀO', 0.200),
+(47, 21, 14, 5, NULL, 120000.00, 'TIỂU ĐÀO ĐÀO', 0.200);
 
 -- --------------------------------------------------------
 
@@ -846,7 +864,8 @@ INSERT INTO `permissions` (`id`, `name`, `description`) VALUES
 (22, 'view_reports', 'Xem báo cáo'),
 (23, 'manage_users', 'Quản lý nhóm người dùng'),
 (24, 'manage_permission', 'Quản lý phân quyền chức năng'),
-(25, 'manage_shippingrate', 'Quản lý biểu phí vận chuyển (thêm/sửa/xoá)');
+(25, 'manage_shippingrate', 'Quản lý biểu phí vận chuyển (thêm/sửa/xoá)'),
+(26, 'manage_themes', 'Quản lý giao diện chủ đề (thêm/sửa/xoá)');
 
 -- --------------------------------------------------------
 
@@ -880,7 +899,7 @@ INSERT INTO `products` (`id`, `name`, `description`, `price`, `image_url`, `cate
 (11, 'GẤU TRÚC HAM ĂN', 'HHH', 130000.00, '/uploads/1756280679637-881067446-OIP9.jpg', 1, 3, 11, '2025-08-27 07:44:39'),
 (12, 'GẤU DÂU ĐÁNG YÊU', 'KKKK', 210000.00, '/uploads/1756280739648-379525019-OIP (5).webp', 1, 1, 22, '2025-08-27 07:45:39'),
 (13, 'THỎ ĐÀO NGỌT NGÀO', 'HHH', 210000.00, '/uploads/1756280802618-785400663-OIP (7).webp', 1, 3, 22, '2025-08-27 07:46:42'),
-(14, 'TIỂU ĐÀO ĐÀO', 'HHH', 120000.00, '/uploads/1756280863080-210403397-OIP (6).webp', 2, 3, 22, '2025-08-27 07:47:43');
+(14, 'TIỂU ĐÀO ĐÀO', 'HHH', 120000.00, '/uploads/1756280863080-210403397-OIP (6).webp', 2, 3, 3000, '2025-08-27 07:47:43');
 
 -- --------------------------------------------------------
 
@@ -1042,7 +1061,8 @@ INSERT INTO `role_permissions` (`role_id`, `permission_id`, `id`) VALUES
 (3, 22, 52),
 (3, 23, 51),
 (3, 24, 47),
-(3, 25, 75);
+(3, 25, 75),
+(3, 26, 79);
 
 -- --------------------------------------------------------
 
@@ -1066,14 +1086,6 @@ CREATE TABLE `shipping` (
   `tracking_number` varchar(50) DEFAULT NULL,
   `shipped_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `shipping`
---
-
-INSERT INTO `shipping` (`id`, `order_id`, `address_id`, `carrier_id`, `service_code`, `fee`, `distance_km`, `status`, `eta_days_min`, `eta_days_max`, `address`, `shipping_method`, `tracking_number`, `shipped_date`) VALUES
-(1, 1, NULL, NULL, NULL, NULL, NULL, 'created', NULL, NULL, '123 Đường Láng, Hà Nội', 'GHTK', 'GH12345', '2025-08-25 14:50:57'),
-(2, 2, NULL, NULL, NULL, NULL, NULL, 'created', NULL, NULL, '123 Đường Láng, Hà Nội', 'Viettel Post', 'VT67890', '2025-08-25 14:50:57');
 
 -- --------------------------------------------------------
 
@@ -1153,7 +1165,15 @@ INSERT INTO `shipping_records` (`id`, `order_id`, `carrier`, `tracking_code`, `f
 (8, 10, 'INTERNAL', NULL, 40010.00, 'CREATED', '2025-09-28 06:04:51', '2025-09-28 06:04:51'),
 (9, 11, 'INTERNAL', NULL, 20840.00, 'CREATED', '2025-09-28 06:20:22', '2025-09-28 06:20:22'),
 (10, 12, 'INTERNAL', NULL, 20280.00, 'CREATED', '2025-09-29 09:55:56', '2025-09-29 09:55:56'),
-(11, 13, 'INTERNAL', NULL, 39200.00, 'CREATED', '2025-09-30 00:48:07', '2025-09-30 00:48:07');
+(11, 13, 'INTERNAL', NULL, 39200.00, 'CREATED', '2025-09-30 00:48:07', '2025-09-30 00:48:07'),
+(12, 14, 'INTERNAL', NULL, 21840.00, 'CREATED', '2025-10-15 09:42:27', '2025-10-15 09:42:27'),
+(13, 15, 'INTERNAL', NULL, 35090.00, 'CREATED', '2025-10-15 09:43:45', '2025-10-15 09:43:45'),
+(14, 16, 'INTERNAL', NULL, 36950.00, 'CREATED', '2025-10-15 14:59:47', '2025-10-15 14:59:47'),
+(15, 17, 'INTERNAL', NULL, 37190.00, 'CREATED', '2025-10-15 15:14:03', '2025-10-15 15:14:03'),
+(16, 18, 'INTERNAL', NULL, 20340.00, 'CREATED', '2025-10-15 15:35:32', '2025-10-15 15:35:32'),
+(17, 19, 'INTERNAL', NULL, 22260.00, 'CREATED', '2025-10-15 16:07:58', '2025-10-15 16:07:58'),
+(18, 20, 'INTERNAL', NULL, 22080.00, 'CREATED', '2025-10-19 11:00:45', '2025-10-19 11:00:45'),
+(19, 21, 'INTERNAL', NULL, 19220.00, 'CREATED', '2025-10-19 11:04:17', '2025-10-19 11:04:17');
 
 -- --------------------------------------------------------
 
@@ -1194,6 +1214,8 @@ CREATE TABLE `shipping_vouchers` (
   `discount_value` decimal(10,2) NOT NULL DEFAULT 0.00,
   `max_discount_amount` decimal(10,2) DEFAULT NULL,
   `min_order_amount` decimal(10,2) DEFAULT NULL,
+  `start_at` datetime DEFAULT NULL,
+  `end_at` datetime DEFAULT NULL,
   `min_shipping_fee` decimal(10,2) DEFAULT NULL,
   `applicable_carriers` varchar(255) DEFAULT NULL,
   `region_include` varchar(255) DEFAULT NULL,
@@ -1212,8 +1234,9 @@ CREATE TABLE `shipping_vouchers` (
 -- Dumping data for table `shipping_vouchers`
 --
 
-INSERT INTO `shipping_vouchers` (`id`, `code`, `description`, `discount_type`, `discount_value`, `max_discount_amount`, `min_order_amount`, `min_shipping_fee`, `applicable_carriers`, `region_include`, `region_exclude`, `max_uses`, `used_count`, `max_uses_per_user`, `start_date`, `end_date`, `active`, `created_at`, `updated_at`) VALUES
-(1, 'FREESHIPHN', 'Miễn phí ship nội thành Hà Nội', 'free', 0.00, NULL, 150000.00, 15000.00, 'GHTK,Viettel Post', 'Hà Nội', NULL, 500, 0, 3, '2025-08-31 17:00:00', '2025-12-31 16:59:59', 1, '2025-09-18 02:26:14', '2025-09-18 02:26:14');
+INSERT INTO `shipping_vouchers` (`id`, `code`, `description`, `discount_type`, `discount_value`, `max_discount_amount`, `min_order_amount`, `start_at`, `end_at`, `min_shipping_fee`, `applicable_carriers`, `region_include`, `region_exclude`, `max_uses`, `used_count`, `max_uses_per_user`, `start_date`, `end_date`, `active`, `created_at`, `updated_at`) VALUES
+(1, 'haha', 'Miễn phí ship nội thành Hà Nội', 'free', 0.00, NULL, 15000.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, NULL, NULL, NULL, 1, '2025-09-18 02:26:14', '2025-09-18 02:26:14'),
+(2, 'hehe', '20000', 'percent', 20000.00, 2000.00, 200000.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 1, '2025-10-15 21:57:52', '2025-10-15 21:57:52');
 
 -- --------------------------------------------------------
 
@@ -1888,7 +1911,7 @@ ALTER TABLE `carrier_rate_rules`
 -- AUTO_INCREMENT for table `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -1906,7 +1929,7 @@ ALTER TABLE `chat_sessions`
 -- AUTO_INCREMENT for table `coupons`
 --
 ALTER TABLE `coupons`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `distance_cache`
@@ -1948,7 +1971,7 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `order_audits`
@@ -1960,7 +1983,7 @@ ALTER TABLE `order_audits`
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT for table `password_reset_codes`
@@ -1978,7 +2001,7 @@ ALTER TABLE `payments`
 -- AUTO_INCREMENT for table `permissions`
 --
 ALTER TABLE `permissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `products`
@@ -2002,13 +2025,13 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT for table `role_permissions`
 --
 ALTER TABLE `role_permissions`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
 -- AUTO_INCREMENT for table `shipping`
 --
 ALTER TABLE `shipping`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `shipping_carriers`
@@ -2026,7 +2049,7 @@ ALTER TABLE `shipping_quotes`
 -- AUTO_INCREMENT for table `shipping_records`
 --
 ALTER TABLE `shipping_records`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `shipping_services`
@@ -2038,7 +2061,7 @@ ALTER TABLE `shipping_services`
 -- AUTO_INCREMENT for table `shipping_vouchers`
 --
 ALTER TABLE `shipping_vouchers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `suppliers`
