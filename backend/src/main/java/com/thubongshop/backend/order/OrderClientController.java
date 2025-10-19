@@ -79,6 +79,7 @@ public class OrderClientController {
   public ResponseEntity<ShippingPreviewResponse> previewShipping(
       @Valid @RequestBody ApplyVoucherPreviewRequest req
   ) {
+    // 1) Tính báo giá ship (base + áp voucher ở tầng service nếu có)
     ShippingQuote quote = shippingCalc.quote(
         new ShippingQuoteRequest(
             req.orderSubtotal(),         // BigDecimal
@@ -91,33 +92,60 @@ public class OrderClientController {
         )
     );
 
+    // 2) Chuẩn hoá số liệu
     BigDecimal feeBefore = nz(quote.feeBeforeVoucher());
     BigDecimal feeAfter  = nz(quote.feeAfterVoucher());
     BigDecimal discount  = feeBefore.subtract(feeAfter).max(BigDecimal.ZERO);
 
+    // 3) Xây response:
+    //    - Trả cả "field mới" (shippingFeeBefore / shippingDiscount / shippingFeeFinal / voucherCode / etaMin / etaMax)
+    //    - Giữ "field cũ" (feeBeforeDiscount / discount / finalFee / etaDaysMin / etaDaysMax) để FE cũ không vỡ
     var body = new ShippingPreviewResponse(
         quote.carrier(),
         quote.service(),
         quote.distanceKm(),
-        feeBefore,
-        discount,
-        feeAfter,
-        quote.etaDaysMin(),
-        quote.etaDaysMax()
+
+        // ===== legacy =====
+        feeBefore,          // feeBeforeDiscount
+        discount,           // discount
+        feeAfter,           // finalFee
+        quote.etaDaysMin(), // etaDaysMin
+        quote.etaDaysMax(), // etaDaysMax
+
+        // ===== new (khớp DB & FE hiện tại) =====
+        feeBefore,          // shippingFeeBefore
+        discount,           // shippingDiscount
+        feeAfter,           // shippingFeeFinal
+        req.voucherCode(), // voucherCode (nếu service đã áp)
+        // map eta về tên mới (nếu FE đọc tên mới)
+        quote.etaDaysMin(), // etaMin
+        quote.etaDaysMax()  // etaMax
     );
+
     return ResponseEntity.ok(body);
   }
 
   // ===== DTO trả về cho preview (dùng để hiển thị) =====
   public record ShippingPreviewResponse(
+      // ------ chung ------
       String carrier,
       String service,
       BigDecimal distanceKm,
+
+      // ------ legacy fields (giữ nguyên để tương thích) ------
       BigDecimal feeBeforeDiscount,
       BigDecimal discount,
       BigDecimal finalFee,
       Integer etaDaysMin,
-      Integer etaDaysMax
+      Integer etaDaysMax,
+
+      // ------ fields mới (khớp DB/FE đã sửa) ------
+      BigDecimal shippingFeeBefore,
+      BigDecimal shippingDiscount,
+      BigDecimal shippingFeeFinal,
+      String voucherCode,
+      Integer etaMin,
+      Integer etaMax
   ) {}
 
   private static BigDecimal nz(BigDecimal v) {

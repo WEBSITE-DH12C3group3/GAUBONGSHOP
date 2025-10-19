@@ -13,7 +13,6 @@ import com.thubongshop.backend.shippingvoucher.ShipVoucherService;
 import com.thubongshop.backend.warehouse.Warehouse;
 import com.thubongshop.backend.warehouse.WarehouseRepository;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -27,12 +26,12 @@ public class ShippingCalculatorService {
 
   private final ShippingCarrierRepo carrierRepo;
   private final ShippingServiceRepo serviceRepo;
+  private final ShipVoucherService shipVoucherService;  // ✅ giữ lại 1 cái thôi
   private final CarrierRateRuleRepo rateRepo;
-
   private final WarehouseRepository warehouseRepository;
+
   @Qualifier("shippingCoreDistanceService")
   private final DistanceService distanceService;
-  private final ShipVoucherService voucherService;
 
   public ShippingQuote quote(ShippingQuoteRequest req) {
     // 1) Lấy kho active (điểm của shop/admin)
@@ -53,7 +52,7 @@ public class ShippingCalculatorService {
 
     // 3) Carrier + Service mặc định
     String carrierCode = (req.carrierCode() == null || req.carrierCode().isBlank()) ? "INTERNAL" : req.carrierCode();
-    String serviceCode = (req.serviceCode() == null || req.serviceCode().isBlank()) ? "STD"      : req.serviceCode();
+    String serviceCode = (req.serviceCode() == null || req.serviceCode().isBlank()) ? "STD" : req.serviceCode();
 
     ShippingCarrier carrier = carrierRepo.findByCodeAndActiveTrue(carrierCode);
     if (carrier == null) {
@@ -88,7 +87,7 @@ public class ShippingCalculatorService {
       throw new IllegalStateException("No carrier rate rule matched for distance " + distanceKm + "km");
     }
 
-    // 5) Tính phí: base + per_km * max(0, distance - free_km); rồi áp min_fee
+    // 5) Tính phí gốc
     BigDecimal base = nz(rule.getBaseFee());
     BigDecimal perKm = nz(rule.getPerKmFee());
     BigDecimal freeKm = nz(rule.getFreeKm());
@@ -101,31 +100,47 @@ public class ShippingCalculatorService {
     if (minFee != null && fee.compareTo(minFee) < 0) fee = minFee;
     fee = fee.setScale(0, RoundingMode.UP);
 
-    // 6) Áp voucher (nếu có)
+    // 6️⃣ Áp dụng voucher (nếu có)
     BigDecimal finalFee = fee;
+    BigDecimal discount = BigDecimal.ZERO;
+
     if (req.voucherCode() != null && !req.voucherCode().isBlank()) {
-      ShipVoucher v = voucherService.getActiveOrThrow(req.voucherCode());
       try {
-        // Nếu service của bạn có calcDiscount(v, orderSubtotal, fee) thì dùng:
-        java.lang.reflect.Method m = voucherService.getClass().getMethod(
-            "calcDiscount", ShipVoucher.class, BigDecimal.class, BigDecimal.class);
-        BigDecimal discount = (BigDecimal) m.invoke(voucherService, v, req.orderSubtotal(), fee);
-        if (discount != null && discount.signum() > 0) {
-          finalFee = fee.subtract(discount);
-          if (finalFee.signum() < 0) finalFee = BigDecimal.ZERO;
+        ShipVoucher voucher = shipVoucherService.getActiveOrThrow(req.voucherCode().trim());
+        // Nếu bạn có hàm tính giảm cụ thể, gọi nó
+        BigDecimal orderSubtotal = req.orderSubtotal() != null ? req.orderSubtotal() : BigDecimal.ZERO;
+
+        // Áp dụng theo loại voucher
+        switch (voucher.getDiscountType()) {
+          case FREE -> {
+            discount = fee;
+          }
+          case FIXED -> {
+            discount = nz(voucher.getDiscountValue());
+          }
+          case PERCENT -> {
+            discount = fee.multiply(voucher.getDiscountValue().divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
+          }
         }
-      } catch (NoSuchMethodException ignore) {
-        // Không có calcDiscount thì tôn trọng logic hiện có (getActiveOrThrow đã validate).
-        // Có thể bổ sung sau nếu cần.
-      } catch (Exception e) {
-        throw new IllegalStateException("Apply voucher error: " + e.getMessage(), e);
+
+        // Giới hạn giảm tối đa (nếu có)
+        if (voucher.getMaxDiscountAmount() != null && discount.compareTo(voucher.getMaxDiscountAmount()) > 0) {
+          discount = voucher.getMaxDiscountAmount();
+        }
+
+        finalFee = fee.subtract(discount);
+        if (finalFee.signum() < 0) finalFee = BigDecimal.ZERO;
+      } catch (IllegalArgumentException ex) {
+        // Mã không hợp lệ → bỏ qua
+        // System.out.println("Voucher not applicable: " + ex.getMessage());
       }
     }
 
+    // 7️⃣ Trả kết quả
     return new ShippingQuote(
         distanceKm,
-        fee,
-        finalFee,
+        fee,        // feeBeforeVoucher
+        finalFee,   // feeAfterVoucher
         service.getBaseDaysMin(),
         service.getBaseDaysMax(),
         carrierCode,

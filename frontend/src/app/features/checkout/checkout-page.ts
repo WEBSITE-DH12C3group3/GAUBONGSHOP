@@ -54,7 +54,7 @@ interface ExtendedCart {
   changeDetection: ChangeDetectionStrategy.Default,
 })
 export class CheckoutPageComponent implements OnInit {
-  cart?: ExtendedCart; // ✅ thay type
+  cart?: ExtendedCart;
   origin?: { lat: number; lng: number; address?: string };
   showMap = false;
   distanceKmPreview: number | null = null;
@@ -106,6 +106,7 @@ export class CheckoutPageComponent implements OnInit {
       lng: [null, Validators.required],
     });
 
+    // ✅ ô nhập mã vận chuyển
     this.shippingForm = this.fb.group({ voucherCode: [''] });
     this.paymentForm = this.fb.group({ method: ['COD', Validators.required] });
     this.noteForm = this.fb.group({ note: [''] });
@@ -115,7 +116,7 @@ export class CheckoutPageComponent implements OnInit {
     this.loadCart();
     this.loadProvinces();
 
-    // ✅ Lấy coupon từ query hoặc localStorage
+    // ✅ Lấy coupon từ query/localStorage
     const q = (this.router.parseUrl(this.router.url).queryParams?.['coupon'] || '').trim();
     const stored = (localStorage.getItem('couponCode') || '').trim();
     this.couponCode = q || stored || '';
@@ -141,7 +142,7 @@ export class CheckoutPageComponent implements OnInit {
     this.shippingForm.valueChanges.subscribe(() => this.tryPreview());
   }
 
-  /** ✅ Giữ 1 bản duy nhất loadCart/applyCartSummary */
+  /** ✅ load cart một lần */
   private loadCart(): void {
     const snap = (this.cartSvc as any).getSnapshot?.();
     if (snap) this.applyCartSummary(snap);
@@ -171,9 +172,6 @@ export class CheckoutPageComponent implements OnInit {
 
     this.cdr.detectChanges();
     this.tryPreview();
-
-    // ❌ KHÔNG đăng ký lại valueChanges ở đây (đã có trong ngOnInit)
-    // Tránh gọi tryPreview() chồng chéo.
   }
 
   openMapPicker() { this.showMap = true; this.cdr.detectChanges(); }
@@ -321,12 +319,12 @@ export class CheckoutPageComponent implements OnInit {
   /** giữ list ổn định khi render */
   trackByCode = (_: number, item: { code: string | number }) => String(item.code);
 
-  /** ⚠️ Quan trọng: luôn truyền STRING code vào service để tránh lệch kiểu */
+  /** ⚠️ luôn truyền STRING code */
   loadDistricts$(provinceCode: string) {
     this.loadingDist = true;
     this.districts = [];
     this.wards = [];
-    const code = String(provinceCode); // <— luôn là string
+    const code = String(provinceCode);
     return this.callVnLoc<District[]>(
       ['getDistricts', 'listDistricts', 'fetchDistricts'],
       code
@@ -336,7 +334,7 @@ export class CheckoutPageComponent implements OnInit {
   loadWards$(districtCode: string) {
     this.loadingWard = true;
     this.wards = [];
-    const code = String(districtCode); // <— luôn là string
+    const code = String(districtCode);
     return this.callVnLoc<Ward[]>(
       ['getWards', 'listWards', 'fetchWards'],
       code
@@ -355,6 +353,24 @@ export class CheckoutPageComponent implements OnInit {
     return Math.max(0, base - discount);
   }
 
+  // ====== ✅ VOUCHER ======
+  get currentVoucher(): string {
+    return (this.shippingForm?.value?.voucherCode || '').toString().trim();
+  }
+  set currentVoucher(v: string) {
+    this.shippingForm.patchValue({ voucherCode: (v || '').trim() }, { emitEvent: true });
+  }
+  applyShipVoucher(): void {
+    if (!this.cart) return;
+    this.currentVoucher = this.currentVoucher; // ensure trim + emitEvent
+    this.tryPreview();
+  }
+  clearShipVoucher(): void {
+    this.shippingForm.patchValue({ voucherCode: '' }, { emitEvent: true });
+    this.tryPreview();
+  }
+  // ====== ✅ END VOUCHER ======
+
   tryPreview() {
     if (!this.cart || !this.canPreview()) return;
 
@@ -363,13 +379,12 @@ export class CheckoutPageComponent implements OnInit {
     const lng = Number(f.lng);
 
     const req: ShippingQuoteRequest = {
-      // ✅ dùng số tiền đã trừ coupon để backend xét điều kiện freeship/min
       orderSubtotal: this.itemsAmountAfterCoupon(),
       weightKg: this.weightKg,
       destLat: lat,
       destLng: lng,
       province: this.provinceName || undefined,
-      voucherCode: (this.shippingForm.value.voucherCode || '').trim() || undefined,
+      voucherCode: this.currentVoucher || undefined,
       carrierCode: undefined,
       serviceCode: undefined,
     };
@@ -378,23 +393,50 @@ export class CheckoutPageComponent implements OnInit {
     this.shipSvc.previewShipping(req)
       .pipe(finalize(() => { this.loadingPreview = false; this.cdr.detectChanges(); }))
       .subscribe({
-        next: (q) => { this.preview = q; this.cdr.detectChanges(); },
+        next: (q) => {
+          // Service đã chuẩn hoá field theo DB
+          this.preview = {
+            ...q,
+            // vẫn giữ fallback nếu BE trả kiểu cũ (an toàn)
+            shippingFeeBefore: q.shippingFeeBefore ?? (q as any).feeBeforeDiscount ?? null,
+            shippingDiscount:   q.shippingDiscount   ?? (q as any).discount ?? null,
+            shippingFeeFinal:   q.shippingFeeFinal   ?? (q as any).finalFee ?? 0,
+            etaMin:             q.etaMin ?? (q as any).etaDaysMin ?? null,
+            etaMax:             q.etaMax ?? (q as any).etaDaysMax ?? null,
+            voucherCode:        ((q as any).voucherCode ?? (q as any).appliedVoucher ?? this.currentVoucher) || null,
+          } as PreviewShippingResponse;
+          this.errMsg = undefined;
+          this.cdr.detectChanges();
+        },
         error: (err) => {
           this.preview = null;
-          // ✅ ưu tiên message thân thiện
           this.errMsg = err?.error?.message || err?.message || err?.error?.error || 'Không tính được phí vận chuyển';
           this.cdr.detectChanges();
         },
       });
   }
 
-  itemsAmount(): number { return this.subtotal; }
-  shippingFee(): number { return this.preview?.finalFee ?? 0; }
+  // ✅ Helper hiển thị/ tính toán theo DB
+  shippingBaseFee(): number { return Number(this.preview?.shippingFeeBefore ?? 0); }
+  shippingFee(): number { return Number(this.preview?.shippingFeeFinal ?? 0); }
+  shippingDiscount(): number {
+    const base = this.shippingBaseFee();
+    const fin = this.shippingFee();
+    const disc = Number(this.preview?.shippingDiscount ?? Math.max(0, base - fin));
+    return Math.max(0, disc);
+  }
 
-  /** ✅ Tổng = (tiền hàng sau coupon) + phí ship */
+  itemsAmount(): number { return this.subtotal; }
+
+  /** ✅ Tổng = (tiền hàng sau coupon) + phí ship sau ưu đãi */
   totalToPay(): number { return this.itemsAmountAfterCoupon() + this.shippingFee(); }
 
   isAddressValid(): boolean { return this.addressForm.valid; }
+
+  // ETA getter (an toàn type)
+  etaMin(): number | null { return (this.preview?.etaMin ?? null); }
+  etaMax(): number | null { return (this.preview?.etaMax ?? null); }
+  etaOne(): number | null { return (this.preview?.etaDays ?? null); }
 
   placeOrder() {
     if (!this.cart || !this.preview) {
@@ -418,8 +460,8 @@ export class CheckoutPageComponent implements OnInit {
       phone: f.phone,
       addressLine: `${f.addressLine}`,
       province: this.provinceName,
-      voucherCode: (this.shippingForm.value.voucherCode || '').trim() || undefined,
-      couponCode: (this.couponCode || '').trim() || undefined, // ✅ gửi coupon lên backend
+      voucherCode: this.currentVoucher || undefined,
+      couponCode: (this.couponCode || '').trim() || undefined,
       items,
       destLat: Number(f.lat),
       destLng: Number(f.lng),
@@ -431,9 +473,8 @@ export class CheckoutPageComponent implements OnInit {
       .pipe(finalize(() => { this.placing = false; this.cdr.detectChanges(); }))
       .subscribe({
         next: (res: any) => {
-          // ✅ TÍNH SỐ CHẮC CHẮN: sau coupon + phí ship
           const itemsAmount = this.itemsAmountAfterCoupon();
-          const shippingFee = Number(this.preview?.finalFee ?? 0);
+          const shippingFee = Number(this.shippingFee());
           const total = Number(itemsAmount + shippingFee);
 
           const successPayload = {
@@ -448,12 +489,10 @@ export class CheckoutPageComponent implements OnInit {
             province: this.provinceName,
             note: this.noteForm.value?.note,
             paymentMethod: this.paymentForm.value?.method,
-            etaDays: (res as any)?.etaDays ?? (this.preview as any)?.etaDays
+            etaDays: (res as any)?.etaDays ?? this.etaOne() ?? this.etaMax() ?? this.etaMin()
           };
 
-          try {
-            localStorage.setItem(`order_success_${successPayload.id}`, JSON.stringify(successPayload));
-          } catch {}
+          try { localStorage.setItem(`order_success_${successPayload.id}`, JSON.stringify(successPayload)); } catch {}
 
           this.router.navigate(['/order-success'], {
             queryParams: { id: successPayload.id },
@@ -477,7 +516,6 @@ export class CheckoutPageComponent implements OnInit {
       return;
     }
 
-    // Tạo đơn trước (như COD), sau đó redirect VNPay
     const f = this.addressForm.value;
     const items = (this.cart.selectedItems || []).map(it => ({
       productId: it.productId,
@@ -490,8 +528,8 @@ export class CheckoutPageComponent implements OnInit {
       phone: f.phone,
       addressLine: `${f.addressLine}`,
       province: this.provinceName,
-      voucherCode: (this.shippingForm.value.voucherCode || '').trim() || undefined,
-      couponCode: (this.couponCode || '').trim() || undefined, // ✅ thêm coupon cho VNPay flow
+      voucherCode: this.currentVoucher || undefined,
+      couponCode: (this.couponCode || '').trim() || undefined,
       items,
       destLat: Number(f.lat),
       destLng: Number(f.lng),
@@ -505,17 +543,14 @@ export class CheckoutPageComponent implements OnInit {
 
     this.orderSvc.create(body).subscribe({
       next: (res: any) => {
-        const itemsAmount = this.itemsAmountAfterCoupon(); // ✅ sau coupon
-        const shippingFee = Number(this.preview?.finalFee ?? 0);
+        const itemsAmount = this.itemsAmountAfterCoupon();
+        const shippingFee = Number(this.shippingFee());
         const total = itemsAmount + shippingFee;
 
         const orderCode = res?.code ?? `ORDER${Date.now()}`;
 
-        // ✅ Gọi API backend để lấy link VNPay
         this.payment.create(orderCode, total).subscribe({
-          next: (resp) => {
-            window.location.href = resp.paymentUrl; // chuyển sang trang VNPay
-          },
+          next: (resp) => { window.location.href = resp.paymentUrl; },
           error: () => {
             this.errMsg = 'Không thể khởi tạo thanh toán VNPay.';
             this.placing = false;
