@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Oct 20, 2025 at 08:30 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- Máy chủ: 127.0.0.1
+-- Thời gian đã tạo: Th10 20, 2025 lúc 09:29 PM
+-- Phiên bản máy phục vụ: 10.4.32-MariaDB
+-- Phiên bản PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `thu_bong_shop`
+-- Cơ sở dữ liệu: `thu_bong_shop`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `attributes`
+-- Cấu trúc bảng cho bảng `attributes`
 --
 
 CREATE TABLE `attributes` (
@@ -35,7 +35,7 @@ CREATE TABLE `attributes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `attributes`
+-- Đang đổ dữ liệu cho bảng `attributes`
 --
 
 INSERT INTO `attributes` (`id`, `name`, `description`, `created_at`) VALUES
@@ -49,7 +49,7 @@ INSERT INTO `attributes` (`id`, `name`, `description`, `created_at`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `brands`
+-- Cấu trúc bảng cho bảng `brands`
 --
 
 CREATE TABLE `brands` (
@@ -62,7 +62,7 @@ CREATE TABLE `brands` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `brands`
+-- Đang đổ dữ liệu cho bảng `brands`
 --
 
 INSERT INTO `brands` (`id`, `name`, `description`, `logo_url`, `website_url`, `created_at`) VALUES
@@ -77,7 +77,7 @@ INSERT INTO `brands` (`id`, `name`, `description`, `logo_url`, `website_url`, `c
 -- --------------------------------------------------------
 
 --
--- Table structure for table `carrier_rate_rules`
+-- Cấu trúc bảng cho bảng `carrier_rate_rules`
 --
 
 CREATE TABLE `carrier_rate_rules` (
@@ -97,7 +97,7 @@ CREATE TABLE `carrier_rate_rules` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `carrier_rate_rules`
+-- Đang đổ dữ liệu cho bảng `carrier_rate_rules`
 --
 
 INSERT INTO `carrier_rate_rules` (`id`, `service_id`, `min_km`, `max_km`, `base_fee`, `per_km_fee`, `min_fee`, `free_km`, `cod_surcharge`, `area_surcharge`, `active_from`, `active_to`, `is_active`) VALUES
@@ -110,7 +110,7 @@ INSERT INTO `carrier_rate_rules` (`id`, `service_id`, `min_km`, `max_km`, `base_
 -- --------------------------------------------------------
 
 --
--- Table structure for table `carts`
+-- Cấu trúc bảng cho bảng `carts`
 --
 
 CREATE TABLE `carts` (
@@ -123,7 +123,7 @@ CREATE TABLE `carts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `carts`
+-- Đang đổ dữ liệu cho bảng `carts`
 --
 
 INSERT INTO `carts` (`id`, `user_id`, `product_id`, `quantity`, `selected`, `created_at`) VALUES
@@ -134,12 +134,14 @@ INSERT INTO `carts` (`id`, `user_id`, `product_id`, `quantity`, `selected`, `cre
 (11, 37, 12, 1, 1, '2025-09-25 03:21:44'),
 (12, 42, 14, 1, 1, '2025-09-26 02:32:46'),
 (13, 42, 12, 1, 1, '2025-09-26 02:32:53'),
-(14, 42, 9, 1, 1, '2025-09-26 02:32:58');
+(14, 42, 9, 1, 1, '2025-09-26 02:32:58'),
+(42, 43, 13, 1, 1, '2025-10-20 19:20:55'),
+(43, 43, 12, 1, 1, '2025-10-20 19:22:01');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `categories`
+-- Cấu trúc bảng cho bảng `categories`
 --
 
 CREATE TABLE `categories` (
@@ -151,7 +153,7 @@ CREATE TABLE `categories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `categories`
+-- Đang đổ dữ liệu cho bảng `categories`
 --
 
 INSERT INTO `categories` (`id`, `name`, `description`, `created_at`, `is_featured`) VALUES
@@ -163,7 +165,7 @@ INSERT INTO `categories` (`id`, `name`, `description`, `created_at`, `is_feature
 -- --------------------------------------------------------
 
 --
--- Table structure for table `chat_sessions`
+-- Cấu trúc bảng cho bảng `chat_sessions`
 --
 
 CREATE TABLE `chat_sessions` (
@@ -176,7 +178,7 @@ CREATE TABLE `chat_sessions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `chat_sessions`
+-- Đang đổ dữ liệu cho bảng `chat_sessions`
 --
 
 INSERT INTO `chat_sessions` (`id`, `participant1_id`, `participant2_id`, `status`, `created_at`, `updated_at`) VALUES
@@ -195,7 +197,7 @@ INSERT INTO `chat_sessions` (`id`, `participant1_id`, `participant2_id`, `status
 -- --------------------------------------------------------
 
 --
--- Table structure for table `coupons`
+-- Cấu trúc bảng cho bảng `coupons`
 --
 
 CREATE TABLE `coupons` (
@@ -224,7 +226,7 @@ CREATE TABLE `coupons` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `coupons`
+-- Đang đổ dữ liệu cho bảng `coupons`
 --
 
 INSERT INTO `coupons` (`id`, `code`, `description`, `discount_type`, `discount_value`, `max_discount_amount`, `min_order_amount`, `exclude_discounted_items`, `applicable_payment_methods`, `applicable_roles`, `region_include`, `region_exclude`, `first_order_only`, `stackable`, `max_uses`, `used_count`, `max_uses_per_user`, `start_date`, `end_date`, `active`, `created_at`, `updated_at`) VALUES
@@ -234,7 +236,7 @@ INSERT INTO `coupons` (`id`, `code`, `description`, `discount_type`, `discount_v
 -- --------------------------------------------------------
 
 --
--- Table structure for table `coupon_brands`
+-- Cấu trúc bảng cho bảng `coupon_brands`
 --
 
 CREATE TABLE `coupon_brands` (
@@ -245,7 +247,7 @@ CREATE TABLE `coupon_brands` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `coupon_categories`
+-- Cấu trúc bảng cho bảng `coupon_categories`
 --
 
 CREATE TABLE `coupon_categories` (
@@ -256,7 +258,7 @@ CREATE TABLE `coupon_categories` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `coupon_products`
+-- Cấu trúc bảng cho bảng `coupon_products`
 --
 
 CREATE TABLE `coupon_products` (
@@ -267,7 +269,7 @@ CREATE TABLE `coupon_products` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `coupon_uses`
+-- Cấu trúc bảng cho bảng `coupon_uses`
 --
 
 CREATE TABLE `coupon_uses` (
@@ -279,7 +281,7 @@ CREATE TABLE `coupon_uses` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `distance_cache`
+-- Cấu trúc bảng cho bảng `distance_cache`
 --
 
 CREATE TABLE `distance_cache` (
@@ -296,7 +298,7 @@ CREATE TABLE `distance_cache` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `favorites`
+-- Cấu trúc bảng cho bảng `favorites`
 --
 
 CREATE TABLE `favorites` (
@@ -307,19 +309,23 @@ CREATE TABLE `favorites` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `favorites`
+-- Đang đổ dữ liệu cho bảng `favorites`
 --
 
 INSERT INTO `favorites` (`id`, `user_id`, `product_id`, `created_at`) VALUES
 (3, 37, 13, '2025-09-21 12:21:13'),
 (7, 42, 11, '2025-09-25 19:30:29'),
 (8, 42, 12, '2025-09-25 19:30:30'),
-(9, 44, 12, '2025-09-30 00:45:21');
+(9, 44, 12, '2025-09-30 00:45:21'),
+(10, 43, 12, '2025-10-20 12:22:09'),
+(12, 43, 7, '2025-10-20 12:22:17'),
+(13, 43, 9, '2025-10-20 12:22:19'),
+(14, 43, 8, '2025-10-20 12:22:20');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `imports`
+-- Cấu trúc bảng cho bảng `imports`
 --
 
 CREATE TABLE `imports` (
@@ -333,7 +339,7 @@ CREATE TABLE `imports` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `imports`
+-- Đang đổ dữ liệu cho bảng `imports`
 --
 
 INSERT INTO `imports` (`id`, `import_date`, `total_cost`, `status`, `notes`, `created_at`, `supplier_id`) VALUES
@@ -345,7 +351,7 @@ INSERT INTO `imports` (`id`, `import_date`, `total_cost`, `status`, `notes`, `cr
 -- --------------------------------------------------------
 
 --
--- Table structure for table `import_details`
+-- Cấu trúc bảng cho bảng `import_details`
 --
 
 CREATE TABLE `import_details` (
@@ -357,7 +363,7 @@ CREATE TABLE `import_details` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `import_details`
+-- Đang đổ dữ liệu cho bảng `import_details`
 --
 
 INSERT INTO `import_details` (`id`, `import_id`, `product_id`, `quantity`, `unit_price`) VALUES
@@ -367,7 +373,7 @@ INSERT INTO `import_details` (`id`, `import_id`, `product_id`, `quantity`, `unit
 (7, 4, 14, 11, 120000.00);
 
 --
--- Triggers `import_details`
+-- Bẫy `import_details`
 --
 DELIMITER $$
 CREATE TRIGGER `after_import_details_insert` AFTER INSERT ON `import_details` FOR EACH ROW BEGIN
@@ -381,7 +387,7 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `messages`
+-- Cấu trúc bảng cho bảng `messages`
 --
 
 CREATE TABLE `messages` (
@@ -394,7 +400,7 @@ CREATE TABLE `messages` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `messages`
+-- Đang đổ dữ liệu cho bảng `messages`
 --
 
 INSERT INTO `messages` (`id`, `chat_session_id`, `sender_id`, `content`, `is_read`, `created_at`) VALUES
@@ -479,7 +485,7 @@ INSERT INTO `messages` (`id`, `chat_session_id`, `sender_id`, `content`, `is_rea
 -- --------------------------------------------------------
 
 --
--- Table structure for table `notifications`
+-- Cấu trúc bảng cho bảng `notifications`
 --
 
 CREATE TABLE `notifications` (
@@ -492,7 +498,7 @@ CREATE TABLE `notifications` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `notifications`
+-- Đang đổ dữ liệu cho bảng `notifications`
 --
 
 INSERT INTO `notifications` (`id`, `user_id`, `message_id`, `type`, `is_read`, `created_at`) VALUES
@@ -576,7 +582,7 @@ INSERT INTO `notifications` (`id`, `user_id`, `message_id`, `type`, `is_read`, `
 -- --------------------------------------------------------
 
 --
--- Table structure for table `orders`
+-- Cấu trúc bảng cho bảng `orders`
 --
 
 CREATE TABLE `orders` (
@@ -605,51 +611,55 @@ CREATE TABLE `orders` (
   `shipping_fee` decimal(12,2) DEFAULT NULL,
   `total_amount` decimal(10,2) NOT NULL,
   `coupon_code` varchar(50) DEFAULT NULL,
-  `coupon_discount` decimal(10,2) DEFAULT 0.00
+  `coupon_discount` decimal(10,2) DEFAULT 0.00,
+  `order_code` varchar(100) NOT NULL,
+  `payment_method` varchar(50) DEFAULT 'COD'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `orders`
+-- Đang đổ dữ liệu cho bảng `orders`
 --
 
-INSERT INTO `orders` (`id`, `user_id`, `shipping_address_id`, `shipping_carrier_id`, `shipping_service_id`, `shipping_distance_km`, `shipping_fee_before`, `shipping_discount`, `grand_total`, `voucher_code`, `receiver_name`, `phone`, `address_line`, `province`, `weight_kg`, `shipping_fee_final`, `shipping_eta_min`, `shipping_eta_max`, `shipping_quote_id`, `order_date`, `status`, `items_total`, `shipping_fee`, `total_amount`, `coupon_code`, `coupon_discount`) VALUES
-(1, 1, NULL, NULL, NULL, NULL, NULL, 0.00, 0.00, NULL, '', '', '', '', 0.000, NULL, NULL, NULL, NULL, '2025-08-25 14:50:57', 'PENDING_PAYMENT', 0.00, NULL, 890000.00, NULL, 0.00),
-(2, 1, NULL, NULL, NULL, NULL, NULL, 0.00, 0.00, NULL, '', '', '', '', 0.000, NULL, NULL, NULL, NULL, '2025-08-25 14:50:57', 'CANCELED', 0.00, NULL, 250000.00, NULL, 0.00),
-(3, 44, NULL, NULL, NULL, 2.44, 17880.00, 0.00, 547880.00, NULL, 'Nguyễn Văn A', '0900000000', '12 Ngõ 34 Xã Đàn', 'Hà Nội', 1.100, 17880.00, NULL, NULL, NULL, '2025-09-28 05:39:27', 'CANCELED', 530000.00, 17880.00, 547880.00, NULL, 0.00),
-(4, 44, NULL, NULL, NULL, 2.44, 17880.00, 0.00, 547880.00, NULL, 'Nguyễn Văn A', '0900000000', '12 Ngõ 34 Xã Đàn', 'Hà Nội', 1.100, 17880.00, NULL, NULL, NULL, '2025-09-28 05:44:30', 'PENDING_PAYMENT', 530000.00, 17880.00, 547880.00, NULL, 0.00),
-(5, 44, NULL, NULL, NULL, 3.39, 19780.00, 0.00, 909780.00, NULL, 'phùng thị trang', '0349459165', 'Ngõ 35 Phố Kim Mã Thượng', 'Thành phố Hà Nội', 1.000, 19780.00, NULL, NULL, NULL, '2025-09-28 12:06:11', 'CANCELED', 890000.00, 19780.00, 909780.00, NULL, 0.00),
-(6, 44, NULL, NULL, NULL, 5.42, 36260.00, 0.00, 926260.00, NULL, 'trang trang', '0123456789', 'Đường Số 19', 'Thành phố Hà Nội', 1.000, 36260.00, NULL, NULL, NULL, '2025-09-28 12:37:30', 'PENDING_PAYMENT', 890000.00, 36260.00, 926260.00, NULL, 0.00),
-(7, 44, NULL, NULL, NULL, 2.96, 18920.00, 0.00, 908920.00, NULL, 'Phùng thị trang', '0123456891', 'Ngách 2 Ngõ 72 Phố Dương Quảng Hàm', 'Thành phố Hà Nội', 1.000, 18920.00, NULL, NULL, NULL, '2025-09-28 13:02:13', 'DELIVERED', 890000.00, 18920.00, 908920.00, NULL, 0.00),
-(8, 44, NULL, NULL, NULL, 2.96, 18920.00, 0.00, 908920.00, NULL, 'Phùng thị trang', '0123456891', 'Ngách 2 Ngõ 72 Phố Dương Quảng Hàm', 'Thành phố Hà Nội', 1.000, 18920.00, NULL, NULL, NULL, '2025-09-28 13:02:13', 'PENDING_PAYMENT', 890000.00, 18920.00, 908920.00, NULL, 0.00),
-(9, 44, NULL, NULL, NULL, 6.67, 40010.00, 0.00, 930010.00, NULL, 'my', '01234568799', 'Phố An Dương', 'Thành phố Hà Nội', 1.000, 40010.00, NULL, NULL, NULL, '2025-09-28 13:04:51', 'DELIVERED', 890000.00, 40010.00, 930010.00, NULL, 0.00),
-(10, 44, NULL, NULL, NULL, 6.67, 40010.00, 0.00, 930010.00, NULL, 'my', '01234568799', 'Phố An Dương', 'Thành phố Hà Nội', 1.000, 40010.00, NULL, NULL, NULL, '2025-09-28 13:04:51', 'PENDING_PAYMENT', 890000.00, 40010.00, 930010.00, NULL, 0.00),
-(11, 44, NULL, NULL, NULL, 3.92, 20840.00, 0.00, 910840.00, NULL, 'trang trang', '0123456789', 'Ngõ Núi Trúc', 'Thành phố Hà Nội', 1.000, 20840.00, NULL, NULL, NULL, '2025-09-28 13:20:22', 'PAID', 890000.00, 20840.00, 910840.00, NULL, 0.00),
-(12, 44, NULL, NULL, NULL, 3.64, 20280.00, 0.00, 620280.00, NULL, 'trang trang', '0349459165', 'Phố Đội Cấn', 'Thành phố Hà Nội', 0.600, 20280.00, NULL, NULL, NULL, '2025-09-29 16:55:56', 'PENDING_PAYMENT', 600000.00, 20280.00, 620280.00, NULL, 0.00),
-(13, 44, NULL, NULL, NULL, 6.40, 39200.00, 0.00, 849200.00, NULL, 'phùng trang', '0349459165', 'Phố Nguyễn Trung Trực', 'Thành phố Hà Nội', 0.800, 39200.00, NULL, NULL, NULL, '2025-09-30 07:48:07', 'SHIPPED', 810000.00, 39200.00, 849200.00, NULL, 0.00),
-(14, 43, NULL, NULL, NULL, 4.42, 21840.00, 0.00, 351840.00, NULL, 'Hoàng Văn Hà', '0366379629', 'Phố Quốc Tử Giám', 'Thành phố Hà Nội', 0.400, 21840.00, NULL, NULL, NULL, '2025-10-15 16:42:27', 'PENDING_PAYMENT', 330000.00, 21840.00, 351840.00, NULL, 0.00),
-(15, 43, NULL, NULL, NULL, 5.03, 35090.00, 0.00, 365090.00, NULL, 'zzzzz', '0142142122', 'Phố Cao Bá Quát', 'Thành phố Hà Nội', 0.400, 35090.00, NULL, NULL, NULL, '2025-10-15 16:43:45', 'CANCELED', 330000.00, 35090.00, 365090.00, NULL, 0.00),
-(16, 43, NULL, NULL, NULL, 5.65, 36950.00, 0.00, 144950.00, 'FREESHIPHN', 'Hoàng Hà', '0366379629', 'Phố Tràng Thi', 'Thành phố Hà Nội', 0.200, 36950.00, NULL, NULL, NULL, '2025-10-15 21:59:47', 'PENDING_PAYMENT', 120000.00, 36950.00, 144950.00, 'hehe', 12000.00),
-(17, 43, NULL, NULL, NULL, 5.73, 37190.00, 0.00, 145190.00, 'haha', 'hoàng hà', '0123456789', 'Phố Hai Bà Trưng', 'Thành phố Hà Nội', 0.200, 37190.00, NULL, NULL, NULL, '2025-10-15 22:14:03', 'PENDING_PAYMENT', 120000.00, 37190.00, 145190.00, 'hehe', 12000.00),
-(18, 43, NULL, NULL, NULL, 3.67, 20340.00, 0.00, 236340.00, NULL, 'gag', '0981248718', 'Phố Núi Trúc', 'Thành phố Hà Nội', 0.400, 20340.00, NULL, NULL, NULL, '2025-10-15 22:35:32', 'PENDING_PAYMENT', 240000.00, 20340.00, 236340.00, 'hehe', 24000.00),
-(19, 43, NULL, NULL, NULL, 4.63, 22260.00, 0.00, 262260.00, NULL, 'hấ', '01210954015', 'Phố Ngô Tất Tố', 'Thành phố Hà Nội', 0.400, 22260.00, NULL, NULL, NULL, '2025-10-15 23:07:58', 'PENDING_PAYMENT', 240000.00, 22260.00, 262260.00, NULL, 0.00),
-(20, 43, NULL, NULL, NULL, 4.54, 22080.00, 0.00, 454080.00, NULL, 'hà', '0988288282', 'Phố Tôn Đức Thắng', 'Thành phố Hà Nội', 0.800, 22080.00, NULL, NULL, NULL, '2025-10-19 18:00:45', 'PENDING_PAYMENT', 480000.00, 22080.00, 454080.00, 'hehe', 48000.00),
-(21, 43, NULL, NULL, NULL, 3.11, 19220.00, 0.00, 619220.00, NULL, 'tao', '03448837283', 'Ngõ 66 Dịch Vọng Hậu', 'Thành phố Hà Nội', 1.000, 19220.00, NULL, NULL, NULL, '2025-10-19 18:04:17', 'PENDING_PAYMENT', 600000.00, 19220.00, 619220.00, NULL, 0.00),
-(22, 43, NULL, NULL, NULL, 5.51, 36530.00, 20000.00, 276530.00, 'haha', 'hà', '0366379629', 'Ngõ 91A Lý Nam Đế', 'Thành phố Hà Nội', 0.600, 16530.00, NULL, NULL, NULL, '2025-10-19 20:03:58', 'PENDING_PAYMENT', 360000.00, 16530.00, 276530.00, 'haha', 100000.00),
-(23, 43, NULL, NULL, NULL, 2.36, 17720.00, 3544.00, 134176.00, 'hihi', 'hà', '0983762522', 'Đường La Thành', 'Thành phố Hà Nội', 0.200, 14176.00, NULL, NULL, NULL, '2025-10-19 21:51:13', 'PENDING_PAYMENT', 120000.00, 14176.00, 134176.00, NULL, 0.00),
-(24, 43, NULL, NULL, NULL, 3.59, 20180.00, 20180.00, 120000.00, 'hehe', 'hà', '02987837222', 'Ngõ 44 Hào Nam', 'Thành phố Hà Nội', 0.200, 0.00, NULL, NULL, NULL, '2025-10-20 16:09:49', 'PENDING_PAYMENT', 120000.00, 0.00, 120000.00, NULL, 0.00),
-(25, 43, NULL, NULL, NULL, 2.35, 17700.00, 0.00, 137700.00, NULL, 'hà', '0988272617', 'Ngõ 933 Đê La Thành', 'Thành phố Hà Nội', 0.200, 17700.00, NULL, NULL, NULL, '2025-10-20 16:43:48', 'PENDING_PAYMENT', 120000.00, 17700.00, 137700.00, NULL, 0.00),
-(26, 43, NULL, NULL, NULL, 3.85, 20700.00, 0.00, 2020700.00, NULL, 'hoàng hà', '09272672162', 'Phố Vạn Phúc', 'Thành phố Hà Nội', 2.000, 20700.00, NULL, NULL, NULL, '2025-10-20 16:45:12', 'CANCELED', 2000000.00, 20700.00, 2020700.00, NULL, 0.00),
-(27, 43, NULL, NULL, NULL, 3.13, 19260.00, 0.00, 1019260.00, NULL, 'hà', '0978755672', 'Phố Ngọc Khánh', 'Thành phố Hà Nội', 1.000, 19260.00, NULL, NULL, NULL, '2025-10-20 16:50:25', 'CANCELED', 1000000.00, 19260.00, 1019260.00, NULL, 0.00),
-(28, 43, NULL, NULL, NULL, 6.37, 39110.00, 0.00, 759110.00, NULL, 'tao', '0988376267', 'Phố Nguyễn Trung Trực', 'Thành phố Hà Nội', 0.800, 39110.00, NULL, NULL, NULL, '2025-10-20 16:59:50', 'CANCELED', 720000.00, 39110.00, 759110.00, NULL, 0.00),
-(29, 43, NULL, NULL, NULL, 4.40, 21800.00, 0.00, 621800.00, NULL, 'hà', '0987727262', 'Ngõ 11 Trịnh Hoài Đức', 'Thành phố Hà Nội', 0.600, 21800.00, NULL, NULL, NULL, '2025-10-20 17:00:57', 'CANCELED', 600000.00, 21800.00, 621800.00, NULL, 0.00),
-(30, 43, NULL, NULL, NULL, 3.66, 20320.00, 0.00, 140320.00, NULL, 'hà', '0928882722', 'Phố Vạn Phúc', 'Thành phố Hà Nội', 0.200, 20320.00, NULL, NULL, NULL, '2025-10-20 17:04:03', 'CANCELED', 120000.00, 20320.00, 140320.00, NULL, 0.00),
-(31, 43, NULL, NULL, NULL, 1.54, 16080.00, 16080.00, 120000.00, 'hehe', 'tao', '0988736321', 'Phường Yên Hòa, Thành phố Hà Nội, 10079, Việt Nam', 'Thành phố Hà Nội', 0.200, 0.00, NULL, NULL, NULL, '2025-10-20 17:19:22', 'CANCELED', 120000.00, 0.00, 120000.00, NULL, 0.00),
-(32, 43, NULL, NULL, NULL, 4.67, 22340.00, 0.00, 622340.00, NULL, 'hà', '0977362343', 'Ngõ 115 Phố Nguyễn Khuyến', 'Thành phố Hà Nội', 1.000, 22340.00, NULL, NULL, NULL, '2025-10-20 17:24:44', 'CANCELED', 600000.00, 22340.00, 622340.00, NULL, 0.00),
-(33, 43, NULL, NULL, NULL, 4.03, 21060.00, 0.00, 2001060.00, NULL, 'hà', '0366368627', 'Phố Tôn Đức Thắng', 'Thành phố Hà Nội', 2.400, 21060.00, NULL, NULL, NULL, '2025-10-20 17:26:19', 'CANCELED', 1980000.00, 21060.00, 2001060.00, NULL, 0.00),
-(34, 43, NULL, NULL, NULL, 2.94, 18880.00, 0.00, 348880.00, NULL, 'hà', '0988372622', 'Ngõ 94 Ngọc Khánh', 'Thành phố Hà Nội', 0.400, 18880.00, NULL, NULL, NULL, '2025-10-20 18:09:47', 'PENDING_PAYMENT', 330000.00, 18880.00, 348880.00, NULL, 0.00);
+INSERT INTO `orders` (`id`, `user_id`, `shipping_address_id`, `shipping_carrier_id`, `shipping_service_id`, `shipping_distance_km`, `shipping_fee_before`, `shipping_discount`, `grand_total`, `voucher_code`, `receiver_name`, `phone`, `address_line`, `province`, `weight_kg`, `shipping_fee_final`, `shipping_eta_min`, `shipping_eta_max`, `shipping_quote_id`, `order_date`, `status`, `items_total`, `shipping_fee`, `total_amount`, `coupon_code`, `coupon_discount`, `order_code`, `payment_method`) VALUES
+(1, 1, NULL, NULL, NULL, NULL, NULL, 0.00, 0.00, NULL, '', '', '', '', 0.000, NULL, NULL, NULL, NULL, '2025-08-25 14:50:57', 'PENDING_PAYMENT', 0.00, NULL, 890000.00, NULL, 0.00, '', 'COD'),
+(2, 1, NULL, NULL, NULL, NULL, NULL, 0.00, 0.00, NULL, '', '', '', '', 0.000, NULL, NULL, NULL, NULL, '2025-08-25 14:50:57', 'CANCELED', 0.00, NULL, 250000.00, NULL, 0.00, '', 'COD'),
+(3, 44, NULL, NULL, NULL, 2.44, 17880.00, 0.00, 547880.00, NULL, 'Nguyễn Văn A', '0900000000', '12 Ngõ 34 Xã Đàn', 'Hà Nội', 1.100, 17880.00, NULL, NULL, NULL, '2025-09-28 05:39:27', 'CANCELED', 530000.00, 17880.00, 547880.00, NULL, 0.00, '', 'COD'),
+(4, 44, NULL, NULL, NULL, 2.44, 17880.00, 0.00, 547880.00, NULL, 'Nguyễn Văn A', '0900000000', '12 Ngõ 34 Xã Đàn', 'Hà Nội', 1.100, 17880.00, NULL, NULL, NULL, '2025-09-28 05:44:30', 'PENDING_PAYMENT', 530000.00, 17880.00, 547880.00, NULL, 0.00, '', 'COD'),
+(5, 44, NULL, NULL, NULL, 3.39, 19780.00, 0.00, 909780.00, NULL, 'phùng thị trang', '0349459165', 'Ngõ 35 Phố Kim Mã Thượng', 'Thành phố Hà Nội', 1.000, 19780.00, NULL, NULL, NULL, '2025-09-28 12:06:11', 'CANCELED', 890000.00, 19780.00, 909780.00, NULL, 0.00, '', 'COD'),
+(6, 44, NULL, NULL, NULL, 5.42, 36260.00, 0.00, 926260.00, NULL, 'trang trang', '0123456789', 'Đường Số 19', 'Thành phố Hà Nội', 1.000, 36260.00, NULL, NULL, NULL, '2025-09-28 12:37:30', 'PENDING_PAYMENT', 890000.00, 36260.00, 926260.00, NULL, 0.00, '', 'COD'),
+(7, 44, NULL, NULL, NULL, 2.96, 18920.00, 0.00, 908920.00, NULL, 'Phùng thị trang', '0123456891', 'Ngách 2 Ngõ 72 Phố Dương Quảng Hàm', 'Thành phố Hà Nội', 1.000, 18920.00, NULL, NULL, NULL, '2025-09-28 13:02:13', 'DELIVERED', 890000.00, 18920.00, 908920.00, NULL, 0.00, '', 'COD'),
+(8, 44, NULL, NULL, NULL, 2.96, 18920.00, 0.00, 908920.00, NULL, 'Phùng thị trang', '0123456891', 'Ngách 2 Ngõ 72 Phố Dương Quảng Hàm', 'Thành phố Hà Nội', 1.000, 18920.00, NULL, NULL, NULL, '2025-09-28 13:02:13', 'PENDING_PAYMENT', 890000.00, 18920.00, 908920.00, NULL, 0.00, '', 'COD'),
+(9, 44, NULL, NULL, NULL, 6.67, 40010.00, 0.00, 930010.00, NULL, 'my', '01234568799', 'Phố An Dương', 'Thành phố Hà Nội', 1.000, 40010.00, NULL, NULL, NULL, '2025-09-28 13:04:51', 'DELIVERED', 890000.00, 40010.00, 930010.00, NULL, 0.00, '', 'COD'),
+(10, 44, NULL, NULL, NULL, 6.67, 40010.00, 0.00, 930010.00, NULL, 'my', '01234568799', 'Phố An Dương', 'Thành phố Hà Nội', 1.000, 40010.00, NULL, NULL, NULL, '2025-09-28 13:04:51', 'PENDING_PAYMENT', 890000.00, 40010.00, 930010.00, NULL, 0.00, '', 'COD'),
+(11, 44, NULL, NULL, NULL, 3.92, 20840.00, 0.00, 910840.00, NULL, 'trang trang', '0123456789', 'Ngõ Núi Trúc', 'Thành phố Hà Nội', 1.000, 20840.00, NULL, NULL, NULL, '2025-09-28 13:20:22', 'PAID', 890000.00, 20840.00, 910840.00, NULL, 0.00, '', 'COD'),
+(12, 44, NULL, NULL, NULL, 3.64, 20280.00, 0.00, 620280.00, NULL, 'trang trang', '0349459165', 'Phố Đội Cấn', 'Thành phố Hà Nội', 0.600, 20280.00, NULL, NULL, NULL, '2025-09-29 16:55:56', 'PENDING_PAYMENT', 600000.00, 20280.00, 620280.00, NULL, 0.00, '', 'COD'),
+(13, 44, NULL, NULL, NULL, 6.40, 39200.00, 0.00, 849200.00, NULL, 'phùng trang', '0349459165', 'Phố Nguyễn Trung Trực', 'Thành phố Hà Nội', 0.800, 39200.00, NULL, NULL, NULL, '2025-09-30 07:48:07', 'SHIPPED', 810000.00, 39200.00, 849200.00, NULL, 0.00, '', 'COD'),
+(14, 43, NULL, NULL, NULL, 4.42, 21840.00, 0.00, 351840.00, NULL, 'Hoàng Văn Hà', '0366379629', 'Phố Quốc Tử Giám', 'Thành phố Hà Nội', 0.400, 21840.00, NULL, NULL, NULL, '2025-10-15 16:42:27', 'PENDING_PAYMENT', 330000.00, 21840.00, 351840.00, NULL, 0.00, '', 'COD'),
+(15, 43, NULL, NULL, NULL, 5.03, 35090.00, 0.00, 365090.00, NULL, 'zzzzz', '0142142122', 'Phố Cao Bá Quát', 'Thành phố Hà Nội', 0.400, 35090.00, NULL, NULL, NULL, '2025-10-15 16:43:45', 'CANCELED', 330000.00, 35090.00, 365090.00, NULL, 0.00, '', 'COD'),
+(16, 43, NULL, NULL, NULL, 5.65, 36950.00, 0.00, 144950.00, 'FREESHIPHN', 'Hoàng Hà', '0366379629', 'Phố Tràng Thi', 'Thành phố Hà Nội', 0.200, 36950.00, NULL, NULL, NULL, '2025-10-15 21:59:47', 'PENDING_PAYMENT', 120000.00, 36950.00, 144950.00, 'hehe', 12000.00, '', 'COD'),
+(17, 43, NULL, NULL, NULL, 5.73, 37190.00, 0.00, 145190.00, 'haha', 'hoàng hà', '0123456789', 'Phố Hai Bà Trưng', 'Thành phố Hà Nội', 0.200, 37190.00, NULL, NULL, NULL, '2025-10-15 22:14:03', 'PENDING_PAYMENT', 120000.00, 37190.00, 145190.00, 'hehe', 12000.00, '', 'COD'),
+(18, 43, NULL, NULL, NULL, 3.67, 20340.00, 0.00, 236340.00, NULL, 'gag', '0981248718', 'Phố Núi Trúc', 'Thành phố Hà Nội', 0.400, 20340.00, NULL, NULL, NULL, '2025-10-15 22:35:32', 'PENDING_PAYMENT', 240000.00, 20340.00, 236340.00, 'hehe', 24000.00, '', 'COD'),
+(19, 43, NULL, NULL, NULL, 4.63, 22260.00, 0.00, 262260.00, NULL, 'hấ', '01210954015', 'Phố Ngô Tất Tố', 'Thành phố Hà Nội', 0.400, 22260.00, NULL, NULL, NULL, '2025-10-15 23:07:58', 'PENDING_PAYMENT', 240000.00, 22260.00, 262260.00, NULL, 0.00, '', 'COD'),
+(20, 43, NULL, NULL, NULL, 4.54, 22080.00, 0.00, 454080.00, NULL, 'hà', '0988288282', 'Phố Tôn Đức Thắng', 'Thành phố Hà Nội', 0.800, 22080.00, NULL, NULL, NULL, '2025-10-19 18:00:45', 'PENDING_PAYMENT', 480000.00, 22080.00, 454080.00, 'hehe', 48000.00, '', 'COD'),
+(21, 43, NULL, NULL, NULL, 3.11, 19220.00, 0.00, 619220.00, NULL, 'tao', '03448837283', 'Ngõ 66 Dịch Vọng Hậu', 'Thành phố Hà Nội', 1.000, 19220.00, NULL, NULL, NULL, '2025-10-19 18:04:17', 'PENDING_PAYMENT', 600000.00, 19220.00, 619220.00, NULL, 0.00, '', 'COD'),
+(22, 43, NULL, NULL, NULL, 5.51, 36530.00, 20000.00, 276530.00, 'haha', 'hà', '0366379629', 'Ngõ 91A Lý Nam Đế', 'Thành phố Hà Nội', 0.600, 16530.00, NULL, NULL, NULL, '2025-10-19 20:03:58', 'PENDING_PAYMENT', 360000.00, 16530.00, 276530.00, 'haha', 100000.00, '', 'COD'),
+(23, 43, NULL, NULL, NULL, 2.36, 17720.00, 3544.00, 134176.00, 'hihi', 'hà', '0983762522', 'Đường La Thành', 'Thành phố Hà Nội', 0.200, 14176.00, NULL, NULL, NULL, '2025-10-19 21:51:13', 'PENDING_PAYMENT', 120000.00, 14176.00, 134176.00, NULL, 0.00, '', 'COD'),
+(24, 43, NULL, NULL, NULL, 3.59, 20180.00, 20180.00, 120000.00, 'hehe', 'hà', '02987837222', 'Ngõ 44 Hào Nam', 'Thành phố Hà Nội', 0.200, 0.00, NULL, NULL, NULL, '2025-10-20 16:09:49', 'PENDING_PAYMENT', 120000.00, 0.00, 120000.00, NULL, 0.00, '', 'COD'),
+(25, 43, NULL, NULL, NULL, 2.35, 17700.00, 0.00, 137700.00, NULL, 'hà', '0988272617', 'Ngõ 933 Đê La Thành', 'Thành phố Hà Nội', 0.200, 17700.00, NULL, NULL, NULL, '2025-10-20 16:43:48', 'PENDING_PAYMENT', 120000.00, 17700.00, 137700.00, NULL, 0.00, '', 'COD'),
+(26, 43, NULL, NULL, NULL, 3.85, 20700.00, 0.00, 2020700.00, NULL, 'hoàng hà', '09272672162', 'Phố Vạn Phúc', 'Thành phố Hà Nội', 2.000, 20700.00, NULL, NULL, NULL, '2025-10-20 16:45:12', 'CANCELED', 2000000.00, 20700.00, 2020700.00, NULL, 0.00, '', 'COD'),
+(27, 43, NULL, NULL, NULL, 3.13, 19260.00, 0.00, 1019260.00, NULL, 'hà', '0978755672', 'Phố Ngọc Khánh', 'Thành phố Hà Nội', 1.000, 19260.00, NULL, NULL, NULL, '2025-10-20 16:50:25', 'CANCELED', 1000000.00, 19260.00, 1019260.00, NULL, 0.00, '', 'COD'),
+(28, 43, NULL, NULL, NULL, 6.37, 39110.00, 0.00, 759110.00, NULL, 'tao', '0988376267', 'Phố Nguyễn Trung Trực', 'Thành phố Hà Nội', 0.800, 39110.00, NULL, NULL, NULL, '2025-10-20 16:59:50', 'CANCELED', 720000.00, 39110.00, 759110.00, NULL, 0.00, '', 'COD'),
+(29, 43, NULL, NULL, NULL, 4.40, 21800.00, 0.00, 621800.00, NULL, 'hà', '0987727262', 'Ngõ 11 Trịnh Hoài Đức', 'Thành phố Hà Nội', 0.600, 21800.00, NULL, NULL, NULL, '2025-10-20 17:00:57', 'CANCELED', 600000.00, 21800.00, 621800.00, NULL, 0.00, '', 'COD'),
+(30, 43, NULL, NULL, NULL, 3.66, 20320.00, 0.00, 140320.00, NULL, 'hà', '0928882722', 'Phố Vạn Phúc', 'Thành phố Hà Nội', 0.200, 20320.00, NULL, NULL, NULL, '2025-10-20 17:04:03', 'CANCELED', 120000.00, 20320.00, 140320.00, NULL, 0.00, '', 'COD'),
+(31, 43, NULL, NULL, NULL, 1.54, 16080.00, 16080.00, 120000.00, 'hehe', 'tao', '0988736321', 'Phường Yên Hòa, Thành phố Hà Nội, 10079, Việt Nam', 'Thành phố Hà Nội', 0.200, 0.00, NULL, NULL, NULL, '2025-10-20 17:19:22', 'CANCELED', 120000.00, 0.00, 120000.00, NULL, 0.00, '', 'COD'),
+(32, 43, NULL, NULL, NULL, 4.67, 22340.00, 0.00, 622340.00, NULL, 'hà', '0977362343', 'Ngõ 115 Phố Nguyễn Khuyến', 'Thành phố Hà Nội', 1.000, 22340.00, NULL, NULL, NULL, '2025-10-20 17:24:44', 'CANCELED', 600000.00, 22340.00, 622340.00, NULL, 0.00, '', 'COD'),
+(33, 43, NULL, NULL, NULL, 4.03, 21060.00, 0.00, 2001060.00, NULL, 'hà', '0366368627', 'Phố Tôn Đức Thắng', 'Thành phố Hà Nội', 2.400, 21060.00, NULL, NULL, NULL, '2025-10-20 17:26:19', 'CANCELED', 1980000.00, 21060.00, 2001060.00, NULL, 0.00, '', 'COD'),
+(34, 43, NULL, NULL, NULL, 2.94, 18880.00, 0.00, 348880.00, NULL, 'hà', '0988372622', 'Ngõ 94 Ngọc Khánh', 'Thành phố Hà Nội', 0.400, 18880.00, NULL, NULL, NULL, '2025-10-20 18:09:47', 'PENDING_PAYMENT', 330000.00, 18880.00, 348880.00, NULL, 0.00, '', 'COD'),
+(35, 43, NULL, NULL, NULL, 3.58, 20160.00, 0.00, 440160.00, NULL, '098', '0971826712', '123', 'Tỉnh Cao Bằng', 0.400, 20160.00, NULL, NULL, NULL, '2025-10-20 19:27:54', 'PENDING_PAYMENT', 420000.00, 20160.00, 440160.00, NULL, 0.00, 'ORDER1760988474407', NULL),
+(36, 43, NULL, NULL, NULL, 0.00, 20160.00, 0.00, 440160.00, NULL, '098', '0971826712', '123', 'Tỉnh Cao Bằng', 0.000, NULL, NULL, NULL, NULL, '2025-10-20 19:27:54', 'PAID', 420000.00, 20160.00, 440160.00, NULL, 0.00, 'ORDER1760988474474', 'VNPAY');
 
 --
--- Triggers `orders`
+-- Bẫy `orders`
 --
 DELIMITER $$
 CREATE TRIGGER `after_orders_cancel_restock` AFTER UPDATE ON `orders` FOR EACH ROW BEGIN
@@ -676,7 +686,7 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `order_audits`
+-- Cấu trúc bảng cho bảng `order_audits`
 --
 
 CREATE TABLE `order_audits` (
@@ -691,7 +701,7 @@ CREATE TABLE `order_audits` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `order_audits`
+-- Đang đổ dữ liệu cho bảng `order_audits`
 --
 
 INSERT INTO `order_audits` (`id`, `order_id`, `action`, `old_status`, `new_status`, `by_user_id`, `note`, `created_at`) VALUES
@@ -727,7 +737,7 @@ INSERT INTO `order_audits` (`id`, `order_id`, `action`, `old_status`, `new_statu
 -- --------------------------------------------------------
 
 --
--- Table structure for table `order_coupons`
+-- Cấu trúc bảng cho bảng `order_coupons`
 --
 
 CREATE TABLE `order_coupons` (
@@ -739,7 +749,7 @@ CREATE TABLE `order_coupons` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `order_items`
+-- Cấu trúc bảng cho bảng `order_items`
 --
 
 CREATE TABLE `order_items` (
@@ -754,7 +764,7 @@ CREATE TABLE `order_items` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `order_items`
+-- Đang đổ dữ liệu cho bảng `order_items`
 --
 
 INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `price`, `unit_price`, `product_name`, `weight_kg_per_item`) VALUES
@@ -818,12 +828,14 @@ INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `price`, 
 (60, 33, 14, 6, NULL, 120000.00, 'TIỂU ĐÀO ĐÀO', 0.200),
 (61, 33, 13, 6, NULL, 210000.00, 'THỎ ĐÀO NGỌT NGÀO', 0.200),
 (62, 34, 14, 1, NULL, 120000.00, 'TIỂU ĐÀO ĐÀO', 0.200),
-(63, 34, 13, 1, NULL, 210000.00, 'THỎ ĐÀO NGỌT NGÀO', 0.200);
+(63, 34, 13, 1, NULL, 210000.00, 'THỎ ĐÀO NGỌT NGÀO', 0.200),
+(64, 35, 13, 1, NULL, 210000.00, 'THỎ ĐÀO NGỌT NGÀO', 0.200),
+(65, 35, 12, 1, NULL, 210000.00, 'GẤU DÂU ĐÁNG YÊU', 0.200);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `order_shipping_vouchers`
+-- Cấu trúc bảng cho bảng `order_shipping_vouchers`
 --
 
 CREATE TABLE `order_shipping_vouchers` (
@@ -835,7 +847,7 @@ CREATE TABLE `order_shipping_vouchers` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `password_reset_codes`
+-- Cấu trúc bảng cho bảng `password_reset_codes`
 --
 
 CREATE TABLE `password_reset_codes` (
@@ -848,7 +860,7 @@ CREATE TABLE `password_reset_codes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `password_reset_codes`
+-- Đang đổ dữ liệu cho bảng `password_reset_codes`
 --
 
 INSERT INTO `password_reset_codes` (`id`, `email`, `code`, `created_at`, `expires_at`, `used`) VALUES
@@ -858,7 +870,7 @@ INSERT INTO `password_reset_codes` (`id`, `email`, `code`, `created_at`, `expire
 -- --------------------------------------------------------
 
 --
--- Table structure for table `payments`
+-- Cấu trúc bảng cho bảng `payments`
 --
 
 CREATE TABLE `payments` (
@@ -873,7 +885,7 @@ CREATE TABLE `payments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `payments`
+-- Đang đổ dữ liệu cho bảng `payments`
 --
 
 INSERT INTO `payments` (`id`, `order_id`, `payment_method`, `amount`, `payment_date`, `status`, `created_at`, `updated_at`) VALUES
@@ -883,7 +895,7 @@ INSERT INTO `payments` (`id`, `order_id`, `payment_method`, `amount`, `payment_d
 -- --------------------------------------------------------
 
 --
--- Table structure for table `permissions`
+-- Cấu trúc bảng cho bảng `permissions`
 --
 
 CREATE TABLE `permissions` (
@@ -893,7 +905,7 @@ CREATE TABLE `permissions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `permissions`
+-- Đang đổ dữ liệu cho bảng `permissions`
 --
 
 INSERT INTO `permissions` (`id`, `name`, `description`) VALUES
@@ -916,7 +928,7 @@ INSERT INTO `permissions` (`id`, `name`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `products`
+-- Cấu trúc bảng cho bảng `products`
 --
 
 CREATE TABLE `products` (
@@ -932,7 +944,7 @@ CREATE TABLE `products` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `products`
+-- Đang đổ dữ liệu cho bảng `products`
 --
 
 INSERT INTO `products` (`id`, `name`, `description`, `price`, `image_url`, `category_id`, `brand_id`, `stock`, `created_at`) VALUES
@@ -943,14 +955,14 @@ INSERT INTO `products` (`id`, `name`, `description`, `price`, `image_url`, `cate
 (9, 'HỔ KAKA', 'WWWWW', 130000.00, '/uploads/1756280577416-563265173-OIP (3).webp', 2, 1, 11, '2025-08-27 07:42:57'),
 (10, 'GẤU TRÚC THIẾU NGỦ', 'HHH', 120000.00, '/uploads/1756280627818-112704816-OIP (4).webp', 2, 3, 12, '2025-08-27 07:43:47'),
 (11, 'GẤU TRÚC HAM ĂN', 'HHH', 130000.00, '/uploads/1756280679637-881067446-OIP9.jpg', 1, 3, 11, '2025-08-27 07:44:39'),
-(12, 'GẤU DÂU ĐÁNG YÊU', 'KKKK', 210000.00, '/uploads/1756280739648-379525019-OIP (5).webp', 1, 1, 22, '2025-08-27 07:45:39'),
-(13, 'THỎ ĐÀO NGỌT NGÀO', 'HHH', 210000.00, '/uploads/1756280802618-785400663-OIP (7).webp', 1, 3, 499, '2025-08-27 07:46:42'),
+(12, 'GẤU DÂU ĐÁNG YÊU', 'KKKK', 210000.00, '/uploads/1756280739648-379525019-OIP (5).webp', 1, 1, 21, '2025-08-27 07:45:39'),
+(13, 'THỎ ĐÀO NGỌT NGÀO', 'HHH', 210000.00, '/uploads/1756280802618-785400663-OIP (7).webp', 1, 3, 498, '2025-08-27 07:46:42'),
 (14, 'TIỂU ĐÀO ĐÀO', 'HHH', 120000.00, '/uploads/1756280863080-210403397-OIP (6).webp', 2, 3, 2995, '2025-08-27 07:47:43');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `product_attributes`
+-- Cấu trúc bảng cho bảng `product_attributes`
 --
 
 CREATE TABLE `product_attributes` (
@@ -960,7 +972,7 @@ CREATE TABLE `product_attributes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `product_attributes`
+-- Đang đổ dữ liệu cho bảng `product_attributes`
 --
 
 INSERT INTO `product_attributes` (`product_id`, `attribute_id`, `value`) VALUES
@@ -1028,7 +1040,7 @@ INSERT INTO `product_attributes` (`product_id`, `attribute_id`, `value`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `reviews`
+-- Cấu trúc bảng cho bảng `reviews`
 --
 
 CREATE TABLE `reviews` (
@@ -1041,7 +1053,7 @@ CREATE TABLE `reviews` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `reviews`
+-- Đang đổ dữ liệu cho bảng `reviews`
 --
 
 INSERT INTO `reviews` (`id`, `product_id`, `user_id`, `rating`, `comment`, `review_date`) VALUES
@@ -1054,7 +1066,7 @@ INSERT INTO `reviews` (`id`, `product_id`, `user_id`, `rating`, `comment`, `revi
 -- --------------------------------------------------------
 
 --
--- Table structure for table `roles`
+-- Cấu trúc bảng cho bảng `roles`
 --
 
 CREATE TABLE `roles` (
@@ -1064,7 +1076,7 @@ CREATE TABLE `roles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `roles`
+-- Đang đổ dữ liệu cho bảng `roles`
 --
 
 INSERT INTO `roles` (`id`, `name`, `description`) VALUES
@@ -1077,7 +1089,7 @@ INSERT INTO `roles` (`id`, `name`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `role_permissions`
+-- Cấu trúc bảng cho bảng `role_permissions`
 --
 
 CREATE TABLE `role_permissions` (
@@ -1087,7 +1099,7 @@ CREATE TABLE `role_permissions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `role_permissions`
+-- Đang đổ dữ liệu cho bảng `role_permissions`
 --
 
 INSERT INTO `role_permissions` (`role_id`, `permission_id`, `id`) VALUES
@@ -1113,7 +1125,7 @@ INSERT INTO `role_permissions` (`role_id`, `permission_id`, `id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `shipping`
+-- Cấu trúc bảng cho bảng `shipping`
 --
 
 CREATE TABLE `shipping` (
@@ -1136,7 +1148,7 @@ CREATE TABLE `shipping` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `shipping_carriers`
+-- Cấu trúc bảng cho bảng `shipping_carriers`
 --
 
 CREATE TABLE `shipping_carriers` (
@@ -1148,7 +1160,7 @@ CREATE TABLE `shipping_carriers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `shipping_carriers`
+-- Đang đổ dữ liệu cho bảng `shipping_carriers`
 --
 
 INSERT INTO `shipping_carriers` (`id`, `code`, `name`, `is_active`, `created_at`) VALUES
@@ -1159,7 +1171,7 @@ INSERT INTO `shipping_carriers` (`id`, `code`, `name`, `is_active`, `created_at`
 -- --------------------------------------------------------
 
 --
--- Table structure for table `shipping_quotes`
+-- Cấu trúc bảng cho bảng `shipping_quotes`
 --
 
 CREATE TABLE `shipping_quotes` (
@@ -1182,7 +1194,7 @@ CREATE TABLE `shipping_quotes` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `shipping_records`
+-- Cấu trúc bảng cho bảng `shipping_records`
 --
 
 CREATE TABLE `shipping_records` (
@@ -1197,7 +1209,7 @@ CREATE TABLE `shipping_records` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `shipping_records`
+-- Đang đổ dữ liệu cho bảng `shipping_records`
 --
 
 INSERT INTO `shipping_records` (`id`, `order_id`, `carrier`, `tracking_code`, `fee_charged`, `status`, `created_at`, `updated_at`) VALUES
@@ -1232,12 +1244,13 @@ INSERT INTO `shipping_records` (`id`, `order_id`, `carrier`, `tracking_code`, `f
 (29, 31, 'INTERNAL', NULL, 0.00, 'CREATED', '2025-10-20 10:19:22', '2025-10-20 10:19:22'),
 (30, 32, 'INTERNAL', NULL, 22340.00, 'CREATED', '2025-10-20 10:24:44', '2025-10-20 10:24:44'),
 (31, 33, 'INTERNAL', NULL, 21060.00, 'CREATED', '2025-10-20 10:26:19', '2025-10-20 10:26:19'),
-(32, 34, 'INTERNAL', NULL, 18880.00, 'CREATED', '2025-10-20 11:09:47', '2025-10-20 11:09:47');
+(32, 34, 'INTERNAL', NULL, 18880.00, 'CREATED', '2025-10-20 11:09:47', '2025-10-20 11:09:47'),
+(33, 35, 'INTERNAL', NULL, 20160.00, 'CREATED', '2025-10-20 12:27:54', '2025-10-20 12:27:54');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `shipping_services`
+-- Cấu trúc bảng cho bảng `shipping_services`
 --
 
 CREATE TABLE `shipping_services` (
@@ -1251,7 +1264,7 @@ CREATE TABLE `shipping_services` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `shipping_services`
+-- Đang đổ dữ liệu cho bảng `shipping_services`
 --
 
 INSERT INTO `shipping_services` (`id`, `carrier_id`, `code`, `label`, `is_active`, `base_days_min`, `base_days_max`) VALUES
@@ -1262,7 +1275,7 @@ INSERT INTO `shipping_services` (`id`, `carrier_id`, `code`, `label`, `is_active
 -- --------------------------------------------------------
 
 --
--- Table structure for table `shipping_vouchers`
+-- Cấu trúc bảng cho bảng `shipping_vouchers`
 --
 
 CREATE TABLE `shipping_vouchers` (
@@ -1290,7 +1303,7 @@ CREATE TABLE `shipping_vouchers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `shipping_vouchers`
+-- Đang đổ dữ liệu cho bảng `shipping_vouchers`
 --
 
 INSERT INTO `shipping_vouchers` (`id`, `code`, `description`, `discount_type`, `discount_value`, `max_discount_amount`, `min_order_amount`, `start_at`, `end_at`, `min_shipping_fee`, `applicable_carriers`, `region_include`, `region_exclude`, `max_uses`, `used_count`, `max_uses_per_user`, `start_date`, `end_date`, `active`, `created_at`, `updated_at`) VALUES
@@ -1301,7 +1314,7 @@ INSERT INTO `shipping_vouchers` (`id`, `code`, `description`, `discount_type`, `
 -- --------------------------------------------------------
 
 --
--- Table structure for table `shipping_voucher_uses`
+-- Cấu trúc bảng cho bảng `shipping_voucher_uses`
 --
 
 CREATE TABLE `shipping_voucher_uses` (
@@ -1313,7 +1326,7 @@ CREATE TABLE `shipping_voucher_uses` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `suppliers`
+-- Cấu trúc bảng cho bảng `suppliers`
 --
 
 CREATE TABLE `suppliers` (
@@ -1328,7 +1341,7 @@ CREATE TABLE `suppliers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `suppliers`
+-- Đang đổ dữ liệu cho bảng `suppliers`
 --
 
 INSERT INTO `suppliers` (`id`, `name`, `contact_person`, `phone`, `email`, `address`, `created_at`, `updated_at`) VALUES
@@ -1337,7 +1350,7 @@ INSERT INTO `suppliers` (`id`, `name`, `contact_person`, `phone`, `email`, `addr
 -- --------------------------------------------------------
 
 --
--- Table structure for table `themes`
+-- Cấu trúc bảng cho bảng `themes`
 --
 
 CREATE TABLE `themes` (
@@ -1353,7 +1366,7 @@ CREATE TABLE `themes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `themes`
+-- Đang đổ dữ liệu cho bảng `themes`
 --
 
 INSERT INTO `themes` (`id`, `name`, `slug`, `description`, `is_featured`, `display_order`, `active`, `created_at`, `updated_at`) VALUES
@@ -1364,7 +1377,7 @@ INSERT INTO `themes` (`id`, `name`, `slug`, `description`, `is_featured`, `displ
 -- --------------------------------------------------------
 
 --
--- Table structure for table `theme_categories`
+-- Cấu trúc bảng cho bảng `theme_categories`
 --
 
 CREATE TABLE `theme_categories` (
@@ -1374,7 +1387,7 @@ CREATE TABLE `theme_categories` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `theme_categories`
+-- Đang đổ dữ liệu cho bảng `theme_categories`
 --
 
 INSERT INTO `theme_categories` (`theme_id`, `category_id`, `created_at`) VALUES
@@ -1388,7 +1401,7 @@ INSERT INTO `theme_categories` (`theme_id`, `category_id`, `created_at`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users`
+-- Cấu trúc bảng cho bảng `users`
 --
 
 CREATE TABLE `users` (
@@ -1405,7 +1418,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `users`
+-- Đang đổ dữ liệu cho bảng `users`
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `email`, `address`, `phone`, `status`, `tier`, `points`, `created_at`) VALUES
@@ -1435,7 +1448,7 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `address`, `phone`, 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user_addresses`
+-- Cấu trúc bảng cho bảng `user_addresses`
 --
 
 CREATE TABLE `user_addresses` (
@@ -1458,7 +1471,7 @@ CREATE TABLE `user_addresses` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user_roles`
+-- Cấu trúc bảng cho bảng `user_roles`
 --
 
 CREATE TABLE `user_roles` (
@@ -1468,7 +1481,7 @@ CREATE TABLE `user_roles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `user_roles`
+-- Đang đổ dữ liệu cho bảng `user_roles`
 --
 
 INSERT INTO `user_roles` (`id`, `user_id`, `role_id`) VALUES
@@ -1485,7 +1498,7 @@ INSERT INTO `user_roles` (`id`, `user_id`, `role_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `vn_districts`
+-- Cấu trúc bảng cho bảng `vn_districts`
 --
 
 CREATE TABLE `vn_districts` (
@@ -1497,7 +1510,7 @@ CREATE TABLE `vn_districts` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `vn_provinces`
+-- Cấu trúc bảng cho bảng `vn_provinces`
 --
 
 CREATE TABLE `vn_provinces` (
@@ -1508,7 +1521,7 @@ CREATE TABLE `vn_provinces` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `vn_wards`
+-- Cấu trúc bảng cho bảng `vn_wards`
 --
 
 CREATE TABLE `vn_wards` (
@@ -1520,7 +1533,7 @@ CREATE TABLE `vn_wards` (
 -- --------------------------------------------------------
 
 --
--- Stand-in structure for view `v_theme_products`
+-- Cấu trúc đóng vai cho view `v_theme_products`
 -- (See below for the actual view)
 --
 CREATE TABLE `v_theme_products` (
@@ -1539,7 +1552,7 @@ CREATE TABLE `v_theme_products` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `warehouses`
+-- Cấu trúc bảng cho bảng `warehouses`
 --
 
 CREATE TABLE `warehouses` (
@@ -1556,7 +1569,7 @@ CREATE TABLE `warehouses` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `warehouses`
+-- Đang đổ dữ liệu cho bảng `warehouses`
 --
 
 INSERT INTO `warehouses` (`id`, `name`, `address_line`, `province_code`, `district_code`, `ward_code`, `latitude`, `longitude`, `is_active`, `created_at`) VALUES
@@ -1565,31 +1578,31 @@ INSERT INTO `warehouses` (`id`, `name`, `address_line`, `province_code`, `distri
 -- --------------------------------------------------------
 
 --
--- Structure for view `v_theme_products`
+-- Cấu trúc cho view `v_theme_products`
 --
 DROP TABLE IF EXISTS `v_theme_products`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_theme_products`  AS SELECT `t`.`id` AS `theme_id`, `t`.`name` AS `theme_name`, `c`.`id` AS `category_id`, `c`.`name` AS `category_name`, `p`.`id` AS `product_id`, `p`.`name` AS `product_name`, `p`.`price` AS `price`, `p`.`image_url` AS `image_url`, `p`.`brand_id` AS `brand_id`, `p`.`created_at` AS `product_created_at` FROM (((`themes` `t` join `theme_categories` `tc` on(`tc`.`theme_id` = `t`.`id`)) join `categories` `c` on(`c`.`id` = `tc`.`category_id`)) left join `products` `p` on(`p`.`category_id` = `c`.`id`)) WHERE `t`.`active` = 1 ;
 
 --
--- Indexes for dumped tables
+-- Chỉ mục cho các bảng đã đổ
 --
 
 --
--- Indexes for table `attributes`
+-- Chỉ mục cho bảng `attributes`
 --
 ALTER TABLE `attributes`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `brands`
+-- Chỉ mục cho bảng `brands`
 --
 ALTER TABLE `brands`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `name` (`name`);
 
 --
--- Indexes for table `carrier_rate_rules`
+-- Chỉ mục cho bảng `carrier_rate_rules`
 --
 ALTER TABLE `carrier_rate_rules`
   ADD PRIMARY KEY (`id`),
@@ -1598,7 +1611,7 @@ ALTER TABLE `carrier_rate_rules`
   ADD KEY `idx_rate_active` (`is_active`,`active_from`,`active_to`);
 
 --
--- Indexes for table `carts`
+-- Chỉ mục cho bảng `carts`
 --
 ALTER TABLE `carts`
   ADD PRIMARY KEY (`id`),
@@ -1606,13 +1619,13 @@ ALTER TABLE `carts`
   ADD KEY `product_id` (`product_id`);
 
 --
--- Indexes for table `categories`
+-- Chỉ mục cho bảng `categories`
 --
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `chat_sessions`
+-- Chỉ mục cho bảng `chat_sessions`
 --
 ALTER TABLE `chat_sessions`
   ADD PRIMARY KEY (`id`),
@@ -1621,7 +1634,7 @@ ALTER TABLE `chat_sessions`
   ADD KEY `idx_participant2` (`participant2_id`);
 
 --
--- Indexes for table `coupons`
+-- Chỉ mục cho bảng `coupons`
 --
 ALTER TABLE `coupons`
   ADD PRIMARY KEY (`id`),
@@ -1629,35 +1642,35 @@ ALTER TABLE `coupons`
   ADD KEY `idx_coupon_active_window` (`active`,`start_date`,`end_date`);
 
 --
--- Indexes for table `coupon_brands`
+-- Chỉ mục cho bảng `coupon_brands`
 --
 ALTER TABLE `coupon_brands`
   ADD PRIMARY KEY (`coupon_id`,`brand_id`),
   ADD KEY `fk_cb_brand` (`brand_id`);
 
 --
--- Indexes for table `coupon_categories`
+-- Chỉ mục cho bảng `coupon_categories`
 --
 ALTER TABLE `coupon_categories`
   ADD PRIMARY KEY (`coupon_id`,`category_id`),
   ADD KEY `fk_cc_cate` (`category_id`);
 
 --
--- Indexes for table `coupon_products`
+-- Chỉ mục cho bảng `coupon_products`
 --
 ALTER TABLE `coupon_products`
   ADD PRIMARY KEY (`coupon_id`,`product_id`),
   ADD KEY `fk_cp_product` (`product_id`);
 
 --
--- Indexes for table `coupon_uses`
+-- Chỉ mục cho bảng `coupon_uses`
 --
 ALTER TABLE `coupon_uses`
   ADD PRIMARY KEY (`coupon_id`,`user_id`),
   ADD KEY `fk_cu_user` (`user_id`);
 
 --
--- Indexes for table `distance_cache`
+-- Chỉ mục cho bảng `distance_cache`
 --
 ALTER TABLE `distance_cache`
   ADD PRIMARY KEY (`id`),
@@ -1665,7 +1678,7 @@ ALTER TABLE `distance_cache`
   ADD KEY `idx_cached` (`cached_at`);
 
 --
--- Indexes for table `favorites`
+-- Chỉ mục cho bảng `favorites`
 --
 ALTER TABLE `favorites`
   ADD PRIMARY KEY (`id`),
@@ -1673,14 +1686,14 @@ ALTER TABLE `favorites`
   ADD KEY `product_id` (`product_id`);
 
 --
--- Indexes for table `imports`
+-- Chỉ mục cho bảng `imports`
 --
 ALTER TABLE `imports`
   ADD PRIMARY KEY (`id`),
   ADD KEY `supplier_id` (`supplier_id`);
 
 --
--- Indexes for table `import_details`
+-- Chỉ mục cho bảng `import_details`
 --
 ALTER TABLE `import_details`
   ADD PRIMARY KEY (`id`),
@@ -1688,7 +1701,7 @@ ALTER TABLE `import_details`
   ADD KEY `idx_import_details_product` (`product_id`);
 
 --
--- Indexes for table `messages`
+-- Chỉ mục cho bảng `messages`
 --
 ALTER TABLE `messages`
   ADD PRIMARY KEY (`id`),
@@ -1697,7 +1710,7 @@ ALTER TABLE `messages`
   ADD KEY `idx_unread` (`is_read`);
 
 --
--- Indexes for table `notifications`
+-- Chỉ mục cho bảng `notifications`
 --
 ALTER TABLE `notifications`
   ADD PRIMARY KEY (`id`),
@@ -1705,7 +1718,7 @@ ALTER TABLE `notifications`
   ADD KEY `idx_message` (`message_id`);
 
 --
--- Indexes for table `orders`
+-- Chỉ mục cho bảng `orders`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`id`),
@@ -1720,21 +1733,21 @@ ALTER TABLE `orders`
   ADD KEY `idx_orders_carrier` (`shipping_carrier_id`);
 
 --
--- Indexes for table `order_audits`
+-- Chỉ mục cho bảng `order_audits`
 --
 ALTER TABLE `order_audits`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_order_audits_order` (`order_id`);
 
 --
--- Indexes for table `order_coupons`
+-- Chỉ mục cho bảng `order_coupons`
 --
 ALTER TABLE `order_coupons`
   ADD PRIMARY KEY (`order_id`,`coupon_id`),
   ADD KEY `fk_oc_coupon` (`coupon_id`);
 
 --
--- Indexes for table `order_items`
+-- Chỉ mục cho bảng `order_items`
 --
 ALTER TABLE `order_items`
   ADD PRIMARY KEY (`id`),
@@ -1742,14 +1755,14 @@ ALTER TABLE `order_items`
   ADD KEY `product_id` (`product_id`);
 
 --
--- Indexes for table `order_shipping_vouchers`
+-- Chỉ mục cho bảng `order_shipping_vouchers`
 --
 ALTER TABLE `order_shipping_vouchers`
   ADD PRIMARY KEY (`order_id`,`voucher_id`),
   ADD KEY `fk_osv_voucher` (`voucher_id`);
 
 --
--- Indexes for table `password_reset_codes`
+-- Chỉ mục cho bảng `password_reset_codes`
 --
 ALTER TABLE `password_reset_codes`
   ADD PRIMARY KEY (`id`),
@@ -1757,21 +1770,21 @@ ALTER TABLE `password_reset_codes`
   ADD KEY `idx_prc_email_code` (`email`,`code`);
 
 --
--- Indexes for table `payments`
+-- Chỉ mục cho bảng `payments`
 --
 ALTER TABLE `payments`
   ADD PRIMARY KEY (`id`),
   ADD KEY `order_id` (`order_id`);
 
 --
--- Indexes for table `permissions`
+-- Chỉ mục cho bảng `permissions`
 --
 ALTER TABLE `permissions`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `name` (`name`);
 
 --
--- Indexes for table `products`
+-- Chỉ mục cho bảng `products`
 --
 ALTER TABLE `products`
   ADD PRIMARY KEY (`id`),
@@ -1780,14 +1793,14 @@ ALTER TABLE `products`
   ADD KEY `idx_product_name` (`name`);
 
 --
--- Indexes for table `product_attributes`
+-- Chỉ mục cho bảng `product_attributes`
 --
 ALTER TABLE `product_attributes`
   ADD PRIMARY KEY (`product_id`,`attribute_id`),
   ADD KEY `attribute_id` (`attribute_id`);
 
 --
--- Indexes for table `reviews`
+-- Chỉ mục cho bảng `reviews`
 --
 ALTER TABLE `reviews`
   ADD PRIMARY KEY (`id`),
@@ -1795,14 +1808,14 @@ ALTER TABLE `reviews`
   ADD KEY `user_id` (`user_id`);
 
 --
--- Indexes for table `roles`
+-- Chỉ mục cho bảng `roles`
 --
 ALTER TABLE `roles`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `name` (`name`);
 
 --
--- Indexes for table `role_permissions`
+-- Chỉ mục cho bảng `role_permissions`
 --
 ALTER TABLE `role_permissions`
   ADD PRIMARY KEY (`id`),
@@ -1812,7 +1825,7 @@ ALTER TABLE `role_permissions`
   ADD KEY `idx_rp_perm` (`permission_id`);
 
 --
--- Indexes for table `shipping`
+-- Chỉ mục cho bảng `shipping`
 --
 ALTER TABLE `shipping`
   ADD PRIMARY KEY (`id`),
@@ -1822,14 +1835,14 @@ ALTER TABLE `shipping`
   ADD KEY `fk_shipping_car` (`carrier_id`);
 
 --
--- Indexes for table `shipping_carriers`
+-- Chỉ mục cho bảng `shipping_carriers`
 --
 ALTER TABLE `shipping_carriers`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `code` (`code`);
 
 --
--- Indexes for table `shipping_quotes`
+-- Chỉ mục cho bảng `shipping_quotes`
 --
 ALTER TABLE `shipping_quotes`
   ADD PRIMARY KEY (`id`),
@@ -1840,7 +1853,7 @@ ALTER TABLE `shipping_quotes`
   ADD KEY `fk_sq_srv` (`service_id`);
 
 --
--- Indexes for table `shipping_records`
+-- Chỉ mục cho bảng `shipping_records`
 --
 ALTER TABLE `shipping_records`
   ADD PRIMARY KEY (`id`),
@@ -1848,14 +1861,14 @@ ALTER TABLE `shipping_records`
   ADD KEY `idx_shipping_status` (`status`);
 
 --
--- Indexes for table `shipping_services`
+-- Chỉ mục cho bảng `shipping_services`
 --
 ALTER TABLE `shipping_services`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uk_carrier_service` (`carrier_id`,`code`);
 
 --
--- Indexes for table `shipping_vouchers`
+-- Chỉ mục cho bảng `shipping_vouchers`
 --
 ALTER TABLE `shipping_vouchers`
   ADD PRIMARY KEY (`id`),
@@ -1863,34 +1876,34 @@ ALTER TABLE `shipping_vouchers`
   ADD KEY `idx_ship_voucher_active_window` (`active`,`start_date`,`end_date`);
 
 --
--- Indexes for table `shipping_voucher_uses`
+-- Chỉ mục cho bảng `shipping_voucher_uses`
 --
 ALTER TABLE `shipping_voucher_uses`
   ADD PRIMARY KEY (`voucher_id`,`user_id`),
   ADD KEY `fk_svu_user` (`user_id`);
 
 --
--- Indexes for table `suppliers`
+-- Chỉ mục cho bảng `suppliers`
 --
 ALTER TABLE `suppliers`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `themes`
+-- Chỉ mục cho bảng `themes`
 --
 ALTER TABLE `themes`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uq_themes_slug` (`slug`);
 
 --
--- Indexes for table `theme_categories`
+-- Chỉ mục cho bảng `theme_categories`
 --
 ALTER TABLE `theme_categories`
   ADD PRIMARY KEY (`theme_id`,`category_id`),
   ADD KEY `idx_theme_categories_category` (`category_id`);
 
 --
--- Indexes for table `users`
+-- Chỉ mục cho bảng `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
@@ -1902,7 +1915,7 @@ ALTER TABLE `users`
   ADD KEY `idx_users_tier` (`tier`);
 
 --
--- Indexes for table `user_addresses`
+-- Chỉ mục cho bảng `user_addresses`
 --
 ALTER TABLE `user_addresses`
   ADD PRIMARY KEY (`id`),
@@ -1910,7 +1923,7 @@ ALTER TABLE `user_addresses`
   ADD KEY `idx_ua_geo` (`latitude`,`longitude`);
 
 --
--- Indexes for table `user_roles`
+-- Chỉ mục cho bảng `user_roles`
 --
 ALTER TABLE `user_roles`
   ADD PRIMARY KEY (`id`),
@@ -1919,334 +1932,334 @@ ALTER TABLE `user_roles`
   ADD KEY `role_id` (`role_id`);
 
 --
--- Indexes for table `vn_districts`
+-- Chỉ mục cho bảng `vn_districts`
 --
 ALTER TABLE `vn_districts`
   ADD PRIMARY KEY (`code`),
   ADD KEY `idx_vnd_prov` (`province_code`);
 
 --
--- Indexes for table `vn_provinces`
+-- Chỉ mục cho bảng `vn_provinces`
 --
 ALTER TABLE `vn_provinces`
   ADD PRIMARY KEY (`code`);
 
 --
--- Indexes for table `vn_wards`
+-- Chỉ mục cho bảng `vn_wards`
 --
 ALTER TABLE `vn_wards`
   ADD PRIMARY KEY (`code`),
   ADD KEY `idx_vnw_dist` (`district_code`);
 
 --
--- Indexes for table `warehouses`
+-- Chỉ mục cho bảng `warehouses`
 --
 ALTER TABLE `warehouses`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_wh_active` (`is_active`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT cho các bảng đã đổ
 --
 
 --
--- AUTO_INCREMENT for table `attributes`
+-- AUTO_INCREMENT cho bảng `attributes`
 --
 ALTER TABLE `attributes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT for table `brands`
+-- AUTO_INCREMENT cho bảng `brands`
 --
 ALTER TABLE `brands`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT for table `carrier_rate_rules`
+-- AUTO_INCREMENT cho bảng `carrier_rate_rules`
 --
 ALTER TABLE `carrier_rate_rules`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `carts`
+-- AUTO_INCREMENT cho bảng `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
--- AUTO_INCREMENT for table `categories`
+-- AUTO_INCREMENT cho bảng `categories`
 --
 ALTER TABLE `categories`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT for table `chat_sessions`
+-- AUTO_INCREMENT cho bảng `chat_sessions`
 --
 ALTER TABLE `chat_sessions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
--- AUTO_INCREMENT for table `coupons`
+-- AUTO_INCREMENT cho bảng `coupons`
 --
 ALTER TABLE `coupons`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT for table `distance_cache`
+-- AUTO_INCREMENT cho bảng `distance_cache`
 --
 ALTER TABLE `distance_cache`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `favorites`
+-- AUTO_INCREMENT cho bảng `favorites`
 --
 ALTER TABLE `favorites`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
--- AUTO_INCREMENT for table `imports`
+-- AUTO_INCREMENT cho bảng `imports`
 --
 ALTER TABLE `imports`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT for table `import_details`
+-- AUTO_INCREMENT cho bảng `import_details`
 --
 ALTER TABLE `import_details`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT for table `messages`
+-- AUTO_INCREMENT cho bảng `messages`
 --
 ALTER TABLE `messages`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=85;
 
 --
--- AUTO_INCREMENT for table `notifications`
+-- AUTO_INCREMENT cho bảng `notifications`
 --
 ALTER TABLE `notifications`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
 
 --
--- AUTO_INCREMENT for table `orders`
+-- AUTO_INCREMENT cho bảng `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
--- AUTO_INCREMENT for table `order_audits`
+-- AUTO_INCREMENT cho bảng `order_audits`
 --
 ALTER TABLE `order_audits`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
--- AUTO_INCREMENT for table `order_items`
+-- AUTO_INCREMENT cho bảng `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
--- AUTO_INCREMENT for table `password_reset_codes`
+-- AUTO_INCREMENT cho bảng `password_reset_codes`
 --
 ALTER TABLE `password_reset_codes`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
--- AUTO_INCREMENT for table `payments`
+-- AUTO_INCREMENT cho bảng `payments`
 --
 ALTER TABLE `payments`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `permissions`
+-- AUTO_INCREMENT cho bảng `permissions`
 --
 ALTER TABLE `permissions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
--- AUTO_INCREMENT for table `products`
+-- AUTO_INCREMENT cho bảng `products`
 --
 ALTER TABLE `products`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
--- AUTO_INCREMENT for table `reviews`
+-- AUTO_INCREMENT cho bảng `reviews`
 --
 ALTER TABLE `reviews`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT for table `roles`
+-- AUTO_INCREMENT cho bảng `roles`
 --
 ALTER TABLE `roles`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT for table `role_permissions`
+-- AUTO_INCREMENT cho bảng `role_permissions`
 --
 ALTER TABLE `role_permissions`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
--- AUTO_INCREMENT for table `shipping`
+-- AUTO_INCREMENT cho bảng `shipping`
 --
 ALTER TABLE `shipping`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `shipping_carriers`
+-- AUTO_INCREMENT cho bảng `shipping_carriers`
 --
 ALTER TABLE `shipping_carriers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `shipping_quotes`
+-- AUTO_INCREMENT cho bảng `shipping_quotes`
 --
 ALTER TABLE `shipping_quotes`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `shipping_records`
+-- AUTO_INCREMENT cho bảng `shipping_records`
 --
 ALTER TABLE `shipping_records`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
--- AUTO_INCREMENT for table `shipping_services`
+-- AUTO_INCREMENT cho bảng `shipping_services`
 --
 ALTER TABLE `shipping_services`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `shipping_vouchers`
+-- AUTO_INCREMENT cho bảng `shipping_vouchers`
 --
 ALTER TABLE `shipping_vouchers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT for table `suppliers`
+-- AUTO_INCREMENT cho bảng `suppliers`
 --
 ALTER TABLE `suppliers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `themes`
+-- AUTO_INCREMENT cho bảng `themes`
 --
 ALTER TABLE `themes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `users`
+-- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
--- AUTO_INCREMENT for table `user_addresses`
+-- AUTO_INCREMENT cho bảng `user_addresses`
 --
 ALTER TABLE `user_addresses`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `user_roles`
+-- AUTO_INCREMENT cho bảng `user_roles`
 --
 ALTER TABLE `user_roles`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
--- AUTO_INCREMENT for table `warehouses`
+-- AUTO_INCREMENT cho bảng `warehouses`
 --
 ALTER TABLE `warehouses`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- Constraints for dumped tables
+-- Các ràng buộc cho các bảng đã đổ
 --
 
 --
--- Constraints for table `carrier_rate_rules`
+-- Các ràng buộc cho bảng `carrier_rate_rules`
 --
 ALTER TABLE `carrier_rate_rules`
   ADD CONSTRAINT `fk_crr_service` FOREIGN KEY (`service_id`) REFERENCES `shipping_services` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `carts`
+-- Các ràng buộc cho bảng `carts`
 --
 ALTER TABLE `carts`
   ADD CONSTRAINT `carts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `carts_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `chat_sessions`
+-- Các ràng buộc cho bảng `chat_sessions`
 --
 ALTER TABLE `chat_sessions`
   ADD CONSTRAINT `chat_sessions_ibfk_1` FOREIGN KEY (`participant1_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `chat_sessions_ibfk_2` FOREIGN KEY (`participant2_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `coupon_brands`
+-- Các ràng buộc cho bảng `coupon_brands`
 --
 ALTER TABLE `coupon_brands`
   ADD CONSTRAINT `fk_cb_brand` FOREIGN KEY (`brand_id`) REFERENCES `brands` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_cb_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `coupon_categories`
+-- Các ràng buộc cho bảng `coupon_categories`
 --
 ALTER TABLE `coupon_categories`
   ADD CONSTRAINT `fk_cc_cate` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_cc_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `coupon_products`
+-- Các ràng buộc cho bảng `coupon_products`
 --
 ALTER TABLE `coupon_products`
   ADD CONSTRAINT `fk_cp_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_cp_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `coupon_uses`
+-- Các ràng buộc cho bảng `coupon_uses`
 --
 ALTER TABLE `coupon_uses`
   ADD CONSTRAINT `fk_cu_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_cu_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `favorites`
+-- Các ràng buộc cho bảng `favorites`
 --
 ALTER TABLE `favorites`
   ADD CONSTRAINT `favorites_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `favorites_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `imports`
+-- Các ràng buộc cho bảng `imports`
 --
 ALTER TABLE `imports`
   ADD CONSTRAINT `imports_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE SET NULL;
 
 --
--- Constraints for table `import_details`
+-- Các ràng buộc cho bảng `import_details`
 --
 ALTER TABLE `import_details`
   ADD CONSTRAINT `import_details_ibfk_1` FOREIGN KEY (`import_id`) REFERENCES `imports` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `import_details_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `messages`
+-- Các ràng buộc cho bảng `messages`
 --
 ALTER TABLE `messages`
   ADD CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`chat_session_id`) REFERENCES `chat_sessions` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `messages_ibfk_2` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `notifications`
+-- Các ràng buộc cho bảng `notifications`
 --
 ALTER TABLE `notifications`
   ADD CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`message_id`) REFERENCES `messages` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `orders`
+-- Các ràng buộc cho bảng `orders`
 --
 ALTER TABLE `orders`
   ADD CONSTRAINT `fk_orders_ship_addr` FOREIGN KEY (`shipping_address_id`) REFERENCES `user_addresses` (`id`) ON DELETE SET NULL,
@@ -2255,68 +2268,68 @@ ALTER TABLE `orders`
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
--- Constraints for table `order_audits`
+-- Các ràng buộc cho bảng `order_audits`
 --
 ALTER TABLE `order_audits`
   ADD CONSTRAINT `fk_oa_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `order_coupons`
+-- Các ràng buộc cho bảng `order_coupons`
 --
 ALTER TABLE `order_coupons`
   ADD CONSTRAINT `fk_oc_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_oc_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `order_items`
+-- Các ràng buộc cho bảng `order_items`
 --
 ALTER TABLE `order_items`
   ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE SET NULL;
 
 --
--- Constraints for table `order_shipping_vouchers`
+-- Các ràng buộc cho bảng `order_shipping_vouchers`
 --
 ALTER TABLE `order_shipping_vouchers`
   ADD CONSTRAINT `fk_osv_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_osv_voucher` FOREIGN KEY (`voucher_id`) REFERENCES `shipping_vouchers` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `payments`
+-- Các ràng buộc cho bảng `payments`
 --
 ALTER TABLE `payments`
   ADD CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `products`
+-- Các ràng buộc cho bảng `products`
 --
 ALTER TABLE `products`
   ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `products_ibfk_2` FOREIGN KEY (`brand_id`) REFERENCES `brands` (`id`) ON DELETE SET NULL;
 
 --
--- Constraints for table `product_attributes`
+-- Các ràng buộc cho bảng `product_attributes`
 --
 ALTER TABLE `product_attributes`
   ADD CONSTRAINT `product_attributes_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `product_attributes_ibfk_2` FOREIGN KEY (`attribute_id`) REFERENCES `attributes` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `reviews`
+-- Các ràng buộc cho bảng `reviews`
 --
 ALTER TABLE `reviews`
   ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
--- Constraints for table `role_permissions`
+-- Các ràng buộc cho bảng `role_permissions`
 --
 ALTER TABLE `role_permissions`
   ADD CONSTRAINT `role_permissions_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `role_permissions_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `shipping`
+-- Các ràng buộc cho bảng `shipping`
 --
 ALTER TABLE `shipping`
   ADD CONSTRAINT `fk_shipping_addr` FOREIGN KEY (`address_id`) REFERENCES `user_addresses` (`id`) ON DELETE SET NULL,
@@ -2324,7 +2337,7 @@ ALTER TABLE `shipping`
   ADD CONSTRAINT `shipping_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `shipping_quotes`
+-- Các ràng buộc cho bảng `shipping_quotes`
 --
 ALTER TABLE `shipping_quotes`
   ADD CONSTRAINT `fk_sq_addr` FOREIGN KEY (`address_id`) REFERENCES `user_addresses` (`id`),
@@ -2333,52 +2346,52 @@ ALTER TABLE `shipping_quotes`
   ADD CONSTRAINT `fk_sq_wh` FOREIGN KEY (`warehouse_id`) REFERENCES `warehouses` (`id`);
 
 --
--- Constraints for table `shipping_records`
+-- Các ràng buộc cho bảng `shipping_records`
 --
 ALTER TABLE `shipping_records`
   ADD CONSTRAINT `fk_sr_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `shipping_services`
+-- Các ràng buộc cho bảng `shipping_services`
 --
 ALTER TABLE `shipping_services`
   ADD CONSTRAINT `fk_ss_carrier` FOREIGN KEY (`carrier_id`) REFERENCES `shipping_carriers` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `shipping_voucher_uses`
+-- Các ràng buộc cho bảng `shipping_voucher_uses`
 --
 ALTER TABLE `shipping_voucher_uses`
   ADD CONSTRAINT `fk_svu_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_svu_voucher` FOREIGN KEY (`voucher_id`) REFERENCES `shipping_vouchers` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `theme_categories`
+-- Các ràng buộc cho bảng `theme_categories`
 --
 ALTER TABLE `theme_categories`
   ADD CONSTRAINT `fk_tc_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_tc_theme` FOREIGN KEY (`theme_id`) REFERENCES `themes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `user_addresses`
+-- Các ràng buộc cho bảng `user_addresses`
 --
 ALTER TABLE `user_addresses`
   ADD CONSTRAINT `fk_ua_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `user_roles`
+-- Các ràng buộc cho bảng `user_roles`
 --
 ALTER TABLE `user_roles`
   ADD CONSTRAINT `user_roles_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `user_roles_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `vn_districts`
+-- Các ràng buộc cho bảng `vn_districts`
 --
 ALTER TABLE `vn_districts`
   ADD CONSTRAINT `fk_vnd_prov` FOREIGN KEY (`province_code`) REFERENCES `vn_provinces` (`code`) ON DELETE CASCADE;
 
 --
--- Constraints for table `vn_wards`
+-- Các ràng buộc cho bảng `vn_wards`
 --
 ALTER TABLE `vn_wards`
   ADD CONSTRAINT `fk_vnw_dist` FOREIGN KEY (`district_code`) REFERENCES `vn_districts` (`code`) ON DELETE CASCADE;
