@@ -10,10 +10,12 @@ import {
   PLATFORM_ID,
   ElementRef,
 } from '@angular/core';
-
+import { ProductService } from '../../shared/services/product.service';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { FormsModule } from '@angular/forms'; // ✅ dùng cho [(ngModel)]
+import { environment } from '../../../environments/environment';
 
 import { ThemeService } from '../../shared/services/theme.service';
 import { BrandService } from '../../shared/services/brand.service';
@@ -26,18 +28,20 @@ import { Theme } from '../../models/theme.model';
 import { Brand } from '../../models/brand.model';
 import { Category } from '../../models/category.model';
 
-import { Subscription } from 'rxjs';
+import { Subscription, of } from 'rxjs'; // ✅ THÊM: of
+import { debounceTime, distinctUntilChanged, map, switchMap } from 'rxjs/operators'; // ✅ THÊM: operators
 
 @Component({
   selector: 'app-user-header',
   standalone: true,
   templateUrl: './header.html',
   styleUrls: ['./header.css'],
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   // --------- Platform & DI ---------
+  private productService = inject(ProductService);
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
 
@@ -55,6 +59,20 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   // --------- UI state ---------
   searchTerm = new FormControl<string>('');
+  selectedCategoryId: number | null = null;
+  favOnly = false;
+
+  suggestOpen = false;
+  suggestItems: { id: number; name: string; imageUrl?: string | null; previewUrl?: string }[] = [];
+  suggestLimit = 8;
+
+  // ✅ Voice search state
+  isListening = false;
+  private recognition?: any;
+
+  // ✅ Danh mục phẳng cho combobox
+  flatCategories: { id: number; name: string }[] = [];
+
   cartCount = 0;
   dropdownOpen = false;
   mobileOpen = false;
@@ -83,6 +101,34 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   // Chat channel handle
   private chatChannel: any;
+
+  // === ẢNH: chuẩn hoá URL & fallback (đã thêm) ===
+  private apiBase = (() => {
+    const raw =
+      (environment as any).apiBase ??
+      (environment as any).apiUrl ??
+      'http://localhost:8080';
+    return String(raw).replace(/\/+$/, '').replace(/\/api$/, '');
+  })();
+  private fallbackImg = 'https://placehold.co/64x64?text=%20';
+
+  imgUrl(path?: string | null): string {
+    if (!path || !`${path}`.trim()) return this.fallbackImg;
+    let clean = `${path}`.trim().replace(/\\/g, '/');
+    if (/^(https?:)?\/\//i.test(clean)) return clean;           // absolute / protocol-relative
+    if (clean.startsWith('/api/')) return this.apiBase + clean; // giữ /api nếu có
+    if (!clean.startsWith('/')) clean = '/' + clean;
+    return this.apiBase.replace(/\/$/, '') + clean;             // ghép host
+  }
+
+  onImgErr(ev: Event): void {
+    const img = ev?.target as HTMLImageElement | null;
+    if (!img) return;
+    if (img.dataset['fallback'] === '1') return; // tránh loop
+    img.dataset['fallback'] = '1';
+    img.src = this.fallbackImg;
+  }
+  // === /ẢNH ===
 
   // ================= Lifecycle =================
   ngOnInit(): void {
@@ -121,7 +167,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         });
       } else {
         this.sessionId = undefined;
-               this.unreadTotal = 0;
+        this.unreadTotal = 0;
         this.unbindChatChannel();
       }
 
@@ -134,10 +180,29 @@ export class HeaderComponent implements OnInit, OnDestroy {
         next: (list) => {
           this.themeTree = list || [];
           this.loadingTree = false;
+
+          // TẠO flatCategories từ themeTree (loại trùng theo id)
+          const seen = new Set<number>();
+          const flat: { id: number; name: string }[] = [];
+          for (const th of this.themeTree) {
+            const cats = (th as any)?.categories as Category[] | undefined;
+            if (!cats?.length) continue;
+            for (const c of cats) {
+              if (c?.id != null && !seen.has(c.id)) {
+                seen.add(c.id);
+                flat.push({ id: c.id, name: c.name as any });
+              }
+            }
+          }
+          this.flatCategories = flat.sort((a, b) =>
+            (a.name || '').localeCompare(b.name || '', 'vi')
+          );
+
           this.cdr.markForCheck();
         },
         error: () => {
           this.themeTree = [];
+          this.flatCategories = []; // rỗng khi lỗi
           this.loadingTree = false;
           this.cdr.markForCheck();
         },
@@ -160,6 +225,39 @@ export class HeaderComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
       })
+    );
+
+    // ✅ GỢI Ý: lắng nghe ô tìm & xây list gợi ý (có ảnh)
+    this.sub.add(
+      (this.searchTerm.valueChanges ?? of(''))
+        .pipe(
+          debounceTime(150),
+          map(v => (v || '').trim()),
+          distinctUntilChanged(),
+          switchMap(q => {
+            if (!q) return of([]);
+            // Nếu backend có /suggest, thay bằng: return this.productService.suggest(q)
+            return this.productService.getAllProducts().pipe(
+              map((res: any) => {
+                const items = (res?.items || []) as any[];
+                return items
+                  .filter(p => this.textMatches(p?.name || '', q))
+                  .slice(0, this.suggestLimit)
+                  .map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    imageUrl: p.imageUrl,
+                    previewUrl: this.imgUrl(p.imageUrl),
+                  }));
+              })
+            );
+          })
+        )
+        .subscribe(list => {
+          this.suggestItems = list || [];
+          this.suggestOpen = this.suggestItems.length > 0;
+          this.cdr.markForCheck();
+        })
     );
 
     // --- Cross-tab storage sync ---
@@ -195,6 +293,22 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   trackTheme = (_: number, th: Theme) => th.id;
   trackCategory = (_: number, c: Category) => c.id;
+
+  // ✅ Chuẩn hoá và so khớp nhẹ cho gợi ý (bỏ dấu + prefix theo token)
+  private norm(s: string): string {
+    return (s || '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+  private textMatches(haystack: string, needle: string): boolean {
+    const h = this.norm(haystack);
+    const tokens = this.norm(needle).split(' ').filter(t => t.length >= 2);
+    if (!tokens.length) return true;
+    return tokens.every(t => h.includes(t) || h.split(' ').some(w => w.startsWith(t)));
+  }
 
   // ================= Scroll handler =================
   @HostListener('window:scroll')
@@ -238,6 +352,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   closeAll() {
     this.dropdownOpen = false;
     this.mobileOpen = false;
+    this.suggestOpen = false; // ✅ đóng panel gợi ý
     this.cdr.markForCheck();
   }
 
@@ -247,11 +362,68 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   // ================= Search =================
+  // ✅ điều hướng về /products với q/category/favorites
   onSearch() {
     const q = (this.searchTerm.value || '').trim();
-    if (q) {
-      this.router.navigate(['/search'], { queryParams: { q } });
+    const params: any = {};
+    if (q) params.q = q;
+    if (this.selectedCategoryId != null) params.category = this.selectedCategoryId;
+    if (this.favOnly) params.favorites = 1;
+
+    this.router.navigate(['/products'], { queryParams: params });
+    this.suggestOpen = false; // ✅ đóng khi tìm
+  }
+
+  // ✅ chọn một gợi ý
+  selectSuggestion(name: string) {
+    this.searchTerm.setValue(name);
+    this.suggestOpen = false;
+    this.onSearch();
+  }
+
+  // ================= Voice Search (Web Speech API) =================
+  private ensureRecognition() {
+    if (!this.isBrowser) return;
+    const w = window as any;
+    const Ctor = w.SpeechRecognition || w.webkitSpeechRecognition;
+    if (!Ctor) return;
+
+    if (!this.recognition) {
+      this.recognition = new Ctor();
+      this.recognition.lang = 'vi-VN';
+      this.recognition.interimResults = false;
+      this.recognition.maxAlternatives = 1;
+
+      this.recognition.onresult = (e: any) => {
+        try {
+          const text = String(e.results[0][0].transcript || '').trim();
+          this.searchTerm.setValue(text);
+          this.cdr.markForCheck();
+          this.onSearch();
+        } catch {}
+      };
+      this.recognition.onend = () => {
+        this.isListening = false;
+        this.cdr.markForCheck();
+      };
+      this.recognition.onerror = () => {
+        this.isListening = false;
+        this.cdr.markForCheck();
+      };
     }
+  }
+
+  toggleVoice() {
+    if (!this.isBrowser) return;
+    this.ensureRecognition();
+    if (!this.recognition) return; // trình duyệt không hỗ trợ
+    if (this.isListening) {
+      try { this.recognition.stop(); } catch {}
+      this.isListening = false;
+    } else {
+      try { this.recognition.start(); this.isListening = true; } catch {}
+    }
+    this.cdr.markForCheck();
   }
 
   // ================= Auth / Account =================

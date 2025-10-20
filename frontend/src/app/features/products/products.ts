@@ -59,6 +59,11 @@ export class ProductsComponent implements OnInit {
   selectedPriceRange: string | null = null; // e.g. "100000-500000" | "1000000+"
   selectedRating: number | null = null;
 
+  // ✅ Thêm: từ khóa & yêu thích từ URL
+  qTerm: string | null = null;
+  favoritesOnly = false;
+  favoriteIds: number[] = [];
+
   // Sort
   currentSort: 'newest' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc' = 'newest';
   sortOptions = [
@@ -103,11 +108,26 @@ export class ProductsComponent implements OnInit {
 
     const sub = this.route.queryParams.subscribe((params) => {
       this.categoryId = params['category'] ? Number(params['category']) : null;
+
+      // ✅ đọc từ khóa & favorites từ URL
+      this.qTerm = params['q'] ? String(params['q']).trim() : null;
+      this.favoritesOnly = !!params['favorites'];
+
       // Đồng bộ selectedCategory filter khi có query
       if (this.categoryId && !this.selectedCategories.includes(this.categoryId)) {
         this.selectedCategories = [this.categoryId];
       }
-      this.loadProducts();
+
+      // Nếu chỉ hiển thị yêu thích -> tải ID yêu thích rồi mới load products
+      if (this.favoritesOnly) {
+        this.favoriteService.getFavorites().subscribe((ids: number[] = []) => {
+          this.favoriteIds = ids || [];
+          this.loadProducts();
+        });
+      } else {
+        this.favoriteIds = [];
+        this.loadProducts();
+      }
     });
 
     this.destroyRef.onDestroy(() => sub.unsubscribe());
@@ -214,16 +234,88 @@ export class ProductsComponent implements OnInit {
       error: (e) => console.error('Không thêm được vào giỏ:', e),
     });
   }
+  // ✅ Chuẩn hoá tiếng Việt: bỏ dấu, lower-case, loại bỏ ký tự thừa
+private vnNormalize(s: string): string {
+  return (s || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // bỏ dấu
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ') // bỏ punctuation
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+// ✅ Kiểm tra haystack có chứa ALL token của needle (mỗi token >=2 ký tự)
+// Cho phép fuzzy nhẹ: token trùng từ đầu (prefix) hoặc Levenshtein khoảng cách 1-2 nếu token dài >=4
+private textMatches(haystack: string, needle: string): boolean {
+  const h = this.vnNormalize(haystack);
+  const tokens = this.vnNormalize(needle).split(' ').filter(t => t.length >= 2);
+  if (!tokens.length) return true;
+
+  const has = (tok: string) => {
+    if (h.includes(tok)) return true;
+    // prefix match từng từ
+    const words = h.split(' ');
+    if (words.some(w => w.startsWith(tok))) return true;
+    // fuzzy rất nhẹ cho token dài: khoảng cách <=1 (<=2 nếu token >=7)
+    if (tok.length >= 4) {
+      const maxDist = tok.length >= 7 ? 2 : 1;
+      return words.some(w => Math.abs(w.length - tok.length) <= maxDist && this.levenshtein(w, tok) <= maxDist);
+    }
+    return false;
+  };
+
+  // yêu cầu tất cả token đều match (AND) để kết quả chính xác hơn
+  return tokens.every(has);
+}
+
+// ✅ Levenshtein đơn giản (dùng cho fuzzy nhẹ)
+private levenshtein(a: string, b: string): number {
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const dp = Array.from({ length: m + 1 }, (_, i) => Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return dp[m][n];
+}
 
   // ========== Filters / Sort / Paging ==========
   /** Tính toán lại list theo filter & sort; reset trang nếu vừa đổi filter */
   private applyFilters(resetPage = false): void {
     let list = [...this.products];
 
+    // ✅ Keyword filter (accent-insensitive + token + fuzzy)
+    if (this.qTerm) {
+    const q = this.qTerm;
+    list = list.filter(p => {
+    const name = p.name || '';
+    const desc = p.description || '';
+    return this.textMatches(name, q) || this.textMatches(desc, q);
+  });
+}
+
+
     // Category filter
     if (this.selectedCategories.length > 0) {
       const set = new Set(this.selectedCategories);
       list = list.filter((p) => (p.categoryId ?? null) !== null && set.has(p.categoryId!));
+    }
+
+    // ✅ Favorites-only filter
+    if (this.favoritesOnly) {
+      const set = new Set(this.favoriteIds);
+      list = list.filter(p => set.has(p.id));
     }
 
     // Price filter

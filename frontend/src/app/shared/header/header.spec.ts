@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Header } from './header';
+import { HeaderComponent } from './header'; // ✅ Đổi import đúng tên export
 
-describe('Header', () => {
-  let component: Header;
-  let fixture: ComponentFixture<Header>;
+describe('HeaderComponent', () => { // ✅ Đổi mô tả cho khớp tên component
+  let component: HeaderComponent;          // ✅ Đổi kiểu
+  let fixture: ComponentFixture<HeaderComponent>; // ✅ Đổi generic
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Header]
-    })
-    .compileComponents();
+      // Standalone component => đưa vào imports
+      imports: [HeaderComponent],
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(Header);
+    fixture = TestBed.createComponent(HeaderComponent); // ✅ Tạo theo đúng class
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

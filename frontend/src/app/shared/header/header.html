@@ -61,28 +61,97 @@
 
     <!-- Center: search (hidden on mobile) -->
     <div class="hidden md:block flex-1 mx-4">
-      <div class="relative">
-        <input
-          type="text"
-          [formControl]="searchTerm"
-          name="gaubong-search"
-          placeholder="Tìm kiếm gấu bông, phụ kiện..."
-          autocomplete="off"
-          readonly
-          (focus)="removeReadonly($event)"
-          (keydown.enter)="onSearch()"
-          class="w-full h-11 rounded-full pl-11 pr-12 border border-gray-200 focus:border-pink-300 focus:ring-4 focus:ring-pink-100 outline-none transition shadow-[0_1px_0_0_rgba(0,0,0,0.02)]"
-          aria-label="Tìm kiếm"
-        />
-        <i
-          class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-        ></i>
-        <button
-          (click)="onSearch()"
-          class="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 px-3 rounded-full text-sm font-medium bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:opacity-95 active:scale-[.98] transition"
+      <div class="flex items-stretch gap-2">
+        <!-- Danh mục -->
+        <select
+          class="h-11 min-w-[170px] rounded-full border border-gray-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-pink-200"
+          [(ngModel)]="selectedCategoryId"
+          (change)="onSearch()"
+          name="header-category"
+          aria-label="Lọc theo danh mục"
         >
-          Tìm
-        </button>
+          <option [ngValue]="null">Tất cả danh mục</option>
+          <option *ngFor="let c of flatCategories" [ngValue]="c.id">{{ c.name }}</option>
+        </select>
+
+        <!-- Ô tìm kiếm + mic -->
+        <div class="relative flex-1">
+          <input
+            type="text"
+            [formControl]="searchTerm"
+            name="gaubong-search"
+            placeholder="Tìm gấu bông, phụ kiện…"
+            autocomplete="off"
+            readonly
+            (focus)="removeReadonly($event)"
+            (keydown.enter)="onSearch()"
+            class="w-full h-11 rounded-full border border-gray-200 pl-4 pr-24 text-[15px] focus:outline-none focus:ring-2 focus:ring-pink-200"
+            aria-label="Nhập từ khóa tìm kiếm"
+          />
+
+          <!-- Mic -->
+          <button
+            type="button"
+            class="absolute right-20 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100"
+            (click)="toggleVoice()"
+            [attr.aria-pressed]="isListening"
+            [title]="isListening ? 'Đang nghe…' : 'Nhấn để nói'"
+            aria-label="Tìm kiếm bằng giọng nói"
+          >
+            <i class="fa-solid fa-microphone" [class.text-rose-600]="isListening"></i>
+          </button>
+
+          <!-- Nút tìm -->
+          <button
+            type="button"
+            class="absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center gap-2 h-9 px-4 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-sm shadow hover:opacity-95"
+            (click)="onSearch()"
+            aria-label="Thực hiện tìm kiếm"
+          >
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>Tìm</span>
+          </button>
+
+          <!-- ✅ Panel gợi ý (desktop) -->
+          <div
+            *ngIf="suggestOpen"
+            class="absolute z-50 mt-2 w-full rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden"
+            role="listbox"
+            aria-label="Gợi ý tìm kiếm"
+          >
+            <button
+              *ngFor="let s of suggestItems; trackBy: trackCategory"
+              type="button"
+              class="w-full text-left flex items-center gap-3 px-3 py-2 hover:bg-gray-50"
+              (click)="selectSuggestion(s.name)"
+              role="option"
+            >
+              <!-- ✅ Luôn hiển thị <img>; fallback sẽ tự áp dụng -->
+              <img
+                [src]="s.previewUrl || imgUrl(s.imageUrl)"
+                (error)="onImgErr($event)"
+                class="w-8 h-8 rounded object-cover"
+                width="32" height="32"
+                loading="lazy" decoding="async"
+                alt=""
+                referrerpolicy="no-referrer"
+              />
+              <span class="text-[14px] truncate">{{ s.name }}</span>
+            </button>
+
+            <div class="px-3 py-2 text-xs text-gray-500 border-t">
+              Nhấn <kbd class="px-1 border rounded">Enter</kbd> để tìm “{{ (searchTerm.value || '') | slice:0:40 }}…”
+            </div>
+          </div>
+          <!-- /Panel gợi ý -->
+        </div>
+
+        <!-- Yêu thích -->
+        <label class="h-11 inline-flex items-center gap-2 px-4 rounded-full border border-gray-200 select-none cursor-pointer">
+          <input type="checkbox" class="accent-rose-600" [(ngModel)]="favOnly" (change)="onSearch()" aria-label="Chỉ hiển thị yêu thích" />
+          <i class="fa-solid fa-heart text-rose-600"></i>
+          <span class="text-sm">Yêu thích</span>
+        </label>
       </div>
     </div>
 
@@ -197,15 +266,75 @@
     </div>
 
     <div class="mt-2">
+      <!-- Ô tìm kiếm + mic (mobile) -->
       <div class="relative">
         <input
           type="text"
           [formControl]="searchTerm"
           placeholder="Tìm sản phẩm..."
+          autocomplete="off"
+          readonly
+          (focus)="removeReadonly($event)"
           (keydown.enter)="onSearch(); toggleMobile()"
-          class="w-full h-11 rounded-xl pl-10 pr-3 border border-gray-200 focus:border-pink-300 focus:ring-4 focus:ring-pink-100 outline-none transition"
+          class="w-full h-11 rounded-xl pl-10 pr-24 border border-gray-200 focus:border-pink-300 focus:ring-4 focus:ring-pink-100 outline-none transition"
+          aria-label="Nhập từ khóa tìm kiếm"
         />
         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+
+        <!-- Mic -->
+        <button
+          type="button"
+          class="absolute right-20 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100"
+          (click)="toggleVoice()"
+          [attr.aria-pressed]="isListening"
+          [title]="isListening ? 'Đang nghe…' : 'Nhấn để nói'"
+          aria-label="Tìm kiếm bằng giọng nói"
+        >
+          <i class="fa-solid fa-microphone" [class.text-rose-600]="isListening"></i>
+        </button>
+
+        <!-- Nút tìm -->
+        <button
+          type="button"
+          class="absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center justify-center h-9 px-4 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 text-white text-sm shadow hover:opacity-95"
+          (click)="onSearch(); toggleMobile()"
+          aria-label="Thực hiện tìm kiếm"
+        >
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+
+        <!-- ✅ Panel gợi ý (mobile) -->
+        <div
+          *ngIf="suggestOpen"
+          class="absolute z-50 mt-2 w-full rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden"
+          role="listbox"
+          aria-label="Gợi ý tìm kiếm"
+        >
+          <button
+            *ngFor="let s of suggestItems; trackBy: trackCategory"
+            type="button"
+            class="w-full text-left flex items-center gap-3 px-3 py-2 hover:bg-gray-50"
+            (click)="selectSuggestion(s.name); toggleMobile()"
+            role="option"
+          >
+            <!-- ✅ Đồng bộ cách hiển thị với desktop -->
+            <img
+              [src]="s.previewUrl || imgUrl(s.imageUrl)"
+              (error)="onImgErr($event)"
+              class="w-8 h-8 rounded object-cover"
+              width="32" height="32"
+              loading="lazy" decoding="async"
+              alt=""
+              referrerpolicy="no-referrer"
+            />
+            <span class="text-[14px] truncate">{{ s.name }}</span>
+          </button>
+
+          <div class="px-3 py-2 text-xs text-gray-500 border-t">
+            Nhấn <kbd class="px-1 border rounded">Enter</kbd> để tìm “{{ (searchTerm.value || '') | slice:0:40 }}…”
+          </div>
+        </div>
+        <!-- /Panel gợi ý -->
       </div>
 
       <nav class="mt-4 space-y-1 text-[15px]">
