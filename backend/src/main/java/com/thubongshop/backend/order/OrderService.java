@@ -70,6 +70,14 @@ public class OrderService {
       Integer qty = it.quantity();
       if (qty == null || qty <= 0) throw new BusinessException("INVALID_QTY", "Số lượng không hợp lệ");
 
+      // ===== THÊM MỚI: Trừ tồn kho an toàn ngay tại DB (chống over-sell) =====
+      int affected = productRepository.tryDecrementStock(p.getId(), qty);
+      if (affected == 0) {
+        throw new BusinessException("OUT_OF_STOCK",
+            "Sản phẩm '" + p.getName() + "' không đủ hàng (yêu cầu " + qty + ").");
+      }
+      // =========================================================================
+
       Double priceDouble = p.getPrice();
       if (priceDouble == null) throw new BusinessException("PRICE_NULL", "Giá sản phẩm chưa cấu hình");
       BigDecimal unitPrice = BigDecimal.valueOf(priceDouble).setScale(2, MONEY_RM);
@@ -271,21 +279,55 @@ public class OrderService {
     return toDto(o);
   }
 
-  @Transactional
-  public OrderResponse cancel(Integer orderId, Integer userId) {
-    var o = orderRepo.findById(orderId)
-        .orElseThrow(() -> new BusinessException("ORDER_NOT_FOUND", "Không thấy đơn hàng"));
-    if (!o.getUserId().equals(userId)) {
-      throw new BusinessException("FORBIDDEN", "Bạn không có quyền hủy đơn này");
-    }
-    if (o.getStatus() == OrderStatus.SHIPPED || o.getStatus() == OrderStatus.DELIVERED) {
-      throw new BusinessException("INVALID_STATE", "Đơn đã giao cho hãng, không thể hủy");
-    }
 
-    o.setStatus(OrderStatus.CANCELED);
-    o = orderRepo.save(o);
+@Transactional
+public OrderResponse cancel(Integer orderId, Integer userId) {
+  var o = orderRepo.findById(orderId)
+      .orElseThrow(() -> new BusinessException("ORDER_NOT_FOUND", "Không thấy đơn hàng"));
+  if (!o.getUserId().equals(userId)) {
+    throw new BusinessException("FORBIDDEN", "Bạn không có quyền hủy đơn này");
+  }
+  if (o.getStatus() == OrderStatus.SHIPPED || o.getStatus() == OrderStatus.DELIVERED) {
+    throw new BusinessException("INVALID_STATE", "Đơn đã giao cho hãng, không thể hủy");
+  }
+  if (o.getStatus() == OrderStatus.CANCELED) {
+    // Tránh hoàn tồn lần 2 nếu gọi lại cancel
     return toDto(o);
   }
+
+  // === HOÀN TỒN KHO ===
+  // Chỉ hoàn khi trước đó đã trừ tồn lúc đặt/ thanh toán.
+  // Ở hệ thống của bạn, tồn đã bị trừ khi mua (theo mô tả), nên hoàn lại toàn bộ item.
+  var items = itemRepo.findByOrderId(orderId);
+  for (var it : items) {
+    if (it.getProductId() != null && it.getQuantity() != null && it.getQuantity() > 0) {
+      // ProductRepository đã có sẵn method này ở lần sửa trước
+      productRepository.increaseStock(it.getProductId(), it.getQuantity());
+    }
+  }
+
+  o.setStatus(OrderStatus.CANCELED);
+  o = orderRepo.save(o);
+  return toDto(o);
+}
+
+
+/**
+ * Fallback khi UPDATE không tăng tồn (ví dụ do id mapping lạ).
+ * Tải Product, cộng COALESCE(stock,0) + qty rồi save.
+ */
+private void manualRestock(Integer productId, Integer qty) {
+  var opt = productRepository.findById(productId);
+  if (opt.isEmpty()) return; // Không làm gì thêm
+  var p = opt.get();
+  Integer cur = p.getStock(); // nếu là Integer
+  // nếu bạn dùng Long/BigDecimal… hãy đổi kiểu tương ứng:
+  int base = (cur == null ? 0 : cur);
+  p.setStock(base + qty);
+  productRepository.save(p);
+}
+
+
 
   @Transactional
   public OrderResponse updateShipping(Integer orderId, String trackingCode, ShippingRecord.ShipStatus status) {
