@@ -88,6 +88,10 @@ export class OrderClientService {
     const params = new HttpParams().set('page', page).set('size', size);
     return this.http.get<Page<OrderListItemDto>>(this.BASE_V2, { params });
   }
+/** ✅ Lấy đơn hàng theo mã (dùng sau thanh toán VNPay) */
+getByCode(orderCode: string): Observable<OrderDetailDto> {
+  return this.http.get<OrderDetailDto>(`${this.BASE_V1}/code/${orderCode}`);
+}
 
   /** Lịch sử mua hàng = đã thanh toán */
   history(page = 0, size = 10): Observable<Page<OrderListItemDto>> {

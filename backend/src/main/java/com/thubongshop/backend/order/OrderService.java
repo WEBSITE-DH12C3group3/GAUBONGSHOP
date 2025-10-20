@@ -200,6 +200,7 @@ public class OrderService {
     return toDto(order);
   }
 
+  
   @Transactional
   public Order createOrderWithShipping(
       Integer userId,
@@ -278,6 +279,23 @@ public class OrderService {
     o = orderRepo.save(o);
     return toDto(o);
   }
+@Transactional
+public void markPaidByCode(String orderCode) {
+    String cleanedCode = orderCode != null ? orderCode.trim() : null;
+    System.out.println("🔍 Tìm đơn hàng với orderCode = [" + cleanedCode + "]");
+
+    Order order = orderRepo.findByOrderCode(cleanedCode)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng trong DB: " + cleanedCode));
+
+    if (!"PAID".equalsIgnoreCase(order.getStatus().toString())) {
+        order.setStatus(OrderStatus.PAID);
+        orderRepo.save(order);
+        System.out.println("✅ Đã cập nhật trạng thái đơn hàng " + cleanedCode + " thành PAID");
+    } else {
+        System.out.println("⚠️ Đơn hàng " + cleanedCode + " đã ở trạng thái PAID, bỏ qua cập nhật.");
+    }
+}
+
 
 
 @Transactional
@@ -353,9 +371,104 @@ private void manualRestock(Integer productId, Integer qty) {
 
     return toDto(o);
   }
+/**
+ * 🔹 Hàm tạo đơn PENDING_PAYMENT (dùng cho VNPay trước khi redirect).
+ * Chỉ lưu thông tin cơ bản, chưa có sản phẩm chi tiết.
+ */
+/**
+ * 🔹 Hàm tạo hoặc lấy lại đơn PENDING_PAYMENT cho VNPay.
+ * Nếu frontend đã gửi orderCode thật, thì dùng lại đơn đó (không tạo mới).
+ */
+@Transactional
+public Order createPendingOrder(String receiverName, String phone, String addressLine,
+                                String province, double itemsTotal, double shippingFee,
+                                double grandTotal, String existingOrderCode) {
+
+    Integer currentUserId = getCurrentUserIdSafe(); // ✅ lấy id user hiện tại
+
+    if (existingOrderCode != null && !existingOrderCode.isBlank()) {
+        return orderRepo.findByOrderCode(existingOrderCode.trim())
+                .map(existing -> {
+                    existing.setReceiverName(receiverName);
+                    existing.setPhone(phone);
+                    existing.setAddressLine(addressLine);
+                    existing.setProvince(province);
+                    existing.setPaymentMethod("VNPAY");
+                    existing.setUserId(currentUserId); // ✅ cập nhật user
+                    if (existing.getStatus() == null)
+                        existing.setStatus(OrderStatus.PENDING_PAYMENT);
+                    return orderRepo.save(existing);
+                })
+                .orElseGet(() -> createNewPendingOrder(receiverName, phone, addressLine,
+                        province, itemsTotal, shippingFee, grandTotal, currentUserId)); // ✅ truyền userId
+    }
+
+    // 🧩 Nếu không có orderCode → tạo mới hoàn toàn
+    return createNewPendingOrder(receiverName, phone, addressLine,
+            province, itemsTotal, shippingFee, grandTotal, currentUserId);
+}
+/** ✅ Lấy user ID hiện tại từ SecurityContext */
+/** ✅ Lấy user ID hiện tại từ SecurityContext (tương thích mọi project) */
+private Integer getCurrentUserIdSafe() {
+    try {
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated()) {
+            Object principal = auth.getPrincipal();
+
+            // Nếu principal là chuỗi (anonymousUser) → bỏ qua
+            if (principal instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
+                // ✅ lấy username/email của user đang đăng nhập
+                String username = userDetails.getUsername();
+
+                // Gọi repository để tra lại userId theo email/username
+                return orderRepo.findUserIdByEmailOrUsername(username);
+            }
+        }
+    } catch (Exception e) {
+        System.err.println("⚠️ Không thể lấy user hiện tại: " + e.getMessage());
+    }
+    return null;
+}
+
+
+
+/** Hàm riêng: tạo mới hoàn toàn */
+private Order createNewPendingOrder(String receiverName, String phone, String addressLine,
+                                    String province, double itemsTotal, double shippingFee,
+                                    double grandTotal, Integer userId) {
+
+    Order order = new Order();
+    order.setOrderCode(generateOrderCode());
+    order.setReceiverName(receiverName);
+    order.setPhone(phone);
+    order.setAddressLine(addressLine);
+    order.setProvince(province);
+    order.setUserId(userId); // ✅ gán user vào
+
+    order.setItemsTotal(BigDecimal.valueOf(itemsTotal));
+    order.setShippingFee(BigDecimal.valueOf(shippingFee));
+    order.setGrandTotal(BigDecimal.valueOf(grandTotal));
+    order.setTotalAmount(BigDecimal.valueOf(grandTotal));
+    order.setStatus(OrderStatus.PENDING_PAYMENT);
+    order.setPaymentMethod("VNPAY");
+
+    // Tránh lỗi null
+    order.setShippingDistanceKm(BigDecimal.ZERO);
+    order.setShippingFeeBefore(BigDecimal.valueOf(shippingFee));
+    order.setShippingDiscount(BigDecimal.ZERO);
+    order.setWeightKg(BigDecimal.ZERO);
+
+    return orderRepo.save(order);
+}
+
+
+/** 🔹 Sinh mã đơn hàng dạng ORDER + timestamp */
+private String generateOrderCode() {
+    return "ORDER" + System.currentTimeMillis();
+}
 
   // -------------------- DTO mapping --------------------
-  private OrderResponse toDto(Order o) {
+  public OrderResponse toDto(Order o) {
     var itemDtos = o.getItems().stream()
         .map(it -> new OrderResponse.Item(
             it.getProductId(),

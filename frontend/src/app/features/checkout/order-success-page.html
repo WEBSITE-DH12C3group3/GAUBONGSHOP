@@ -1,75 +1,119 @@
 <section class="container mx-auto px-4 py-10 max-w-3xl">
-  <!-- hero -->
-  <div class="bg-white rounded-2xl shadow p-8 text-center relative overflow-hidden">
-    <!-- animated success -->
+  <!-- ✅ Hero Section -->
+  <div
+    class="bg-white rounded-2xl shadow p-8 text-center relative overflow-hidden animate-fadeIn"
+  >
+    <!-- ✅ Animated Success Icon -->
     <div class="mx-auto mb-4 success-mark">
       <svg viewBox="0 0 52 52" class="success-svg">
-        <circle class="success-circle" cx="26" cy="26" r="25" fill="none"></circle>
+        <circle
+          class="success-circle"
+          cx="26"
+          cy="26"
+          r="25"
+          fill="none"
+        ></circle>
         <path class="success-check" fill="none" d="M14 27 l7 7 l17 -17"></path>
       </svg>
     </div>
 
-    <h1 class="text-2xl font-bold">Đặt hàng thành công!</h1>
+    <h1 class="text-2xl font-bold text-gray-800">Đặt hàng thành công!</h1>
     <p class="text-gray-600 mt-2">
-      Cảm ơn bạn đã mua sắm tại <b>GAUBONGSHOP</b>.
+      Cảm ơn bạn đã mua sắm tại <b class="text-pink-600">GAUBONGSHOP</b> 💕
     </p>
 
-    <div class="mt-4 inline-flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-2">
-      <span class="text-sm text-gray-500">Mã đơn hàng</span>
-      <strong class="text-lg">{{ orderCode || '—' }}</strong>
-      <button class="text-pink-600 text-sm underline" (click)="copyCode()">Sao chép</button>
-    </div>
-
-    <div *ngIf="state.etaDays" class="mt-2 text-sm text-gray-500">
-      Dự kiến giao trong {{ state.etaDays }} ngày.
-    </div>
-
-    <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
-    <a routerLink="/" class="px-4 py-2 rounded-xl border">Tiếp tục mua sắm</a>
-
-    <!-- ✅ dùng state.id hoặc id -->
-    <a
-        [routerLink]="['/order', (state.id ?? id)]"
-        [queryParams]="{ highlight: orderCode }"
-        class="px-4 py-2 rounded-xl bg-pink-600 text-white"
+    <!-- ✅ Mã đơn hàng -->
+    <div
+      class="mt-4 inline-flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-2 border border-gray-200"
     >
+      <span class="text-sm text-gray-500">Mã đơn hàng</span>
+      <strong class="text-lg tracking-wide text-gray-800">
+        {{ orderCode || '—' }}
+      </strong>
+      <button
+        class="text-pink-600 text-sm underline hover:text-pink-700 transition"
+        (click)="copyCode()"
+      >
+        Sao chép
+      </button>
+    </div>
+
+    <!-- ✅ Dự kiến giao hàng -->
+    <div *ngIf="state.etaDays" class="mt-2 text-sm text-gray-500">
+      Dự kiến giao trong <b>{{ state.etaDays }}</b> ngày.
+    </div>
+
+    <!-- ✅ Buttons -->
+    <div
+      class="mt-6 flex flex-wrap items-center justify-center gap-3 transition-transform"
+    >
+      <a
+        routerLink="/"
+        class="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50 transition"
+      >
+        Tiếp tục mua sắm
+      </a>
+
+      <a
+        [routerLink]="['/order', (state.id ?? orderCode)]"
+        [queryParams]="{ highlight: orderCode }"
+        class="px-4 py-2 rounded-xl bg-pink-600 text-white hover:bg-pink-700 transition"
+      >
         Xem đơn hàng của tôi
-    </a>
+      </a>
     </div>
   </div>
 
-  <!-- summary -->
-  <div class="bg-white rounded-2xl shadow p-6 mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+  <!-- ✅ Order Summary -->
+  <div
+    class="bg-white rounded-2xl shadow p-6 mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn delay-150"
+  >
+    <!-- Thông tin nhận hàng -->
     <div>
-      <h3 class="font-semibold mb-3">Thông tin nhận hàng</h3>
-      <div class="space-y-1 text-sm">
-        <div><span class="text-gray-500">Người nhận:</span> {{ state.receiverName || '—' }}</div>
-        <div><span class="text-gray-500">Điện thoại:</span> {{ state.phone || '—' }}</div>
+      <h3 class="font-semibold mb-3 text-gray-800">Thông tin nhận hàng</h3>
+      <div class="space-y-1 text-sm text-gray-700">
+        <div>
+          <span class="text-gray-500">Người nhận:</span>
+          {{ state.receiverName || '—' }}
+        </div>
+        <div>
+          <span class="text-gray-500">Điện thoại:</span>
+          {{ state.phone || '—' }}
+        </div>
         <div class="break-words">
           <span class="text-gray-500">Địa chỉ:</span>
-          {{ state.addressLine || '—' }} <ng-container *ngIf="state.province">, {{ state.province }}</ng-container>
+          {{ state.addressLine || '—' }}
+          <ng-container *ngIf="state.province">, {{ state.province }}</ng-container>
         </div>
-        <div *ngIf="state.note"><span class="text-gray-500">Ghi chú:</span> {{ state.note }}</div>
+        <div *ngIf="state.note">
+          <span class="text-gray-500">Ghi chú:</span> {{ state.note }}
+        </div>
       </div>
     </div>
 
+    <!-- Thanh toán -->
     <div>
-      <h3 class="font-semibold mb-3">Thanh toán</h3>
-      <div class="space-y-2 text-sm">
+      <h3 class="font-semibold mb-3 text-gray-800">Thanh toán</h3>
+      <div class="space-y-2 text-sm text-gray-700">
         <div class="flex justify-between">
           <span>Tiền hàng</span>
-          <span class="font-medium">{{ itemsAmountSafe | currency:'VND':'symbol':'1.0-0' }}</span>
+          <span class="font-medium">{{
+            itemsAmountSafe | currency: 'VND' : 'symbol' : '1.0-0'
+          }}</span>
         </div>
         <div class="flex justify-between">
           <span>Phí vận chuyển</span>
-          <span class="font-medium">{{ (state.shippingFee ?? 0) | currency:'VND':'symbol':'1.0-0' }}</span>
+          <span class="font-medium">{{
+            (state.shippingFee ?? 0)
+              | currency: 'VND' : 'symbol' : '1.0-0'
+          }}</span>
         </div>
-        <hr>
+        <hr />
         <div class="flex justify-between text-base">
           <span class="font-semibold">Tổng thanh toán</span>
-          <span class="text-pink-600 font-bold">
-            {{ totalSafe | currency:'VND':'symbol':'1.0-0' }}
-          </span>
+          <span class="text-pink-600 font-bold">{{
+            totalSafe | currency: 'VND' : 'symbol' : '1.0-0'
+          }}</span>
         </div>
         <div class="text-xs text-gray-500 mt-1">
           Hình thức: {{ state.paymentMethod || 'COD' }}
@@ -78,8 +122,8 @@
     </div>
   </div>
 
-  <!-- help -->
+  <!-- ✅ Help -->
   <div class="text-center text-sm text-gray-500 mt-6">
-    Nếu cần hỗ trợ, chat với shop ở góc phải màn hình nhé.
+    Nếu cần hỗ trợ, hãy chat với shop ở góc phải màn hình nhé 💬
   </div>
 </section>

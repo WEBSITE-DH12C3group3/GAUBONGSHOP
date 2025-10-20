@@ -4,6 +4,7 @@ import com.thubongshop.backend.order.dto.ApplyVoucherPreviewRequest;
 import com.thubongshop.backend.order.dto.CreateOrderRequest;
 import com.thubongshop.backend.order.dto.OrderResponse;
 import com.thubongshop.backend.security.UserPrincipal;
+import com.thubongshop.backend.shared.BusinessException;
 import com.thubongshop.backend.shippingcore.ShippingCalculatorService;
 import com.thubongshop.backend.shippingcore.dto.ShippingQuote;
 import com.thubongshop.backend.shippingcore.dto.ShippingQuoteRequest;
@@ -21,7 +22,7 @@ import java.math.BigDecimal;
 @RequestMapping("/api/client/orders")
 @RequiredArgsConstructor
 public class OrderClientController {
-
+ private final OrderRepo orderRepo;
   private final OrderService orderService;
   private final ShippingCalculatorService shippingCalc;
 
@@ -45,7 +46,12 @@ public class OrderClientController {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
     return orderService.findMyOrders(me.getId(), pageable);
   }
-
+ @GetMapping("/code/{orderCode}")
+  public ResponseEntity<OrderResponse> getByCodePublic(@PathVariable String orderCode) {
+    var order = orderRepo.findByOrderCode(orderCode)
+        .orElseThrow(() -> new BusinessException("ORDER_NOT_FOUND", "Không tìm thấy đơn hàng"));
+    return ResponseEntity.ok(orderService.toDto(order));
+  }
   // ========== GET ONE ==========
   @GetMapping("/{id}")
   public ResponseEntity<OrderResponse> getOne(

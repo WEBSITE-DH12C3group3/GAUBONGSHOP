@@ -92,7 +92,7 @@ export class CheckoutPageComponent implements OnInit {
     private addrBook: AddressBookService,
     private shopInfo: ShopInfoService,
     private payment: PaymentService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.addressForm = this.fb.group({
@@ -251,7 +251,7 @@ export class CheckoutPageComponent implements OnInit {
         return;
       }
 
-    this.addressForm.patchValue({ districtCode: dCode, wardCode: '' }, { emitEvent: false });
+      this.addressForm.patchValue({ districtCode: dCode, wardCode: '' }, { emitEvent: false });
 
       this.loadWards$(dCode).subscribe(ws => {
         this.wards = ws ?? [];
@@ -278,7 +278,7 @@ export class CheckoutPageComponent implements OnInit {
       longitude: f.lng ?? undefined,
       isDefault: false,
     };
-    this.addrBook.create(payload).subscribe({ next: () => {} });
+    this.addrBook.create(payload).subscribe({ next: () => { } });
   }
 
   onChooseAddress(a: UserAddress) {
@@ -399,11 +399,11 @@ export class CheckoutPageComponent implements OnInit {
             ...q,
             // vẫn giữ fallback nếu BE trả kiểu cũ (an toàn)
             shippingFeeBefore: q.shippingFeeBefore ?? (q as any).feeBeforeDiscount ?? null,
-            shippingDiscount:   q.shippingDiscount   ?? (q as any).discount ?? null,
-            shippingFeeFinal:   q.shippingFeeFinal   ?? (q as any).finalFee ?? 0,
-            etaMin:             q.etaMin ?? (q as any).etaDaysMin ?? null,
-            etaMax:             q.etaMax ?? (q as any).etaDaysMax ?? null,
-            voucherCode:        ((q as any).voucherCode ?? (q as any).appliedVoucher ?? this.currentVoucher) || null,
+            shippingDiscount: q.shippingDiscount ?? (q as any).discount ?? null,
+            shippingFeeFinal: q.shippingFeeFinal ?? (q as any).finalFee ?? 0,
+            etaMin: q.etaMin ?? (q as any).etaDaysMin ?? null,
+            etaMax: q.etaMax ?? (q as any).etaDaysMax ?? null,
+            voucherCode: ((q as any).voucherCode ?? (q as any).appliedVoucher ?? this.currentVoucher) || null,
           } as PreviewShippingResponse;
           this.errMsg = undefined;
           this.cdr.detectChanges();
@@ -438,145 +438,188 @@ export class CheckoutPageComponent implements OnInit {
   etaMax(): number | null { return (this.preview?.etaMax ?? null); }
   etaOne(): number | null { return (this.preview?.etaDays ?? null); }
 
-  placeOrder() {
-    if (!this.cart || !this.preview) {
-      this.errMsg = 'Vui lòng chọn vị trí và tính phí vận chuyển.'; 
-      return;
-    }
-    if (this.addressForm.invalid) { 
-      this.addressForm.markAllAsTouched(); 
-      return; 
-    }
 
-    const f = this.addressForm.value;
-    const items = (this.cart.selectedItems || []).map(it => ({
-      productId: it.productId,
-      quantity: it.quantity,
-      weightKgPerItem: it.weightKgPerItem ?? 0.2,
-    }));
 
-    const body: CreateOrderRequest = {
-      receiverName: f.receiverName,
-      phone: f.phone,
-      addressLine: `${f.addressLine}`,
-      province: this.provinceName,
-      voucherCode: this.currentVoucher || undefined,
-      couponCode: (this.couponCode || '').trim() || undefined,
-      items,
-      destLat: Number(f.lat),
-      destLng: Number(f.lng),
-    };
+// ===============================
+// 🔹 Đặt hàng COD
+// ===============================
+placeOrder() {
+  if (!this.cart || !this.preview) {
+    this.errMsg = 'Vui lòng chọn vị trí và tính phí vận chuyển.';
+    return;
+  }
+  if (this.addressForm.invalid) {
+    this.addressForm.markAllAsTouched();
+    return;
+  }
 
-    this.placing = true; this.errMsg = undefined; this.cdr.detectChanges();
+  const f = this.addressForm.value;
+  const items = (this.cart.selectedItems || []).map(it => ({
+    productId: it.productId,
+    quantity: it.quantity,
+    weightKgPerItem: it.weightKgPerItem ?? 0.2,
+  }));
 
-    this.orderSvc.create(body)
-      .pipe(finalize(() => { this.placing = false; this.cdr.detectChanges(); }))
-      .subscribe({
-        next: (res: any) => {
-          const itemsAmount = this.itemsAmountAfterCoupon();
-          const shippingFee = Number(this.shippingFee());
-          const total = Number(itemsAmount + shippingFee);
+  const body: CreateOrderRequest = {
+    receiverName: f.receiverName,
+    phone: f.phone,
+    addressLine: `${f.addressLine}`,
+    province: this.provinceName,
+    voucherCode: (this.shippingForm.value.voucherCode || '').trim() || undefined,
+    couponCode: (this.couponCode || '').trim() || undefined,
+    items,
+    destLat: Number(f.lat),
+    destLng: Number(f.lng),
+    note: this.noteForm.value?.note,
+    paymentMethod: 'COD', // ✅ COD
+  };
 
-          const successPayload = {
-            id: res?.id,
-            code: res?.code ?? res?.id,
-            total,
-            shippingFee,
-            itemsAmount,
-            receiverName: f.receiverName,
-            phone: f.phone,
-            addressLine: f.addressLine,
-            province: this.provinceName,
-            note: this.noteForm.value?.note,
-            paymentMethod: this.paymentForm.value?.method,
-            etaDays: (res as any)?.etaDays ?? this.etaOne() ?? this.etaMax() ?? this.etaMin()
-          };
+  this.placing = true;
+  this.errMsg = undefined;
+  this.cdr.detectChanges();
 
-          try { localStorage.setItem(`order_success_${successPayload.id}`, JSON.stringify(successPayload)); } catch {}
+  console.log('🧾 [Checkout] Tạo đơn COD...', body);
 
-          // 👉 NEW: DỌN GIỎ HÀNG NGAY SAU KHI TẠO ĐƠN (COD)
-          this.cartSvc.clear().subscribe({
-            next: () => {
-              this.router.navigate(['/order-success'], {
-                queryParams: { id: successPayload.id },
-                state: successPayload
-              });
-            },
-            error: () => {
-              // Nếu clear fail vẫn điều hướng, UI có thể chậm 1 nhịp
-              this.router.navigate(['/order-success'], {
-                queryParams: { id: successPayload.id },
-                state: successPayload
-              });
-            }
-          });
+  this.orderSvc.create(body).subscribe({
+    next: (res: any) => {
+      const itemsAmount = Number(
+        this.cart?.selectedAmount ?? this.cart?.totalAmount ?? this.subtotal ?? 0
+      );
+const shippingFee = Number(this.preview?.shippingFeeFinal ?? 0);
+      const total = Number(itemsAmount + shippingFee);
+
+      const successPayload = {
+        id: res?.id,
+        code: res?.code ?? res?.id,
+        total,
+        shippingFee,
+        itemsAmount,
+        receiverName: f.receiverName,
+        phone: f.phone,
+        addressLine: f.addressLine,
+        province: this.provinceName,
+        note: this.noteForm.value?.note,
+        paymentMethod: 'COD',
+        etaDays: (res as any)?.etaDays ?? (this.preview as any)?.etaDays,
+      };
+
+      try {
+        localStorage.setItem(`order_success_${successPayload.code}`, JSON.stringify(successPayload));
+      } catch {}
+
+      // ✅ Điều hướng sang trang thành công (COD)
+      this.router.navigate(['/order-success'], {
+        queryParams: { id: successPayload.code },
+        state: successPayload,
+      });
+    },
+    error: (err) => {
+      console.error('❌ [Checkout] Lỗi tạo đơn COD:', err);
+      this.errMsg = err?.error?.error || 'Đặt hàng thất bại.';
+      this.placing = false;
+      this.cdr.detectChanges();
+    },
+  });
+}
+
+
+
+
+
+
+// ===============================
+// 🔹 Thanh toán VNPay
+// ===============================
+payVnPay() {
+  if (!this.cart || !this.preview) {
+    this.errMsg = 'Vui lòng chọn vị trí và tính phí vận chuyển trước.';
+    return;
+  }
+  if (this.addressForm.invalid) {
+    this.addressForm.markAllAsTouched();
+    return;
+  }
+
+  const f = this.addressForm.value;
+  const items = (this.cart.selectedItems || []).map(it => ({
+    productId: it.productId,
+    quantity: it.quantity,
+    weightKgPerItem: it.weightKgPerItem ?? 0.2,
+  }));
+
+  const body: CreateOrderRequest = {
+    receiverName: f.receiverName,
+    phone: f.phone,
+    addressLine: `${f.addressLine}`,
+    province: this.provinceName,
+    voucherCode: (this.shippingForm.value.voucherCode || '').trim() || undefined,
+    couponCode: (this.couponCode || '').trim() || undefined,
+    items,
+    destLat: Number(f.lat),
+    destLng: Number(f.lng),
+    note: this.noteForm.value?.note,
+    paymentMethod: 'VNPAY', // ✅ Khác biệt chính
+  };
+
+  this.placing = true;
+  this.errMsg = undefined;
+  this.cdr.detectChanges();
+
+  console.log('🧾 [Checkout] Tạo đơn hàng trước khi thanh toán VNPay...', body);
+
+  this.orderSvc.create(body).subscribe({
+    next: (res: any) => {
+      // ✅ Chuẩn bị dữ liệu gửi VNPay
+      const itemsAmount = Number(this.cart?.selectedAmount ?? this.cart?.totalAmount ?? this.subtotal ?? 0);
+const shippingFee = Number(this.preview?.shippingFeeFinal ?? 0);
+      const total = itemsAmount + shippingFee;
+      const orderCode = res?.code ?? res?.orderCode ?? `ORDER${Date.now()}`;
+
+      console.log('✅ [Checkout] Đã tạo đơn hàng thành công:', orderCode);
+      console.log('➡️ [Checkout] Gửi yêu cầu VNPay:', {
+        orderCode,
+        receiverName: f.receiverName,
+        phone: f.phone,
+        addressLine: f.addressLine,
+        province: this.provinceName,
+        itemsTotal: itemsAmount,
+        shippingFee,
+        grandTotal: total,
+      });
+
+      // ✅ Gọi backend để tạo link VNPay
+      this.payment.create({
+        receiverName: f.receiverName,
+        phone: f.phone,
+        addressLine: f.addressLine,
+        province: this.provinceName,
+        itemsTotal: itemsAmount,
+        shippingFee,
+        grandTotal: total,
+      }).subscribe({
+        next: (resp) => {
+          console.log('✅ [Checkout] VNPay response:', resp);
+          window.location.href = resp.paymentUrl; // 🚀 redirect sang VNPay
         },
         error: (err) => {
-          this.errMsg = err?.error?.message || err?.message || err?.error?.error || 'Đặt hàng thất bại';
-          console.error(err);
-        }
+          console.error('❌ [Checkout] Lỗi tạo thanh toán VNPay:', err);
+          this.errMsg = 'Không thể khởi tạo thanh toán VNPay.';
+          this.placing = false;
+          this.cdr.detectChanges();
+        },
       });
-  }
+    },
+    error: (err) => {
+      console.error('❌ [Checkout] Lỗi tạo đơn hàng trước VNPay:', err);
+      this.errMsg = err?.error?.error || 'Không thể tạo đơn hàng.';
+      this.placing = false;
+      this.cdr.detectChanges();
+    },
+  });
+}
 
-  payVnPay() {
-    if (!this.cart || !this.preview) {
-      this.errMsg = 'Vui lòng chọn vị trí và tính phí vận chuyển trước.';
-      return;
-    }
-    if (this.addressForm.invalid) {
-      this.addressForm.markAllAsTouched();
-      return;
-    }
 
-    const f = this.addressForm.value;
-    const items = (this.cart.selectedItems || []).map(it => ({
-      productId: it.productId,
-      quantity: it.quantity,
-      weightKgPerItem: it.weightKgPerItem ?? 0.2,
-    }));
 
-    const body: CreateOrderRequest = {
-      receiverName: f.receiverName,
-      phone: f.phone,
-      addressLine: `${f.addressLine}`,
-      province: this.provinceName,
-      voucherCode: this.currentVoucher || undefined,
-      couponCode: (this.couponCode || '').trim() || undefined,
-      items,
-      destLat: Number(f.lat),
-      destLng: Number(f.lng),
-      note: this.noteForm.value?.note,
-      paymentMethod: 'VNPAY',
-    };
-
-    this.placing = true;
-    this.errMsg = undefined;
-    this.cdr.detectChanges();
-
-    this.orderSvc.create(body).subscribe({
-      next: (res: any) => {
-        const itemsAmount = this.itemsAmountAfterCoupon();
-        const shippingFee = Number(this.shippingFee());
-        const total = itemsAmount + shippingFee;
-
-        const orderCode = res?.code ?? `ORDER${Date.now()}`;
-
-        this.payment.create(orderCode, total).subscribe({
-          next: (resp) => { window.location.href = resp.paymentUrl; },
-          error: () => {
-            this.errMsg = 'Không thể khởi tạo thanh toán VNPay.';
-            this.placing = false;
-            this.cdr.detectChanges();
-          },
-        });
-      },
-      error: (err) => {
-        this.errMsg = err?.error?.message || err?.message || err?.error?.error || 'Không thể tạo đơn hàng.';
-        this.placing = false;
-        this.cdr.detectChanges();
-      },
-    });
-  }
 
   private haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const toRad = (d: number) => (d * Math.PI) / 180;
@@ -584,7 +627,7 @@ export class CheckoutPageComponent implements OnInit {
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a = Math.sin(dLat / 2) ** 2 +
-              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
     const km = R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
     return Math.round(km * 100) / 100;
   }
@@ -619,10 +662,10 @@ export class CheckoutPageComponent implements OnInit {
   }
 
   get districtName(): string {
-  const code = String(this.addressForm?.value?.districtCode ?? '');
-  const d = (this.districts || []).find((x: District) => String(x.code) === code);
-  return d?.name || '';
-}
+    const code = String(this.addressForm?.value?.districtCode ?? '');
+    const d = (this.districts || []).find((x: District) => String(x.code) === code);
+    return d?.name || '';
+  }
 
 
   get wardName(): string {

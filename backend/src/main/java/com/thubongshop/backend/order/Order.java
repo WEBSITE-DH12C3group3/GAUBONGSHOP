@@ -6,7 +6,6 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "orders")
@@ -20,6 +19,10 @@ public class Order {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
 
+  // ✅ Mã đơn hàng (liên kết với VNPay)
+  @Column(name = "order_code", unique = true, nullable = false, length = 50)
+  private String orderCode;
+
   @Column(name = "user_id", nullable = false)
   private Integer userId;
 
@@ -27,11 +30,14 @@ public class Order {
   @Column(nullable = false)
   private OrderStatus status;
 
+  @Column(name = "payment_method", length = 30)
+private String paymentMethod;
+
   // ====== Tổng tiền hàng ======
   @Column(name = "items_total", precision = 12, scale = 2)
   private BigDecimal itemsTotal;
 
-  // ====== Thông tin vận chuyển (THÊM CHO KHỚP VỚI OrderService) ======
+  // ====== Thông tin vận chuyển ======
   @Column(name = "shipping_distance_km", precision = 12, scale = 2)
   private BigDecimal shippingDistanceKm;
 
@@ -44,7 +50,6 @@ public class Order {
   @Column(name = "shipping_fee_final", precision = 12, scale = 2)
   private BigDecimal shippingFeeFinal;
 
-  // Giữ field cũ nếu trước đây bạn dùng (không bắt buộc)
   @Column(name = "shipping_fee", precision = 12, scale = 2)
   private BigDecimal shippingFee;
 
@@ -94,8 +99,16 @@ public class Order {
   @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
   private ShippingRecord shippingRecord;
 
-  // ====== Hỗ trợ tương thích ngược (nếu code cũ còn dùng getShippingFee()) ======
+  // ====== Hỗ trợ tương thích ngược ======
   public BigDecimal getShippingFeeOrFinal() {
     return shippingFeeFinal != null ? shippingFeeFinal : shippingFee;
+  }
+
+  // ✅ Hàm tiện ích: tự sinh mã orderCode khi tạo mới
+  @PrePersist
+  public void generateOrderCode() {
+    if (this.orderCode == null || this.orderCode.isBlank()) {
+      this.orderCode = "ORDER" + System.currentTimeMillis();
+    }
   }
 }
