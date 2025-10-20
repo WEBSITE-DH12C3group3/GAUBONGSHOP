@@ -251,7 +251,7 @@ export class CheckoutPageComponent implements OnInit {
         return;
       }
 
-      this.addressForm.patchValue({ districtCode: dCode, wardCode: '' }, { emitEvent: false });
+    this.addressForm.patchValue({ districtCode: dCode, wardCode: '' }, { emitEvent: false });
 
       this.loadWards$(dCode).subscribe(ws => {
         this.wards = ws ?? [];
@@ -494,9 +494,21 @@ export class CheckoutPageComponent implements OnInit {
 
           try { localStorage.setItem(`order_success_${successPayload.id}`, JSON.stringify(successPayload)); } catch {}
 
-          this.router.navigate(['/order-success'], {
-            queryParams: { id: successPayload.id },
-            state: successPayload
+          // 👉 NEW: DỌN GIỎ HÀNG NGAY SAU KHI TẠO ĐƠN (COD)
+          this.cartSvc.clear().subscribe({
+            next: () => {
+              this.router.navigate(['/order-success'], {
+                queryParams: { id: successPayload.id },
+                state: successPayload
+              });
+            },
+            error: () => {
+              // Nếu clear fail vẫn điều hướng, UI có thể chậm 1 nhịp
+              this.router.navigate(['/order-success'], {
+                queryParams: { id: successPayload.id },
+                state: successPayload
+              });
+            }
           });
         },
         error: (err) => {
@@ -607,10 +619,11 @@ export class CheckoutPageComponent implements OnInit {
   }
 
   get districtName(): string {
-    const code = String(this.addressForm?.value?.districtCode ?? '');
-    const d = (this.districts || []).find(x => String(x.code) === code);
-    return d?.name || '';
-  }
+  const code = String(this.addressForm?.value?.districtCode ?? '');
+  const d = (this.districts || []).find((x: District) => String(x.code) === code);
+  return d?.name || '';
+}
+
 
   get wardName(): string {
     const code = String(this.addressForm?.value?.wardCode ?? '');

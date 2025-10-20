@@ -2,6 +2,9 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 
+// 👇 NEW: import CartService (sửa lại path nếu dự án bạn khác)
+import { CartService } from '../../shared/services/cart.service';
+
 type OrderSuccessState = {
   id?: string | number;
   code?: string | number;        // mã đơn
@@ -29,7 +32,12 @@ export class OrderSuccessPageComponent {
   id = '';
   state: OrderSuccessState = {};
 
-  constructor(private ar: ActivatedRoute, private router: Router) {
+  // 👇 NEW: tiêm CartService
+  constructor(
+    private ar: ActivatedRoute,
+    private router: Router,
+    private cartSvc: CartService,            // NEW
+  ) {
     // 1) Lấy id từ query
     this.id = this.ar.snapshot.queryParamMap.get('id') ?? '';
 
@@ -58,6 +66,17 @@ export class OrderSuccessPageComponent {
 
     // Nếu chưa có code, dùng id để UI không trống
     if (!this.state.code && this.id) this.state.code = this.id;
+
+    // 👉 NEW: DỌN GIỎ HÀNG AN TOÀN khi vào trang thành công
+    // - Nếu giỏ đã trống: không sao.
+    // - Nếu còn dữ liệu local/server: xóa để badge = 0 và không còn SP hiển thị.
+    this.cartSvc.clear().subscribe({
+      next: () => {},
+      error: () => {
+        // Không chặn UI nếu clear thất bại; có thể log nếu cần
+        // console.warn('Clear cart failed on success page');
+      }
+    });
   }
 
   copyCode(): void {
@@ -83,7 +102,7 @@ export class OrderSuccessPageComponent {
     if (!Number.isNaN(total) && !Number.isNaN(ship)) return Math.max(0, total - ship);
 
     return 0;
-    }
+  }
 
   /** Tổng thanh toán an toàn */
   get totalSafe(): number {
