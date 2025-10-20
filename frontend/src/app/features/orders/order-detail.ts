@@ -32,10 +32,20 @@ export class OrderDetailComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    this.id = Number(this.route.snapshot.paramMap.get('id'));
-    this.load();
+ngOnInit(): void {
+  const rawId = this.route.snapshot.paramMap.get('id');
+
+  // ✅ Kiểm tra hợp lệ trước khi chuyển sang Number
+  if (!rawId || isNaN(Number(rawId))) {
+    console.error('❌ orderId không hợp lệ:', rawId);
+    this.loading = false;
+    return;
   }
+
+  this.id = Number(rawId);
+  this.load();
+}
+
 
   load(): void {
     this.loading = true;

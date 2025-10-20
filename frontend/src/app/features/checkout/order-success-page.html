@@ -55,12 +55,21 @@
       </a>
 
       <a
-        [routerLink]="['/order', (state.id ?? orderCode)]"
-        [queryParams]="{ highlight: orderCode }"
-        class="px-4 py-2 rounded-xl bg-pink-600 text-white hover:bg-pink-700 transition"
-      >
-        Xem đơn hàng của tôi
-      </a>
+  *ngIf="state?.id"
+  [routerLink]="['/order', state.id]"
+  class="px-4 py-2 rounded-xl bg-pink-600 text-white hover:bg-pink-700 transition"
+>
+  Xem chi tiết đơn hàng
+</a>
+
+<a
+  *ngIf="!state?.id"
+  routerLink="/order"
+  class="px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50 transition"
+>
+  Xem danh sách đơn hàng
+</a>
+
     </div>
   </div>
 

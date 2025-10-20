@@ -78,36 +78,37 @@ export class OrderSuccessPageComponent {
   }
 
   /** 🔹 Gọi API lấy đơn hàng thật từ backend */
-  fetchOrderFromApi(orderCode: string) {
-    this.http
-      .get<any>(`http://localhost:8080/api/client/orders/code/${orderCode}`)
-      .subscribe({
-        next: (res) => {
-          this.state = {
-            code: res.orderCode || orderCode,
-            total: res.grandTotal ?? res.totalAmount ?? this.amount,
-            shippingFee: res.shippingFee ?? 0,
-            itemsAmount: res.itemsTotal ?? res.subTotal ?? res.itemsTotal ?? 0,
-            receiverName: res.receiverName ?? '',
-            phone: res.phone ?? '',
-            addressLine: res.addressLine ?? '',
-            province: res.province ?? '',
-            paymentMethod: res.paymentMethod ?? 'VNPay',
-          };
+fetchOrderFromApi(orderCode: string) {
+  this.http
+    .get<any>(`http://localhost:8080/api/client/orders/code/${orderCode}`)
+    .subscribe({
+      next: (res) => {
+        this.state = {
+          id: res.id, // ✅ Lấy id từ backend
+          code: res.orderCode || orderCode,
+          total: res.grandTotal ?? res.totalAmount ?? this.amount,
+          shippingFee: res.shippingFee ?? 0,
+          itemsAmount: res.itemsTotal ?? res.subTotal ?? res.itemsTotal ?? 0,
+          receiverName: res.receiverName ?? '',
+          phone: res.phone ?? '',
+          addressLine: res.addressLine ?? '',
+          province: res.province ?? '',
+          paymentMethod: res.paymentMethod ?? 'VNPay',
+        };
 
-          // ✅ Lưu cache localStorage để reload vẫn còn
-          localStorage.setItem(
-            `order_success_${orderCode}`,
-            JSON.stringify(this.state)
-          );
+        localStorage.setItem(
+          `order_success_${orderCode}`,
+          JSON.stringify(this.state)
+        );
 
-          this.cdr.markForCheck(); // Cập nhật UI ngay
-        },
-        error: (err) => {
-          console.error('❌ Lỗi khi tải đơn hàng:', err);
-        },
-      });
-  }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('❌ Lỗi khi tải đơn hàng:', err);
+      },
+    });
+}
+
 
   /** ✅ Sao chép mã đơn hàng */
   copyCode(): void {
