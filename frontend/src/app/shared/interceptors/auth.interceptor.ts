@@ -41,16 +41,15 @@ export const authInterceptorFn: HttpInterceptorFn = (req, next) => {
   // 4) Allow-list: endpoint PUBLIC
   //    - Các endpoint auth/guest
   //    - Các GET public (catalog/media)
-  const isExplicitPublic =
-    (is('POST') && (
-      path.startsWith('/api/users/login') ||
-      path.startsWith('/api/users/register') ||
-      path.startsWith('/api/auth/guest')
-    )) ||
-    (is('GET') && (
-      path.startsWith('/uploads/') ||
-      path.startsWith('/brandimg/')
-    ));
+// --- thay đoạn isExplicitPublic hiện tại ---
+const isLogin     = path.startsWith('/api/users/login') || path.startsWith('/users/login');
+const isRegister  = path.startsWith('/api/users/register') || path.startsWith('/users/register');
+const isGuestAuth = path.startsWith('/api/auth/guest') || path.startsWith('/auth/guest');
+
+const isExplicitPublic =
+  (is('POST') && (isLogin || isRegister || isGuestAuth)) ||
+  (is('GET')  && (path.startsWith('/uploads/') || path.startsWith('/brandimg/')));
+
 
   const isPublicGet =
     is('GET') && (
