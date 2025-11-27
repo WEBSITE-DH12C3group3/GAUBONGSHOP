@@ -2,6 +2,10 @@ package com.thubongshop.backend.order;
 
 import com.thubongshop.backend.order.dto.CreateOrderRequest;
 import com.thubongshop.backend.order.dto.OrderResponse;
+import com.thubongshop.backend.order.dto.ShippingDto;
+import com.thubongshop.backend.orderv2.dto.OrderV2Dtos;
+
+import com.thubongshop.backend.orderv2.dto.OrderV2Dtos.OrderDetailDto;
 import com.thubongshop.backend.product.ProductRepository;
 import com.thubongshop.backend.shippingcore.ShippingCalculatorService;
 import com.thubongshop.backend.shippingcore.dto.ShippingQuote;
@@ -429,6 +433,50 @@ private Integer getCurrentUserIdSafe() {
     }
     return null;
 }
+
+@Transactional
+public OrderDetailDto detail(Integer id) {
+    var o = orderRepo.findById(id)
+        .orElseThrow(() -> new BusinessException("ORDER_NOT_FOUND", "Không tìm thấy đơn hàng"));
+
+    var shippingDto = ShippingDto.fromEntity(o.getShippingRecord());
+    var itemDtos = (o.getItems() == null || o.getItems().isEmpty())
+        ? List.of()
+        : o.getItems().stream()
+            .map(com.thubongshop.backend.order.dto.ItemDto::fromEntity)
+            .toList();
+return new OrderV2Dtos.OrderDetailDto(
+    o.getId(),
+    o.getUserId(),
+    o.getStatus(),
+    o.getItemsTotal(),
+    o.getShippingFeeOrFinal(),
+    o.getShippingDiscount(),
+    o.getGrandTotal(),
+    o.getVoucherCode(),
+    o.getReceiverName(),
+    o.getPhone(),
+    o.getAddressLine(),
+    o.getProvince(),
+    o.getWeightKg(),
+    o.getCreatedAt() != null
+        ? o.getCreatedAt().atOffset(java.time.ZoneOffset.ofHours(7))
+        : null,
+    OrderV2Dtos.ShippingDto.fromEntity(o.getShippingRecord()),
+    o.getItems().stream()
+        .map(i -> new OrderV2Dtos.ItemDto(
+            i.getProductId(),
+            i.getProductName(),
+            i.getUnitPrice(),
+            i.getQuantity(),
+            i.getWeightKgPerItem()
+        ))
+        .toList()
+);
+
+}
+
+
 
 
 
