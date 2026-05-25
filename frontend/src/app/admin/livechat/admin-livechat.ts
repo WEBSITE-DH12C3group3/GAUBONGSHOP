@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 
 import { LivechatAdminService } from '../../shared/services/livechat-admin.service';
 import { ChatSessionResponse, MessageDTO } from '../../models/chat.model';
+import { Subscription, interval } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -31,8 +32,11 @@ export class AdminLivechatPage implements OnInit, OnDestroy {
   sessions: ChatSessionResponse[] = [];
   selected?: ChatSessionResponse;
   messages: MessageDTO[] = [];
+  private messageIds = new Set<number>();
   input = '';
   loading = false;
+  private incomingSub?: Subscription;
+  private selectedPollSub?: Subscription;
 
   @ViewChild('scrollHost', { static: false })
   private scrollHost?: ElementRef<HTMLDivElement>;
@@ -69,6 +73,14 @@ export class AdminLivechatPage implements OnInit, OnDestroy {
       this.cdr.markForCheck();
     });
 
+    // 2.1) Tin nhắn đến realtime cho phiên đang mở -> append ngay, không cần reload
+    this.incomingSub = this.svc.incomingMessage$.subscribe(({ sessionId, message }) => {
+      if (!this.selected || this.selected.id !== sessionId) return;
+      this.upsertMessage(message);
+      this.cdr.markForCheck();
+      setTimeout(() => this.scrollBottom(), 0);
+    });
+
     // 3) Tải lần đầu
     this.svc.reload();
   }
@@ -84,6 +96,7 @@ export class AdminLivechatPage implements OnInit, OnDestroy {
     this.svc.messages(s.id).subscribe({
       next: (items) => {
         this.messages = items || [];
+        this.messageIds = new Set(this.messages.map((m) => m.id));
         this.loading = false;
         this.cdr.markForCheck();
         setTimeout(() => this.scrollBottom(), 0);
@@ -93,6 +106,8 @@ export class AdminLivechatPage implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       },
     });
+
+    this.startSelectedPolling(s.id);
   }
 
   send() {
@@ -105,7 +120,7 @@ export class AdminLivechatPage implements OnInit, OnDestroy {
 
     this.svc.send(this.selected.id, text).subscribe({
       next: (m) => {
-        this.messages.push(m);
+        this.upsertMessage(m);
         this.cdr.markForCheck();
         this.scrollBottom();
       },
@@ -115,6 +130,15 @@ export class AdminLivechatPage implements OnInit, OnDestroy {
 
   trackSession = (_: number, s: ChatSessionResponse) => s.id;
   trackMessage = (_: number, m: MessageDTO) => m.id;
+
+  customerLabel(s: ChatSessionResponse): string {
+    const name = (s.customerName || '').trim();
+    return name ? name : `Khách #${s.participant1Id}`;
+  }
+
+  isSelectedSession(s: ChatSessionResponse): boolean {
+    return !!this.selected && this.selected.id === s.id;
+  }
 
   rowClass(m: MessageDTO, sel: ChatSessionResponse) {
     return m.senderId === sel.participant1Id ? 'flex justify-start' : 'flex justify-end';
@@ -152,8 +176,32 @@ export class AdminLivechatPage implements OnInit, OnDestroy {
     if (el) el.scrollTop = el.scrollHeight;
   }
 
+  private upsertMessage(msg: MessageDTO) {
+    if (msg?.id == null) return;
+    if (this.messageIds.has(msg.id)) return;
+    this.messageIds.add(msg.id);
+    this.messages.push(msg);
+  }
+
+  private startSelectedPolling(sessionId: number) {
+    this.selectedPollSub?.unsubscribe();
+    this.selectedPollSub = interval(1500).subscribe(() => {
+      if (!this.selected || this.selected.id !== sessionId) return;
+      this.svc.messages(sessionId, 0, 50).subscribe({
+        next: (items) => {
+          for (const m of items || []) this.upsertMessage(m);
+          this.cdr.markForCheck();
+          setTimeout(() => this.scrollBottom(), 0);
+        },
+        error: () => {}
+      });
+    });
+  }
+
   ngOnDestroy(): void {
     try {
+      this.incomingSub?.unsubscribe();
+      this.selectedPollSub?.unsubscribe();
       (this.svc as any)?.dispose?.();
     } catch {}
   }

@@ -488,8 +488,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
       if (this.chatChannel?.unbind) {
         this.chatChannel.unbind('message:new');
       }
-      if (this.chatChannel?.unsubscribe) {
-        this.chatChannel.unsubscribe();
+      if (this.sessionId != null) {
+        this.socket.unsub(`private-chat.${this.sessionId}`);
       }
     } catch {}
     this.chatChannel = undefined;

@@ -9,6 +9,8 @@ import com.thubongshop.backend.chat.entity.Notification;
 import com.thubongshop.backend.chat.repo.ChatSessionRepo;
 import com.thubongshop.backend.chat.repo.MessageRepo;
 import com.thubongshop.backend.chat.repo.NotificationRepo;
+import com.thubongshop.backend.user.User;
+import com.thubongshop.backend.user.UserRepository;
 // ✅ sửa import đúng package PusherService bạn đang đặt
 import com.thubongshop.backend.chat.service.PusherService;
 
@@ -32,6 +34,7 @@ public class ChatService {
   private final MessageRepo messageRepo;
   private final NotificationRepo notificationRepo;
   private final PusherService pusher;
+  private final UserRepository userRepository;
 
   @Value("${chat.default-admin-id:1}")
   private Integer defaultAdminId;
@@ -58,13 +61,29 @@ public class ChatService {
         Sort.by(Sort.Direction.DESC, "updatedAt") // ✅ field Instant
     );
     Page<ChatSession> page = sessionRepo.findAll(pr);
+    Set<Long> clientIds = page.getContent().stream()
+        .map(ChatSession::getParticipant1Id)
+        .filter(Objects::nonNull)
+        .map(Integer::longValue)
+        .collect(java.util.stream.Collectors.toSet());
+
+    Map<Integer, String> customerNameById = new HashMap<>();
+    if (!clientIds.isEmpty()) {
+      for (User u : userRepository.findAllById(clientIds)) {
+        String name = (u.getUsername() != null && !u.getUsername().isBlank())
+            ? u.getUsername()
+            : u.getEmail();
+        customerNameById.put(u.getId().intValue(), name);
+      }
+    }
 
     List<ChatSessionResponse> mapped = new ArrayList<>();
     for (ChatSession s : page) {
       if (!canView(viewerId, s.getId())) continue;
       String lastSnippet = lastMessageSnippet(s.getId());
       int unread = countUnreadForViewer(viewerId, s.getId());
-      mapped.add(ChatSessionResponse.of(s, viewerId, lastSnippet, unread));
+      String customerName = customerNameById.get(s.getParticipant1Id());
+      mapped.add(ChatSessionResponse.of(s, viewerId, lastSnippet, unread, customerName));
     }
     return new PageImpl<>(mapped, pr, page.getTotalElements());
   }

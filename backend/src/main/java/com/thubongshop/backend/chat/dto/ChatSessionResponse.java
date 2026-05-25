@@ -18,9 +18,16 @@ public class ChatSessionResponse {
   // meta hiển thị
   private String lastMessageSnippet;
   private Integer unreadForViewer;
+  private String customerName;
 
   public static ChatSessionResponse of(ChatSession s, Integer viewerId,
                                        String lastSnippet, int unread) {
+    return of(s, viewerId, lastSnippet, unread, null);
+  }
+
+  public static ChatSessionResponse of(ChatSession s, Integer viewerId,
+                                       String lastSnippet, int unread,
+                                       String customerName) {
     return ChatSessionResponse.builder()
         .id(s.getId())
         .participant1Id(s.getParticipant1Id())
@@ -30,6 +37,7 @@ public class ChatSessionResponse {
         .updatedAt(s.getUpdatedAt())
         .lastMessageSnippet(lastSnippet)
         .unreadForViewer(unread)
+        .customerName(customerName)
         .build();
   }
 }

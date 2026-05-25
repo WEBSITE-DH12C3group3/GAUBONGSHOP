@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, map, Observable, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, Subject, tap } from 'rxjs';
 
 import { ChatSocketService } from './chat-socket.service';
 import { environment } from '../../../environments/environment';
@@ -27,10 +27,12 @@ export class LivechatAdminService {
 
   private _sessions$ = new BehaviorSubject<ChatSessionResponse[]>([]);
   private _unreadTotal$ = new BehaviorSubject<number>(0);
+  private _incomingMessage$ = new Subject<{ sessionId: number; message: MessageDTO }>();
 
   /** public streams */
   sessions$ = this._sessions$.asObservable();
   unreadTotal$ = this._unreadTotal$.asObservable();
+  incomingMessage$ = this._incomingMessage$.asObservable();
 
   constructor(
     private readonly http: HttpClient,
@@ -89,18 +91,25 @@ export class LivechatAdminService {
           this.socket.bind(ch, 'message:new', (p: any) => {
             const msg: MessageDTO | undefined = p?.message ?? p;
             const ss = this.sessions.get(s.id);
-            if (!ss) return;
+            if (!ss || !msg) return;
 
             // cập nhật snippet + updatedAt
-            if (msg?.content) ss.lastMessageSnippet = msg.content;
+            if (msg.content) ss.lastMessageSnippet = msg.content;
             // nếu BE không đẩy updatedAt, đẩy session lên đầu bằng cách sửa updatedAt client-side
             (ss as any).updatedAt = new Date().toISOString();
 
             // badge unread nếu không phải phiên đang mở
             if (this.activeSessionId !== s.id) {
               ss.unreadForViewer = (ss.unreadForViewer ?? 0) + 1;
+            } else {
+              // Đang mở đúng phiên: tự đánh dấu đã đọc để badge tổng (sidebar) không bật lại do polling.
+              ss.unreadForViewer = 0;
+              this.http.post<void>(`${this.base}/sessions/${s.id}/read`, {}).subscribe({
+                error: () => {}
+              });
             }
 
+            this._incomingMessage$.next({ sessionId: s.id, message: msg });
             this.emit();
           });
 

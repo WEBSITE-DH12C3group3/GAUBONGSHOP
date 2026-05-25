@@ -1,5 +1,6 @@
 package com.thubongshop.backend.orderv2.dto;
 
+import com.thubongshop.backend.order.ShippingRecord;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -30,17 +31,33 @@ public class OrderV2Dtos {
   ) {}
 
   public record ShippingDto(
-      String carrier,          // từ shipping_carriers.code/name nếu có
-      String service,          // từ orders.shipping_service_id -> shipping_services.code/label
-      String trackingCode,     // ưu tiên shipping_records.tracking_code, fallback shipping.tracking_number
-      String status,           // ưu tiên shipping_records.status, fallback shipping.status
-      Integer etaDaysMin,      // orders.shipping_eta_min
-      Integer etaDaysMax,      // orders.shipping_eta_max
-      BigDecimal distanceKm,   // orders.shipping_distance_km
-      BigDecimal feeBeforeDiscount, // orders.shipping_fee_before
-      BigDecimal discount,     // orders.shipping_discount
-      BigDecimal finalFee      // orders.shipping_fee_final
-  ) {}
+      String carrier,
+      String service,
+      String trackingCode,
+      String status,
+      Integer etaDaysMin,
+      Integer etaDaysMax,
+      BigDecimal distanceKm,
+      BigDecimal feeBeforeDiscount,
+      BigDecimal discount,
+      BigDecimal finalFee
+  ) {
+    public static ShippingDto fromEntity(ShippingRecord sr) {
+      if (sr == null) return null;
+      return new ShippingDto(
+          sr.getCarrier(),
+          null,
+          sr.getTrackingCode(),
+          sr.getStatus() != null ? sr.getStatus().name() : null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          sr.getFeeCharged()
+      );
+    }
+  }
 
   public record OrderDetailDto(
       Integer id,

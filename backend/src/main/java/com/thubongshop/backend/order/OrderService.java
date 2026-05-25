@@ -448,7 +448,7 @@ public OrderDetailDto detail(Integer id) {
 return new OrderV2Dtos.OrderDetailDto(
     o.getId(),
     o.getUserId(),
-    o.getStatus(),
+    (o.getStatus() != null ? OrderV2Dtos.OrderStatus.valueOf(o.getStatus().name()) : null),
     o.getItemsTotal(),
     o.getShippingFeeOrFinal(),
     o.getShippingDiscount(),

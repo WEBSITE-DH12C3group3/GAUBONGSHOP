@@ -9,6 +9,7 @@ export interface ChatSessionDTO {
   updatedAt?: string | null;
   unreadForViewer: number;
   lastMessageSnippet?: string | null;
+  customerName?: string | null;
 }
 
 export interface MessageDTO {
@@ -29,4 +30,5 @@ export interface ChatSessionResponse {
   updatedAt: string;
   lastMessageSnippet: string;
   unreadForViewer: number;
+  customerName?: string | null;
 }

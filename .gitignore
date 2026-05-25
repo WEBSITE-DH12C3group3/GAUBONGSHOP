@@ -1,0 +1,35 @@
+# Secrets and local env
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.jks
+
+# Local config overrides
+backend/src/main/resources/application-local.properties
+backend/src/main/resources/application-dev.properties
+backend/src/main/resources/application-secrets.properties
+
+# Java/Spring build
+backend/target/
+*.class
+
+# Node/Angular build
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# Logs and crash dumps
+*.log
+hs_err_pid*
+replay_pid*
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db

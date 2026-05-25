@@ -26,6 +26,7 @@ export class ClientChatPage implements OnInit, OnDestroy {
   loading = true;
 
   private unbindSocket?: () => void;
+  private messageIds = new Set<number>();
 
   @ViewChild('chatScroll', { static: false }) chatScrollRef?: ElementRef<HTMLDivElement>;
 
@@ -66,7 +67,7 @@ export class ClientChatPage implements OnInit, OnDestroy {
         this.unbindSocket = this.socket.bind(ch, 'message:new', (payload: any) => {
           const msg: MessageDTO = payload?.message ?? payload;
           if (!msg) return;
-          this.messages.push(msg);
+          this.upsertMessage(msg);
           this.cdr.markForCheck();
           this.scrollBottom();
         });
@@ -90,6 +91,7 @@ export class ClientChatPage implements OnInit, OnDestroy {
     this.api.messages(this.session.id, 0, 50).subscribe({
       next: (items) => {
         this.messages = items || [];
+        this.messageIds = new Set(this.messages.map((m) => m.id));
         this.loading = false;
         this.cdr.markForCheck();
         setTimeout(() => this.scrollBottom(), 0);
@@ -111,7 +113,7 @@ export class ClientChatPage implements OnInit, OnDestroy {
 
     this.api.send(this.session.id, text).subscribe({
       next: (m) => {
-        this.messages.push(m);
+        this.upsertMessage(m);
         this.cdr.markForCheck();
         this.scrollBottom();
       },
@@ -122,6 +124,13 @@ export class ClientChatPage implements OnInit, OnDestroy {
   private scrollBottom() {
     const el = this.chatScrollRef?.nativeElement || document.getElementById('chat-scroll');
     if (el) el.scrollTop = el.scrollHeight;
+  }
+
+  private upsertMessage(msg: MessageDTO) {
+    if (msg?.id == null) return;
+    if (this.messageIds.has(msg.id)) return;
+    this.messageIds.add(msg.id);
+    this.messages.push(msg);
   }
 
   ngOnDestroy(): void {
